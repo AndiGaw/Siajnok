@@ -1,12 +1,62 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Próba Posłuszeństwa</title>
+
+<style>
+body {
+  background:#0b0b0b;
+  color:#d8c58a;
+  font-family: "Georgia", serif;
+  text-align:center;
+  padding:10%;
+}
+input, button {
+  background:black;
+  color:#d8c58a;
+  border:1px solid #d8c58a;
+  padding:10px;
+  font-size:1em;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Próba Posłuszeństwa</h1>
+
+<p>
+Nienawidzą mnie, ponieważ trzymam ich w stagnacji.<br>
+Moje panowanie jest ciężarem.
+</p>
+
+<p>
+<strong>Dlaczego to robię?</strong>
+</p>
+
+<input id="a" placeholder="Twoja odpowiedź">
+<br><br>
+<button onclick="check()">Odpowiedz</button>
+
+<p id="r"></p>
+
 <script>
 function check(){
- let v = document.getElementById("a").value.toLowerCase();
- if(v.includes("przetr") || v.includes("ocal") || v.includes("surviv")){
-   document.getElementById("r").innerHTML =
-   "Zrozumiałaś ciężar władzy.<br><a href='final.html'>Objawienie</a>";
- } else {
-   document.getElementById("r").innerText =
-   "Jeszcze nie rozumiesz ofiary.";
- }
+  let v = document.getElementById("a").value.toLowerCase().trim();
+
+  if(
+    v.includes("przetr") ||
+    v.includes("ocal") ||
+    v.includes("ludzko")
+  ){
+    window.location.href = "final.html";
+  } else {
+    document.getElementById("r").innerText =
+      "Nie rozumiesz jeszcze ceny Złotej Ścieżki.";
+  }
 }
 </script>
+
+</body>
+</html>

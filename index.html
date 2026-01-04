@@ -25,9 +25,9 @@ html, body {
   background:
     repeating-linear-gradient(
       45deg,
-      rgba(230,196,122,0.2),  /* większa widoczność ziarenek */
+      rgba(230,196,122,0.2),  /* złote ziarenka widoczne */
       rgba(230,196,122,0.2) 2px,
-      rgba(0,0,0,0) 6px        /* przerwa między ziarenkami */
+      rgba(0,0,0,0) 6px        /* przerwy między ziarenkami */
     );
   animation: drift 60s linear infinite;
   pointer-events:none;
@@ -58,6 +58,17 @@ img {
   max-width:80%;
   height:auto;
   border: 2px solid #e6c47a; /* złota ramka */
+}
+
+/* Stylizacja przycisku Obudź Boga Imperatora */
+button {
+  cursor:pointer;
+  margin-top:10px;
+  background:black;          /* czarne tło */
+  color:#e6c47a;             /* złoty tekst */
+  border:1px solid #e6c47a;  /* złota ramka */
+  padding:10px;
+  font-size:1em;
 }
 </style>
 </head>
@@ -118,6 +129,3 @@ setInterval(() => {
     `Objawienie za: ${d}d ${h}h ${m}m ${s}s`;
 }, 1000);
 </script>
-
-</body>
-</html>

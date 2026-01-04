@@ -1,12 +1,58 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Próba Pamięci</title>
+
+<style>
+body {
+  background:#0b0b0b;
+  color:#d8c58a;
+  font-family: "Georgia", serif;
+  text-align:center;
+  padding:10%;
+}
+input, button {
+  background:black;
+  color:#d8c58a;
+  border:1px solid #d8c58a;
+  padding:10px;
+  font-size:1em;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Próba Pamięci</h1>
+
+<p>
+Noszę w sobie tysiące istnień.<br>
+Jedno imię powraca częściej niż inne.
+</p>
+
+<p>
+Jak nazywał się mój ojciec?
+</p>
+
+<input id="a" placeholder="Twoja odpowiedź">
+<br><br>
+<button onclick="check()">Odpowiedz</button>
+
+<p id="r"></p>
+
 <script>
 function check(){
- let v = document.getElementById("a").value.toLowerCase();
- if(v.includes("paul") || v.includes("muad")){
-   document.getElementById("r").innerHTML =
-   "Pamięć cię nie odrzuca.<br><a href='qr3.html'>Próba Posłuszeństwa</a>";
- } else {
-   document.getElementById("r").innerText =
-   "Nie znasz swoich przodków.";
- }
+  let v = document.getElementById("a").value.toLowerCase().trim();
+
+  if(v.includes("paul") || v.includes("muad")){
+    window.location.href = "qr3.html";
+  } else {
+    document.getElementById("r").innerText =
+      "Pamięć cię nie rozpoznaje.";
+  }
 }
 </script>
+
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Rytuał Złotej Ścieżki</title>
+<title>Rytuał Złotego Szlaku</title>
 
 <style>
 html, body {
@@ -27,7 +27,7 @@ html, body {
       45deg,
       rgba(230,196,122,0.2),  /* większa widoczność ziarenek */
       rgba(230,196,122,0.2) 2px,
-      rgba(0,0,0,0) 6px        /* większa przerwa między ziarenkami */
+      rgba(0,0,0,0) 6px        /* przerwa między ziarenkami */
     );
   animation: drift 60s linear infinite;
   pointer-events:none;
@@ -45,23 +45,19 @@ html, body {
   padding:10%;
 }
 
-input, button {
-  background:black;
-  color:#e6c47a;
-  border:1px solid #e6c47a;
-  padding:10px;
-  font-size:1em;
-}
-
-button {
-  cursor:pointer;
-  margin-top:10px;
-}
-
 #countdown {
   margin-top:30px;
   font-size:1.2em;
   letter-spacing:2px;
+}
+
+/* Stylizacja obrazka */
+img {
+  display:block;
+  margin: 20px auto;
+  max-width:80%;
+  height:auto;
+  border: 2px solid #e6c47a; /* złota ramka */
 }
 </style>
 </head>
@@ -71,25 +67,20 @@ button {
 <div class="sand"></div>
 
 <div class="container">
-  <h1>Bóg Imperator Przemawia</h1>
+  <h1>Bóg Imperator Przemówi 09/01/26</h1>
 
   <p>
     Widzę wszystkie przyszłości.<br>
     Tylko jedna prowadzi dalej.
   </p>
 
-  <p>
-    Jak nazywa się jedyna droga, którą narzuciłem ludzkości?
-  </p>
+  <!-- OBRAZ Z ZAGADKĄ -->
+  <img src="czerw.jpg" alt="Zagadka Bóg Imperator">
 
-  <input id="a" placeholder="Twoja odpowiedź">
-  <br>
-  <button onclick="check()">Odpowiedz</button>
-
-  <p id="r"></p>
-
+  <!-- LICZNIK -->
   <div id="countdown"></div>
 
+  <!-- PRZYCISK MUZYKI -->
   <br>
   <button onclick="startMusic()">Obudź Boga Imperatora</button>
 </div>
@@ -100,17 +91,6 @@ button {
 </audio>
 
 <script>
-/* PRZEKIEROWANIE DO QR2 */
-function check(){
-  let v = document.getElementById("a").value.toLowerCase().trim();
-  if(v === "złota ścieżka" || v === "zlota sciezka" || v === "golden path"){
-    window.location.href = "qr2.html";
-  } else {
-    document.getElementById("r").innerText =
-      "Twoja przyszłość się urywa.";
-  }
-}
-
 /* MUZYKA */
 function startMusic(){
   document.getElementById("music").play();

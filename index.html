@@ -12,14 +12,16 @@ html, body {
 }
 
 body {
-  background: radial-gradient(circle at top, #3a2f1b, #0b0b0b);
+  background: url('piasek.jpg') no-repeat center center fixed;
+  background-size: cover;
   color:#e6c47a;
   font-family: "Georgia", serif;
   text-align:center;
   overflow:hidden;
+  position:relative;
 }
 
-/* PIASKOWE TŁO */
+/* Nakładka ruchomego piasku */
 .sand {
   position:fixed;
   width:100%;
@@ -33,6 +35,7 @@ body {
     );
   animation: drift 60s linear infinite;
   pointer-events:none;
+  z-index:1;
 }
 
 @keyframes drift {
@@ -56,6 +59,7 @@ input, button {
 
 button {
   cursor:pointer;
+  margin-top:10px;
 }
 
 #countdown {
@@ -83,7 +87,7 @@ button {
   </p>
 
   <input id="a" placeholder="Twoja odpowiedź">
-  <br><br>
+  <br>
   <button onclick="check()">Odpowiedz</button>
 
   <p id="r"></p>
@@ -94,21 +98,16 @@ button {
   <button onclick="startMusic()">Obudź Boga Imperatora</button>
 </div>
 
-<!-- MUZYKA (wrzuć plik np. dune.mp3 do repo) -->
+<!-- MUZYKA (wrzuć plik dune.mp3 do repo) -->
 <audio id="music" loop>
   <source src="dune.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-/* PRZEKIEROWANIE */
+/* PRZEKIEROWANIE DO QR2 */
 function check(){
   let v = document.getElementById("a").value.toLowerCase().trim();
-
-  if(
-    v === "złota ścieżka" ||
-    v === "zlota sciezka" ||
-    v === "golden path"
-  ){
+  if(v === "złota ścieżka" || v === "zlota sciezka" || v === "golden path"){
     window.location.href = "qr2.html";
   } else {
     document.getElementById("r").innerText =
@@ -121,8 +120,8 @@ function startMusic(){
   document.getElementById("music").play();
 }
 
-/* LICZNIK */
-const target = new Date("2026-02-14T12:00:00").getTime();
+/* LICZNIK DO 14.02.2026 16:00 */
+const target = new Date("2026-02-14T16:00:00").getTime();
 
 setInterval(() => {
   const now = new Date().getTime();

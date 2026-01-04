@@ -1,0 +1,12 @@
+<script>
+function check(){
+ let v = document.getElementById("a").value.toLowerCase();
+ if(v.includes("przetr") || v.includes("ocal") || v.includes("surviv")){
+   document.getElementById("r").innerHTML =
+   "Zrozumiałaś ciężar władzy.<br><a href='final.html'>Objawienie</a>";
+ } else {
+   document.getElementById("r").innerText =
+   "Jeszcze nie rozumiesz ofiary.";
+ }
+}
+</script>

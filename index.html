@@ -21,6 +21,7 @@ body {
   position:relative;
 }
 
+/* Ciemna nakładka przyciemniająca tło */
 body::before {
   content:"";
   position:fixed;
@@ -31,6 +32,7 @@ body::before {
   z-index:0;
 }
 
+/* Nakładka ruchomego piasku */
 .sand {
   position:fixed;
   width:100%;
@@ -46,7 +48,7 @@ body::before {
   pointer-events:none;
   z-index:1;
 }
-  
+
 @keyframes drift {
   from { background-position:0 0; }
   to { background-position:1000px 1000px; }

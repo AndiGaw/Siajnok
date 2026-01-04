@@ -2,49 +2,146 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Próba Widzenia</title>
+<title>Rytuał Złotej Ścieżki</title>
+
 <style>
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
+}
+
 body {
-  background:#0b0b0b;
-  color:#d8c58a;
+  background: radial-gradient(circle at top, #3a2f1b, #0b0b0b);
+  color:#e6c47a;
   font-family: "Georgia", serif;
   text-align:center;
+  overflow:hidden;
+}
+
+/* PIASKOWE TŁO */
+.sand {
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(230,196,122,0.05),
+      rgba(230,196,122,0.05) 2px,
+      rgba(0,0,0,0) 4px
+    );
+  animation: drift 60s linear infinite;
+  pointer-events:none;
+}
+
+@keyframes drift {
+  from { background-position:0 0; }
+  to { background-position:1000px 1000px; }
+}
+
+.container {
+  position:relative;
+  z-index:2;
   padding:10%;
 }
+
 input, button {
   background:black;
-  color:#d8c58a;
-  border:1px solid #d8c58a;
+  color:#e6c47a;
+  border:1px solid #e6c47a;
   padding:10px;
+  font-size:1em;
+}
+
+button {
+  cursor:pointer;
+}
+
+#countdown {
+  margin-top:30px;
+  font-size:1.2em;
+  letter-spacing:2px;
 }
 </style>
 </head>
+
 <body>
 
-<h1>Próba Widzenia</h1>
-<p>
-Widzę wszystkie przyszłości.<br>
-Tylko jedna prowadzi dalej.
-</p>
-<p>
-Jak nazywa się jedyna droga, którą narzuciłem ludzkości?
-</p>
+<div class="sand"></div>
 
-<input id="a">
-<button onclick="check()">Odpowiedz</button>
+<div class="container">
+  <h1>Bóg Imperator Przemawia</h1>
 
-<p id="r"></p>
+  <p>
+    Widzę wszystkie przyszłości.<br>
+    Tylko jedna prowadzi dalej.
+  </p>
+
+  <p>
+    Jak nazywa się jedyna droga, którą narzuciłem ludzkości?
+  </p>
+
+  <input id="a" placeholder="Twoja odpowiedź">
+  <br><br>
+  <button onclick="check()">Odpowiedz</button>
+
+  <p id="r"></p>
+
+  <div id="countdown"></div>
+
+  <br>
+  <button onclick="startMusic()">Obudź Boga Imperatora</button>
+</div>
+
+<!-- MUZYKA (wrzuć plik np. dune.mp3 do repo) -->
+<audio id="music" loop>
+  <source src="dune.mp3" type="audio/mpeg">
+</audio>
 
 <script>
+/* PRZEKIEROWANIE */
 function check(){
-  let v = document.getElementById("a").value.toLowerCase();
-  if(v.includes("złota") || v.includes("zlota") || v.includes("golden")){
-    document.getElementById("r").innerHTML =
-    "Widzę, że rozumiesz.<br><a href='qr2.html'>Przejdź do Próby Pamięci</a>";
+  let v = document.getElementById("a").value.toLowerCase().trim();
+
+  if(
+    v === "złota ścieżka" ||
+    v === "zlota sciezka" ||
+    v === "golden path"
+  ){
+    window.location.href = "qr2.html";
   } else {
-    document.getElementById("r").innerText = "Twoja przyszłość się urywa.";
+    document.getElementById("r").innerText =
+      "Twoja przyszłość się urywa.";
   }
 }
+
+/* MUZYKA */
+function startMusic(){
+  document.getElementById("music").play();
+}
+
+/* LICZNIK */
+const target = new Date("2026-02-14T12:00:00").getTime();
+
+setInterval(() => {
+  const now = new Date().getTime();
+  const diff = target - now;
+
+  if(diff <= 0){
+    document.getElementById("countdown").innerText =
+      "Złota Ścieżka została wypełniona.";
+    return;
+  }
+
+  const d = Math.floor(diff / (1000*60*60*24));
+  const h = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  const m = Math.floor((diff % (1000*60*60)) / (1000*60));
+  const s = Math.floor((diff % (1000*60)) / 1000);
+
+  document.getElementById("countdown").innerText =
+    `Objawienie za: ${d}d ${h}h ${m}m ${s}s`;
+}, 1000);
 </script>
 
 </body>

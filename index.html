@@ -14,6 +14,8 @@ html, body {
 body {
   background: url('piasek.png') no-repeat center center fixed;
   background-size: cover;
+  background-color: #000; /* czarne podłoże */
+  background-blend-mode: multiply; /* mieszanie dla przyciemnienia */
   color:#e6c47a;
   font-family: "Georgia", serif;
   text-align:center;
@@ -21,15 +23,16 @@ body {
   position:relative;
 }
 
-/* Ciemna nakładka przyciemniająca tło */
-body::before {
+/* Dodatkowa nakładka przyciemniająca */
+body::after {
   content:"";
   position:fixed;
   top:0; left:0;
   width:100%;
   height:100%;
-  background: rgba(0,0,0,0.5); /* półprzezroczyste czarne przyciemnienie */
-  z-index:0;
+  background: rgba(0,0,0,0.5); 
+  z-index:1;
+  pointer-events:none;
 }
 
 /* Nakładka ruchomego piasku */
@@ -46,7 +49,7 @@ body::before {
     );
   animation: drift 60s linear infinite;
   pointer-events:none;
-  z-index:1;
+  z-index:2;
 }
 
 @keyframes drift {
@@ -56,7 +59,7 @@ body::before {
 
 .container {
   position:relative;
-  z-index:2;
+  z-index:3;
   padding:10%;
 }
 

@@ -9,16 +9,34 @@ html, body {
   margin:0;
   padding:0;
   height:100%;
-}
-
-body {
-  background: url('piasek.png') no-repeat center center fixed;
-  background-size: cover;
+  background: #000; /* czarne tło */
   color:#e6c47a;
   font-family: "Georgia", serif;
   text-align:center;
   overflow:hidden;
   position:relative;
+}
+
+/* Nakładka ruchomego piasku */
+.sand {
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(230,196,122,0.02),
+      rgba(230,196,122,0.02) 2px,
+      rgba(0,0,0,0) 4px
+    );
+  animation: drift 60s linear infinite;
+  pointer-events:none;
+  z-index:1;
+}
+
+@keyframes drift {
+  from { background-position:0 0; }
+  to { background-position:1000px 1000px; }
 }
 
 .container {
@@ -49,6 +67,8 @@ button {
 </head>
 
 <body>
+
+<div class="sand"></div>
 
 <div class="container">
   <h1>Bóg Imperator Przemawia</h1>

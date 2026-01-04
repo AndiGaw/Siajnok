@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Próba Widzenia</title>
+<style>
+body {
+  background:#0b0b0b;
+  color:#d8c58a;
+  font-family: "Georgia", serif;
+  text-align:center;
+  padding:10%;
+}
+input, button {
+  background:black;
+  color:#d8c58a;
+  border:1px solid #d8c58a;
+  padding:10px;
+}
+</style>
+</head>
+<body>
+
+<h1>Próba Widzenia</h1>
+<p>
+Widzę wszystkie przyszłości.<br>
+Tylko jedna prowadzi dalej.
+</p>
+<p>
+Jak nazywa się jedyna droga, którą narzuciłem ludzkości?
+</p>
+
+<input id="a">
+<button onclick="check()">Odpowiedz</button>
+
+<p id="r"></p>
+
+<script>
+function check(){
+  let v = document.getElementById("a").value.toLowerCase();
+  if(v.includes("złota") || v.includes("zlota") || v.includes("golden")){
+    document.getElementById("r").innerHTML =
+    "Widzę, że rozumiesz.<br><a href='qr2.html'>Przejdź do Próby Pamięci</a>";
+  } else {
+    document.getElementById("r").innerText = "Twoja przyszłość się urywa.";
+  }
+}
+</script>
+
+</body>
+</html>

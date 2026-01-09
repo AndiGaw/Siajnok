@@ -83,7 +83,41 @@ button {
 
   <!-- TUTAJ JEST WSTAWIONY OBRAZ -->
   <img src="czerw.png" alt="">
-  
+
+  <!-- ZAGADKA -->
+<div class="riddle" style="margin-top:30px; font-style:italic; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.6; z-index:2; position:relative;">
+  <p>
+    Nim byłeś, była.<br>
+    Oby znikła przed tobą.<br>
+    W młodości źródłem szyderstw, choć i namiętności – pożogą.<br>
+    Nie staniesz się nią, choćbyś oszukiwać się starał.<br>
+    Ludzkości piastą.<br>
+    Siajnok na myśl imię jej przywodzi.<br>
+    Wypowiedz je głośno,<br>
+    a Złoty Szlak Cię wyswobodzi.
+  </p>
+
+  <input type="text" id="riddleAnswer" placeholder="Wpisz odpowiedź..." style="padding:8px; font-size:1em; width:70%;">
+  <button onclick="checkRiddle()" style="padding:8px; font-size:1em; margin-left:5px; cursor:pointer;">Sprawdź</button>
+  <div id="riddleResult" style="margin-top:10px; color:#ff6666; font-weight:bold;"></div>
+</div>
+
+<script>
+function checkRiddle() {
+  const answer = document.getElementById("riddleAnswer").value.trim().toLowerCase();
+  const correctAnswers = ["matka", "mama", "twoja stara"];
+  const resultDiv = document.getElementById("riddleResult");
+
+  if (correctAnswers.includes(answer)) {
+    // Poprawna odpowiedź - przekierowanie
+    window.location.href = "https://andigaw.github.io/Siajnok/qr2.html";
+  } else {
+    // Błędna odpowiedź
+    resultDiv.innerText = "Błędna odpowiedź";
+  }
+}
+</script>
+
   <!-- LICZNIK -->
   <div id="countdown"></div>
 
@@ -96,6 +130,8 @@ button {
 <audio id="music" loop>
   <source src="dune.mp3" type="audio/mpeg">
 </audio>
+
+  
 
 <script>
 /* MUZYKA */

@@ -74,8 +74,6 @@ button {
     <button type="submit">Wyślij</button>
     <p id="formMessage" style="color:#e6c47a;"></p>
   </form>
-
- <p style="margin-top:30px; font-size:0.9em;">Oczekuj wieści.</p>
 </div>
 
 <script>
@@ -92,7 +90,7 @@ form.addEventListener('submit', function(e) {
     headers: { 'Accept': 'application/json' }
   }).then(response => {
     if (response.ok) {
-      message.textContent = "Bóg Imperator zapisał Twe imię na Złotym Szlaku.";
+      message.textContent = "Bóg Imperator zapisał Twe imię na Złotym Szlaku. Oczekuj wieści.";
       form.reset();
     } else {
       message.textContent = "Ups, wystąpił problem. Spróbuj ponownie.";

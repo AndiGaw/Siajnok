@@ -92,7 +92,7 @@ form.addEventListener('submit', function(e) {
     headers: { 'Accept': 'application/json' }
   }).then(response => {
     if (response.ok) {
-      message.textContent = "Bóg Imperator zapisał Twe imię w swym Złotym Szlaku.";
+      message.textContent = "Bóg Imperator zapisał Twe imię na Złotym Szlaku.";
       form.reset();
     } else {
       message.textContent = "Ups, wystąpił problem. Spróbuj ponownie.";

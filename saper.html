@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Saper – Złoty Szlak</title>
+<title>Przeprawa przez Arrakis</title>
 
 <style>
 html, body {
@@ -17,7 +17,6 @@ html, body {
   position:relative;
 }
 
-/* Ruchomy piasek */
 .sand {
   position:fixed;
   width:100%;
@@ -45,7 +44,6 @@ html, body {
   padding:20px;
 }
 
-/* Styl Sapera */
 #board {
   display: inline-grid;
   margin-top: 20px;
@@ -53,8 +51,8 @@ html, body {
 }
 
 .cell {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background: #222;
   border: 1px solid #e6c47a;
   display: flex;
@@ -62,33 +60,31 @@ html, body {
   justify-content: center;
   cursor: pointer;
   font-weight: bold;
-  color: #e6c47a;
 }
 
-.revealed {
-  background: #111;
-  cursor: default;
+.visited {
+  background: #444;
 }
 
-.mine {
+.start {
+  background: darkgreen;
+}
+
+.goal {
+  background: darkblue;
+}
+
+.worm {
   background: darkred;
-  color: white;
+  color:white;
 }
 
-.flag {
-  background: #665500;
-}
-
-/* Formularz */
 input, button {
   background:black;
   color:#e6c47a;
   border:1px solid #e6c47a;
   padding:8px;
   margin:5px;
-}
-
-button {
   cursor:pointer;
 }
 </style>
@@ -99,52 +95,54 @@ button {
 <div class="sand"></div>
 
 <div class="container">
-  <h1>Saper Boga Imperatora</h1>
+  <h1>Przeprawa przez Arrakis</h1>
+
+  <p>
+    Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!
+  </p>
 
   <label>Rozmiar:
     <input id="size" type="number" value="10" min="5" max="20">
   </label>
 
-  <label>Miny:
-    <input id="mines" type="number" value="10" min="1" max="50">
+  <label>Czerwie:
+    <input id="mines" type="number" value="12" min="1" max="50">
   </label>
 
-  <button onclick="startGame()">Nowa gra</button>
+  <button onclick="startGame()">Nowa wyprawa</button>
 
   <div id="board"></div>
 </div>
 
 <script>
-let size, mines;
+let size, worms;
 let board = [];
-let revealedCount = 0;
 let gameOver = false;
+let playerPos = {x:0, y:0};
 
 function startGame() {
   size = parseInt(document.getElementById("size").value);
-  mines = parseInt(document.getElementById("mines").value);
+  worms = parseInt(document.getElementById("mines").value);
 
-  if (mines >= size * size) {
-    alert("Za dużo min!");
+  if (worms >= size * size - 2) {
+    alert("Za dużo czerwii!");
     return;
   }
 
   board = [];
-  revealedCount = 0;
   gameOver = false;
+  playerPos = {x:0, y:0};
 
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
-  boardDiv.style.gridTemplateColumns = `repeat(${size}, 30px)`;
+  boardDiv.style.gridTemplateColumns = `repeat(${size}, 32px)`;
 
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
       board[y][x] = {
-        mine: false,
-        revealed: false,
-        flag: false,
-        count: 0
+        worm: false,
+        visited: false
       };
 
       const cell = document.createElement("div");
@@ -152,138 +150,108 @@ function startGame() {
       cell.dataset.x = x;
       cell.dataset.y = y;
 
-      cell.onclick = () => reveal(x, y);
-      cell.oncontextmenu = (e) => {
-        e.preventDefault();
-        toggleFlag(x, y);
-      };
+      cell.onclick = () => moveTo(x, y);
 
       boardDiv.appendChild(cell);
     }
   }
 
-  placeMines();
-  calculateNumbers();
+  placeWorms();
+  drawBoard();
 }
 
-function placeMines() {
+function placeWorms() {
   let placed = 0;
 
-  while (placed < mines) {
+  while (placed < worms) {
     let x = Math.floor(Math.random() * size);
     let y = Math.floor(Math.random() * size);
 
-    if (!board[y][x].mine) {
-      board[y][x].mine = true;
+    if ((x === 0 && y === 0) || (x === size-1 && y === size-1))
+      continue;
+
+    if (!board[y][x].worm) {
+      board[y][x].worm = true;
       placed++;
     }
   }
 }
 
-function calculateNumbers() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].mine) continue;
+function isAdjacent(x, y) {
+  const dx = Math.abs(playerPos.x - x);
+  const dy = Math.abs(playerPos.y - y);
 
-      let count = 0;
-
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          let ny = y + dy;
-          let nx = x + dx;
-
-          if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
-            if (board[ny][nx].mine) count++;
-          }
-        }
-      }
-
-      board[y][x].count = count;
-    }
-  }
+  return (dx + dy === 1);
 }
 
-function reveal(x, y) {
+function moveTo(x, y) {
   if (gameOver) return;
 
-  const cell = board[y][x];
-  const div = getCellDiv(x, y);
+  if (!isAdjacent(x, y)) return;
 
-  if (cell.revealed || cell.flag) return;
+  playerPos = {x, y};
+  board[y][x].visited = true;
 
-  cell.revealed = true;
-  div.classList.add("revealed");
-  revealedCount++;
-
-  if (cell.mine) {
-    div.classList.add("mine");
-    div.textContent = "💣";
-    endGame(false);
+  if (board[y][x].worm) {
+    revealWorms();
+    alert("Pożarł Cię Czerw Pustyni! 💀");
+    gameOver = true;
     return;
   }
 
-  if (cell.count > 0) {
-    div.textContent = cell.count;
-  } else {
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        let ny = y + dy;
-        let nx = x + dx;
+  if (x === size-1 && y === size-1) {
+    drawBoard();
+    alert("Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉");
+    gameOver = true;
+    return;
+  }
 
-        if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
-          if (!board[ny][nx].revealed) {
-            reveal(nx, ny);
-          }
-        }
+  drawBoard();
+}
+
+function revealWorms() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].worm) {
+        const div = getCell(x, y);
+        div.classList.add("worm");
+        div.textContent = "🪱";
       }
     }
   }
+}
 
-  if (revealedCount === size * size - mines) {
-    endGame(true);
+function drawBoard() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const div = getCell(x, y);
+      div.textContent = "";
+      div.className = "cell";
+
+      if (board[y][x].visited)
+        div.classList.add("visited");
+
+      if (x === 0 && y === 0) {
+        div.classList.add("start");
+        div.textContent = "A";
+      }
+
+      if (x === size-1 && y === size-1) {
+        div.classList.add("goal");
+        div.textContent = "B";
+      }
+
+      if (x === playerPos.x && y === playerPos.y) {
+        div.textContent = "👣";
+      }
+    }
   }
 }
 
-function toggleFlag(x, y) {
-  if (gameOver) return;
-
-  const cell = board[y][x];
-  const div = getCellDiv(x, y);
-
-  if (cell.revealed) return;
-
-  cell.flag = !cell.flag;
-
-  if (cell.flag) {
-    div.classList.add("flag");
-    div.textContent = "🚩";
-  } else {
-    div.classList.remove("flag");
-    div.textContent = "";
-  }
-}
-
-function getCellDiv(x, y) {
+function getCell(x, y) {
   return document.querySelector(
     `.cell[data-x='${x}'][data-y='${y}']`
   );
-}
-
-function endGame(win) {
-  gameOver = true;
-
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].mine) {
-        const div = getCellDiv(x, y);
-        div.textContent = "💣";
-      }
-    }
-  }
-
-  setTimeout(() => {
-    alert(win ? "Zwycięstwo na Złotym Szlaku! 🎉" : "Czerwie pustyni zwyciężyły 💥");
-  }, 100);
 }
 
 startGame();

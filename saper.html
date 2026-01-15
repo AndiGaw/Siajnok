@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis</title>
+<title>Przeprawa przez Arrakis – z Echem Czerwia</title>
 
 <style>
 html, body {
@@ -98,7 +98,8 @@ input, button {
   <h1>Przeprawa przez Arrakis</h1>
 
   <p>
-    Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!
+    Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!<br>
+    Nasłuchuj ich pomruku...
   </p>
 
   <label>Rozmiar:
@@ -120,6 +121,55 @@ let board = [];
 let gameOver = false;
 let playerPos = {x:0, y:0};
 
+/* --- SYSTEM DŹWIĘKU --- */
+let audioCtx, oscillator, gainNode;
+
+function initSound() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  oscillator = audioCtx.createOscillator();
+  gainNode = audioCtx.createGain();
+
+  oscillator.type = "sine";
+  oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
+
+  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.start();
+}
+
+function updateSound() {
+  if (!audioCtx) return;
+
+  let minDist = Infinity;
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].worm) {
+        let dist = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
+        if (dist < minDist) minDist = dist;
+      }
+    }
+  }
+
+  if (minDist === Infinity) minDist = size;
+
+  let freq = 60 + (size - minDist) * 20;
+  let volume = Math.max(0, (size - minDist) / size);
+
+  oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
+  gainNode.gain.setTargetAtTime(volume * 0.3, audioCtx.currentTime, 0.1);
+}
+
+function stopSound() {
+  if (gainNode)
+    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+}
+/* --- KONIEC SYSTEMU DŹWIĘKU --- */
+
 function startGame() {
   size = parseInt(document.getElementById("size").value);
   worms = parseInt(document.getElementById("mines").value);
@@ -128,6 +178,8 @@ function startGame() {
     alert("Za dużo czerwii!");
     return;
   }
+
+  if (!audioCtx) initSound();
 
   board = [];
   gameOver = false;
@@ -157,6 +209,7 @@ function startGame() {
   }
 
   placeWorms();
+  updateSound();
   drawBoard();
 }
 
@@ -192,14 +245,18 @@ function moveTo(x, y) {
   playerPos = {x, y};
   board[y][x].visited = true;
 
+  updateSound();
+
   if (board[y][x].worm) {
     revealWorms();
+    stopSound();
     alert("Pożarł Cię Czerw Pustyni! 💀");
     gameOver = true;
     return;
   }
 
   if (x === size-1 && y === size-1) {
+    stopSound();
     drawBoard();
     alert("Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉");
     gameOver = true;

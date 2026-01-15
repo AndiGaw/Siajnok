@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Escape Room – Diuna</title>
+<style>
+html, body {
+  margin:0; padding:0; height:100%;
+  background:#000; color:#e6c47a;
+  font-family:"Georgia", serif; text-align:center;
+  overflow-y:auto; position:relative;
+}
+
+body.shake { animation: shake 0.1s infinite; }
+@keyframes shake {
+  0% { transform: translate(1px,1px); }
+  25% { transform: translate(-1px,-1px); }
+  50% { transform: translate(1px,-1px); }
+  75% { transform: translate(-1px,1px); }
+  100% { transform: translate(0,0); }
+}
+
+body.flash { background-color:#8B0000 !important; transition: background-color 0.3s ease; }
+
+.room { display:none; padding:20px; }
+.room.active { display:block; }
+
+#board { display:inline-grid; gap:3px; margin-top:20px; }
+
+.cell { width:50px; height:50px; background:#222; border:2px solid #e6c47a;
+  display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;
+}
+.visited { background:#444; }
+.start   { background:darkgreen; }
+.goal    { background:darkblue; }
+.worm    { background:darkred; color:white; }
+
+input, button { background:black; color:#e6c47a; border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer; }
+
+#audioInfo, #stats { margin-top:10px; font-size:0.9em; }
+
+#wormMouth {
+  position:fixed; top:50%; left:50%;
+  width:200px; height:200px;
+  transform: translate(-50%, -50%) scale(0);
+  background: url('worm_mouth.png') no-repeat center/contain;
+  pointer-events:none; z-index:999; transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+  opacity:0;
+}
+</style>
+</head>
+<body>
+
+<div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
+<div id="stats">Kroki: 0 | Punktacja: 0</div>
+
+<!-- Lokacje -->
+<div id="room1" class="room active">
+  <h2>Komnata Fremenów</h2>
+  <p>Zbierz kryształ Spice, aby otworzyć przejście do piasków Arrakis.</p>
+  <img src="spice.png" id="spice" style="width:50px;cursor:pointer;" onclick="collectSpice()">
+</div>
+
+<div id="room2" class="room">
+  <h2>Piaski Arrakis</h2>
+  <p>Przejdź przez planszę unikając czerwia! Dotarcie do końca lokacji = przejście dalej.</p>
+  <div id="board"></div>
+</div>
+
+<div id="room3" class="room">
+  <h2>Świątynia Złotego Szlaku</h2>
+  <p>Odszyfruj zagadkę, aby wygrać grę.</p>
+  <input type="text" id="puzzleInput" placeholder="Wpisz hasło..." style="padding:8px; font-size:1em; width:70%;">
+  <button onclick="checkPuzzle()">Sprawdź</button>
+</div>
+
+<div id="wormMouth"></div>
+
+<script>
+/* ---- AUDIO ---- */
+let audioCtx=null, oscillator=null, gainNode=null;
+function initSound(){
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  oscillator=audioCtx.createOscillator();
+  gainNode=audioCtx.createGain();
+  oscillator.type="sine";
+  oscillator.frequency.setValueAtTime(50,audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(0,audioCtx.currentTime);
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  oscillator.start();
+}
+
+/* ---- ROOM1 ---- */
+let inventory={spice:false};
+function collectSpice(){
+  inventory.spice=true;
+  alert("Zebrałeś kryształ Spice!");
+  document.getElementById("room1").classList.remove("active");
+  document.getElementById("room2").classList.add("active");
+  startGame(); // rozpoczęcie planszy
+}
+
+/* ---- ROOM2 – mini gra czerwia ---- */
+let size=8, worms=12, board=[], playerPos={x:0,y:0}, steps=0, score=0, gameOver=false;
+
+function startGame(){
+  const boardDiv=document.getElementById("board");
+  boardDiv.innerHTML="";
+  boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
+  board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
+  document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
+  if(!audioCtx) initSound();
+  if(audioCtx.state==="suspended") audioCtx.resume();
+
+  for(let y=0;y<size;y++){
+    board[y]=[];
+    for(let x=0;x<size;x++){
+      board[y][x]={worm:false,visited:false};
+      const cell=document.createElement("div");
+      cell.className="cell"; cell.dataset.x=x; cell.dataset.y=y;
+      cell.onclick=()=>moveTo(x,y);
+      boardDiv.appendChild(cell);
+    }
+  }
+  placeWorms();
+  updateSoundAndShake();
+  drawBoard();
+}
+
+function placeWorms(){
+  let placed=0;
+  while(placed<worms){
+    let x=Math.floor(Math.random()*size);
+    let y=Math.floor(Math.random()*size);
+    if((x===0&&y===0)||(x===size-1&&y===size-1)) continue;
+    if(!board[y][x].worm){ board[y][x].worm=true; placed++; }
+  }
+}
+
+function isAdjacent(x,y){ return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1; }
+
+function moveTo(x,y){
+  if(gameOver||!isAdjacent(x,y)) return;
+  playerPos={x,y};
+  if(!board[y][x].visited) steps++;
+  board[y][x].visited=true;
+  updateSoundAndShake();
+  document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
+
+  if(board[y][x].worm){
+    revealWorms(); stopSound(); showWormMouth();
+    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: 0`;
+    gameOver=true; document.body.classList.remove("shake");
+    setTimeout(()=>{document.getElementById("room2").classList.remove("active");
+                     document.getElementById("room1").classList.add("active");},1500);
+    return;
+  }
+
+  if(x===size-1 && y===size-1){
+    stopSound(); score=Math.max(0,100-steps*2);
+    drawBoard(); alert(`Dotarłeś do końca planszy! 🎉\nPunkty: ${score}`);
+    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
+    gameOver=true; document.body.classList.remove("shake");
+    setTimeout(()=>{document.getElementById("room2").classList.remove("active");
+                     document.getElementById("room3").classList.add("active");},500);
+    return;
+  }
+
+  drawBoard();
+}
+
+function revealWorms(){
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const div=getCell(x,y);
+        div.classList.add("worm"); div.textContent="🪱";
+      }
+    }
+  }
+}
+
+function drawBoard(){
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const div=getCell(x,y);
+      div.className="cell"; div.textContent="";
+      if(board[y][x].visited) div.classList.add("visited");
+      if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
+      if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
+      if(x===playerPos.x&&y===playerPos.y) div.textContent="👣";
+    }
+  }
+}
+
+function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
+
+function updateSoundAndShake(){
+  if(!audioCtx) return;
+  let minDist=Infinity;
+  for(let y=0;y<size;y++){ for(let x=0;x<size;x++){ if(board[y][x].worm){ let d=Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y); if(d<minDist) minDist=d; }}}
+  if(minDist===Infinity) minDist=size;
+  let freq=60+(size-minDist)*20;
+  let volume=Math.max(0,(size-minDist)/size);
+  oscillator.frequency.setTargetAtTime(freq,audioCtx.currentTime,0.1);
+  gainNode.gain.setTargetAtTime(volume*0.35,audioCtx.currentTime,0.1);
+  if(minDist<=3 && !gameOver) document.body.classList.add("shake"); else document.body.classList.remove("shake");
+}
+
+function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
+
+/* ---- Worm Mouth Animation ---- */
+function showWormMouth(){
+  let mouth=document.getElementById("wormMouth");
+  mouth.style.transform="translate(-50%,-50%) scale(1.5)"; mouth.style.opacity="1";
+  document.body.classList.add("flash");
+  if(audioCtx){ const scream=audioCtx.createOscillator(); const gain=audioCtx.createGain(); scream.type="sawtooth"; scream.frequency.setValueAtTime(200,audioCtx.currentTime); gain.gain.setValueAtTime(0.5,audioCtx.currentTime); scream.connect(gain); gain.connect(audioCtx.destination); scream.start(); scream.stop(audioCtx.currentTime+1.2);}
+  setTimeout(()=>{mouth.style.transform="translate(-50%,-50%) scale(0)"; mouth.style.opacity="0"; document.body.classList.remove("flash");},1200);
+}
+
+/* ---- ROOM3 – Zagadki ---- */
+function checkPuzzle(){
+  const ans=document.getElementById("puzzleInput").value.trim().toLowerCase();
+  if(ans==="siajnok"){
+    alert("Gratulacje! Udało Ci się przejść Escape Room Diuny! 🎉");
+  } else {
+    alert("Błędna odpowiedź. Spróbuj ponownie!");
+  }
+}
+
+/* Odblokowanie audio po kliknięciu */
+document.addEventListener("click",()=>{
+  if(audioCtx && audioCtx.state==="suspended"){ audioCtx.resume(); document.getElementById("audioInfo").innerText="Sonar czerwia aktywny 🔊"; }
+});
+</script>
+</body>
+</html>

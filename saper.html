@@ -87,6 +87,12 @@ input, button {
   margin:5px;
   cursor:pointer;
 }
+
+#audioInfo {
+  margin-top:10px;
+  font-size:0.9em;
+  opacity:0.8;
+}
 </style>
 </head>
 
@@ -101,6 +107,8 @@ input, button {
     Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!<br>
     Nasłuchuj ich pomruku...
   </p>
+
+  <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar czerwia 🔊</div>
 
   <label>Rozmiar:
     <input id="size" type="number" value="10" min="5" max="20">
@@ -122,7 +130,9 @@ let gameOver = false;
 let playerPos = {x:0, y:0};
 
 /* --- SYSTEM DŹWIĘKU --- */
-let audioCtx, oscillator, gainNode;
+let audioCtx = null;
+let oscillator = null;
+let gainNode = null;
 
 function initSound() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -161,7 +171,7 @@ function updateSound() {
   let volume = Math.max(0, (size - minDist) / size);
 
   oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
-  gainNode.gain.setTargetAtTime(volume * 0.3, audioCtx.currentTime, 0.1);
+  gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
 }
 
 function stopSound() {
@@ -171,148 +181,4 @@ function stopSound() {
 /* --- KONIEC SYSTEMU DŹWIĘKU --- */
 
 function startGame() {
-  size = parseInt(document.getElementById("size").value);
-  worms = parseInt(document.getElementById("mines").value);
-
-  if (worms >= size * size - 2) {
-    alert("Za dużo czerwii!");
-    return;
-  }
-
-  if (!audioCtx) initSound();
-
-  board = [];
-  gameOver = false;
-  playerPos = {x:0, y:0};
-
-  const boardDiv = document.getElementById("board");
-  boardDiv.innerHTML = "";
-  boardDiv.style.gridTemplateColumns = `repeat(${size}, 32px)`;
-
-  for (let y = 0; y < size; y++) {
-    board[y] = [];
-    for (let x = 0; x < size; x++) {
-      board[y][x] = {
-        worm: false,
-        visited: false
-      };
-
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.dataset.x = x;
-      cell.dataset.y = y;
-
-      cell.onclick = () => moveTo(x, y);
-
-      boardDiv.appendChild(cell);
-    }
-  }
-
-  placeWorms();
-  updateSound();
-  drawBoard();
-}
-
-function placeWorms() {
-  let placed = 0;
-
-  while (placed < worms) {
-    let x = Math.floor(Math.random() * size);
-    let y = Math.floor(Math.random() * size);
-
-    if ((x === 0 && y === 0) || (x === size-1 && y === size-1))
-      continue;
-
-    if (!board[y][x].worm) {
-      board[y][x].worm = true;
-      placed++;
-    }
-  }
-}
-
-function isAdjacent(x, y) {
-  const dx = Math.abs(playerPos.x - x);
-  const dy = Math.abs(playerPos.y - y);
-
-  return (dx + dy === 1);
-}
-
-function moveTo(x, y) {
-  if (gameOver) return;
-
-  if (!isAdjacent(x, y)) return;
-
-  playerPos = {x, y};
-  board[y][x].visited = true;
-
-  updateSound();
-
-  if (board[y][x].worm) {
-    revealWorms();
-    stopSound();
-    alert("Pożarł Cię Czerw Pustyni! 💀");
-    gameOver = true;
-    return;
-  }
-
-  if (x === size-1 && y === size-1) {
-    stopSound();
-    drawBoard();
-    alert("Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉");
-    gameOver = true;
-    return;
-  }
-
-  drawBoard();
-}
-
-function revealWorms() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
-        const div = getCell(x, y);
-        div.classList.add("worm");
-        div.textContent = "🪱";
-      }
-    }
-  }
-}
-
-function drawBoard() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const div = getCell(x, y);
-      div.textContent = "";
-      div.className = "cell";
-
-      if (board[y][x].visited)
-        div.classList.add("visited");
-
-      if (x === 0 && y === 0) {
-        div.classList.add("start");
-        div.textContent = "A";
-      }
-
-      if (x === size-1 && y === size-1) {
-        div.classList.add("goal");
-        div.textContent = "B";
-      }
-
-      if (x === playerPos.x && y === playerPos.y) {
-        div.textContent = "👣";
-      }
-    }
-  }
-}
-
-function getCell(x, y) {
-  return document.querySelector(
-    `.cell[data-x='${x}'][data-y='${y}']`
-  );
-}
-
-startGame();
-</script>
-
-</body>
-</html>
+  size = parseInt(document.getElementById("size").value)

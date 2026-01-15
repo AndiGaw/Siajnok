@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – z Echem Czerwia</title>
+<title>Przeprawa przez Arrakis – pełny klimat</title>
 
 <style>
 html, body {
@@ -15,6 +15,18 @@ html, body {
   text-align:center;
   overflow-y: auto;
   position:relative;
+}
+
+body.shake {
+  animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px); }
+  25% { transform: translate(-1px, -1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0,0); }
 }
 
 .sand {
@@ -47,20 +59,21 @@ html, body {
 #board {
   display: inline-grid;
   margin-top: 20px;
-  gap: 2px;
+  gap: 3px;
   min-height: 50px;
 }
 
 .cell {
-  width: 32px;
-  height: 32px;
+  width: 50px;  /* większe pola */
+  height: 50px;
   background: #222;
-  border: 1px solid #e6c47a;
+  border: 2px solid #e6c47a;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1.2em;
 }
 
 .visited { background: #444; }
@@ -77,7 +90,7 @@ input, button {
   cursor:pointer;
 }
 
-#audioInfo {
+#audioInfo, #stats {
   margin-top:10px;
   font-size:0.9em;
 }
@@ -94,6 +107,7 @@ input, button {
   <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
 
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
+  <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <label>Rozmiar:
     <input id="size" type="number" value="10" min="5" max="20">
@@ -113,6 +127,8 @@ let size, worms;
 let board = [];
 let gameOver = false;
 let playerPos = {x:0, y:0};
+let steps = 0;
+let score = 0;
 
 /* ---- AUDIO ---- */
 let audioCtx = null;
@@ -121,22 +137,17 @@ let gainNode = null;
 
 function initSound() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
   oscillator = audioCtx.createOscillator();
   gainNode = audioCtx.createGain();
-
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
-
   gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-
   oscillator.connect(gainNode);
   gainNode.connect(audioCtx.destination);
-
   oscillator.start();
 }
 
-function updateSound() {
+function updateSoundAndShake() {
   if (!audioCtx) return;
 
   let minDist = Infinity;
@@ -154,9 +165,15 @@ function updateSound() {
 
   let freq = 60 + (size - minDist) * 20;
   let volume = Math.max(0, (size - minDist) / size);
-
   oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
+
+  // Efekt drżenia ekranu
+  if (minDist <= 3 && !gameOver) {
+    document.body.classList.add("shake");
+  } else {
+    document.body.classList.remove("shake");
+  }
 }
 
 function stopSound() {
@@ -165,18 +182,12 @@ function stopSound() {
 }
 
 /* ---- GRA ---- */
-
 function startGame() {
-
   const boardDiv = document.getElementById("board");
-
   size = parseInt(document.getElementById("size").value);
   worms = parseInt(document.getElementById("mines").value);
 
-  if (worms >= size * size - 2) {
-    alert("Za dużo czerwii!");
-    return;
-  }
+  if (worms >= size * size - 2) { alert("Za dużo czerwii!"); return; }
 
   if (!audioCtx) initSound();
   if (audioCtx.state === "suspended") audioCtx.resume();
@@ -184,80 +195,73 @@ function startGame() {
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
+  steps = 0;
+  score = 0;
+  document.getElementById("stats").innerText = `Kroki: 0 | Punktacja: 0`;
 
   boardDiv.innerHTML = "";
-  boardDiv.style.gridTemplateColumns = `repeat(${size}, 32px)`;
+  boardDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
 
-  for (let y = 0; y < size; y++) {
-    board[y] = [];
-
-    for (let x = 0; x < size; x++) {
-      board[y][x] = {
-        worm: false,
-        visited: false
-      };
-
+  for (let y=0;y<size;y++) {
+    board[y]=[];
+    for (let x=0;x<size;x++) {
+      board[y][x]={worm:false, visited:false};
       const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.dataset.x = x;
-      cell.dataset.y = y;
-
-      cell.onclick = () => moveTo(x, y);
-
+      cell.className="cell";
+      cell.dataset.x=x;
+      cell.dataset.y=y;
+      cell.onclick=()=>moveTo(x,y);
       boardDiv.appendChild(cell);
     }
   }
 
   placeWorms();
-  updateSound();
+  updateSoundAndShake();
   drawBoard();
 }
 
 function placeWorms() {
-  let placed = 0;
-
-  while (placed < worms) {
-    let x = Math.floor(Math.random() * size);
-    let y = Math.floor(Math.random() * size);
-
-    if ((x === 0 && y === 0) || (x === size-1 && y === size-1))
-      continue;
-
-    if (!board[y][x].worm) {
-      board[y][x].worm = true;
-      placed++;
-    }
+  let placed=0;
+  while(placed<worms) {
+    let x=Math.floor(Math.random()*size);
+    let y=Math.floor(Math.random()*size);
+    if((x===0&&y===0)||(x===size-1&&y===size-1)) continue;
+    if(!board[y][x].worm){ board[y][x].worm=true; placed++; }
   }
 }
 
-function isAdjacent(x, y) {
-  const dx = Math.abs(playerPos.x - x);
-  const dy = Math.abs(playerPos.y - y);
-  return (dx + dy === 1);
+function isAdjacent(x,y){
+  return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) ===1;
 }
 
-function moveTo(x, y) {
-  if (gameOver) return;
-  if (!isAdjacent(x, y)) return;
+function moveTo(x,y){
+  if(gameOver) return;
+  if(!isAdjacent(x,y)) return;
 
-  playerPos = {x, y};
-  board[y][x].visited = true;
+  playerPos={x,y};
+  if(!board[y][x].visited) steps++;
+  board[y][x].visited=true;
+  updateSoundAndShake();
+  document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
-  updateSound();
-
-  if (board[y][x].worm) {
+  if(board[y][x].worm){
     revealWorms();
     stopSound();
+    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: 0`;
     alert("Pożarł Cię Czerw Pustyni! 💀");
-    gameOver = true;
+    gameOver=true;
+    document.body.classList.remove("shake");
     return;
   }
 
-  if (x === size-1 && y === size-1) {
+  if(x===size-1 && y===size-1){
     stopSound();
-    alert("Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉");
-    gameOver = true;
+    score = Math.max(0, 100 - steps*2);
     drawBoard();
+    alert(`Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉\nPunkty: ${score}`);
+    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+    gameOver=true;
+    document.body.classList.remove("shake");
     return;
   }
 
@@ -265,63 +269,42 @@ function moveTo(x, y) {
 }
 
 function revealWorms() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
-        const div = getCell(x, y);
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const div=getCell(x,y);
         div.classList.add("worm");
-        div.textContent = "🪱";
+        div.textContent="🪱";
       }
     }
   }
 }
 
-function drawBoard() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const div = getCell(x, y);
-      div.className = "cell";
-      div.textContent = "";
-
-      if (board[y][x].visited)
-        div.classList.add("visited");
-
-      if (x === 0 && y === 0) {
-        div.classList.add("start");
-        div.textContent = "A";
-      }
-
-      if (x === size-1 && y === size-1) {
-        div.classList.add("goal");
-        div.textContent = "B";
-      }
-
-      if (x === playerPos.x && y === playerPos.y) {
-        div.textContent = "👣";
-      }
+function drawBoard(){
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const div=getCell(x,y);
+      div.className="cell";
+      div.textContent="";
+      if(board[y][x].visited) div.classList.add("visited");
+      if(x===0 && y===0){ div.classList.add("start"); div.textContent="A"; }
+      if(x===size-1 && y===size-1){ div.classList.add("goal"); div.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) div.textContent="👣";
     }
   }
 }
 
-function getCell(x, y) {
-  return document.querySelector(
-    `.cell[data-x='${x}'][data-y='${y}']`
-  );
+function getCell(x,y){
+  return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
 }
 
-/* odblokowanie audio po pierwszym kliknięciu */
-document.addEventListener("click", () => {
-  if (audioCtx && audioCtx.state === "suspended") {
-    audioCtx.resume();
-    document.getElementById("audioInfo").innerText =
-      "Sonar czerwia aktywny 🔊";
-  }
+/* Odblokowanie audio po pierwszym kliknięciu */
+document.addEventListener("click", ()=>{
+  if(audioCtx && audioCtx.state==="suspended"){ audioCtx.resume(); document.getElementById("audioInfo").innerText="Sonar czerwia aktywny 🔊"; }
 });
 
-/* NAJWAŻNIEJSZA POPRAWKA – start gry dopiero po załadowaniu strony */
-window.onload = () => {
-  startGame();
-};
+/* Start gry po załadowaniu strony */
+window.onload=()=>{ startGame(); };
 </script>
 
 </body>

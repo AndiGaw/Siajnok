@@ -48,6 +48,7 @@ html, body {
   display: inline-grid;
   margin-top: 20px;
   gap: 2px;
+  min-height: 50px;
 }
 
 .cell {
@@ -62,22 +63,10 @@ html, body {
   font-weight: bold;
 }
 
-.visited {
-  background: #444;
-}
-
-.start {
-  background: darkgreen;
-}
-
-.goal {
-  background: darkblue;
-}
-
-.worm {
-  background: darkred;
-  color:white;
-}
+.visited { background: #444; }
+.start   { background: darkgreen; }
+.goal    { background: darkblue; }
+.worm    { background: darkred; color:white; }
 
 input, button {
   background:black;
@@ -91,7 +80,6 @@ input, button {
 #audioInfo {
   margin-top:10px;
   font-size:0.9em;
-  opacity:0.8;
 }
 </style>
 </head>
@@ -103,12 +91,9 @@ input, button {
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
 
-  <p>
-    Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!<br>
-    Nasłuchuj ich pomruku...
-  </p>
+  <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
 
-  <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar czerwia 🔊</div>
+  <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
 
   <label>Rozmiar:
     <input id="size" type="number" value="10" min="5" max="20">
@@ -129,7 +114,7 @@ let board = [];
 let gameOver = false;
 let playerPos = {x:0, y:0};
 
-/* --- SYSTEM DŹWIĘKU --- */
+/* ---- AUDIO ---- */
 let audioCtx = null;
 let oscillator = null;
 let gainNode = null;
@@ -178,7 +163,166 @@ function stopSound() {
   if (gainNode)
     gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
 }
-/* --- KONIEC SYSTEMU DŹWIĘKU --- */
+
+/* ---- GRA ---- */
 
 function startGame() {
-  size = parseInt(document.getElementById("size").value)
+
+  const boardDiv = document.getElementById("board");
+
+  size = parseInt(document.getElementById("size").value);
+  worms = parseInt(document.getElementById("mines").value);
+
+  if (worms >= size * size - 2) {
+    alert("Za dużo czerwii!");
+    return;
+  }
+
+  if (!audioCtx) initSound();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  board = [];
+  gameOver = false;
+  playerPos = {x:0, y:0};
+
+  boardDiv.innerHTML = "";
+  boardDiv.style.gridTemplateColumns = `repeat(${size}, 32px)`;
+
+  for (let y = 0; y < size; y++) {
+    board[y] = [];
+
+    for (let x = 0; x < size; x++) {
+      board[y][x] = {
+        worm: false,
+        visited: false
+      };
+
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+
+      cell.onclick = () => moveTo(x, y);
+
+      boardDiv.appendChild(cell);
+    }
+  }
+
+  placeWorms();
+  updateSound();
+  drawBoard();
+}
+
+function placeWorms() {
+  let placed = 0;
+
+  while (placed < worms) {
+    let x = Math.floor(Math.random() * size);
+    let y = Math.floor(Math.random() * size);
+
+    if ((x === 0 && y === 0) || (x === size-1 && y === size-1))
+      continue;
+
+    if (!board[y][x].worm) {
+      board[y][x].worm = true;
+      placed++;
+    }
+  }
+}
+
+function isAdjacent(x, y) {
+  const dx = Math.abs(playerPos.x - x);
+  const dy = Math.abs(playerPos.y - y);
+  return (dx + dy === 1);
+}
+
+function moveTo(x, y) {
+  if (gameOver) return;
+  if (!isAdjacent(x, y)) return;
+
+  playerPos = {x, y};
+  board[y][x].visited = true;
+
+  updateSound();
+
+  if (board[y][x].worm) {
+    revealWorms();
+    stopSound();
+    alert("Pożarł Cię Czerw Pustyni! 💀");
+    gameOver = true;
+    return;
+  }
+
+  if (x === size-1 && y === size-1) {
+    stopSound();
+    alert("Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉");
+    gameOver = true;
+    drawBoard();
+    return;
+  }
+
+  drawBoard();
+}
+
+function revealWorms() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].worm) {
+        const div = getCell(x, y);
+        div.classList.add("worm");
+        div.textContent = "🪱";
+      }
+    }
+  }
+}
+
+function drawBoard() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const div = getCell(x, y);
+      div.className = "cell";
+      div.textContent = "";
+
+      if (board[y][x].visited)
+        div.classList.add("visited");
+
+      if (x === 0 && y === 0) {
+        div.classList.add("start");
+        div.textContent = "A";
+      }
+
+      if (x === size-1 && y === size-1) {
+        div.classList.add("goal");
+        div.textContent = "B";
+      }
+
+      if (x === playerPos.x && y === playerPos.y) {
+        div.textContent = "👣";
+      }
+    }
+  }
+}
+
+function getCell(x, y) {
+  return document.querySelector(
+    `.cell[data-x='${x}'][data-y='${y}']`
+  );
+}
+
+/* odblokowanie audio po pierwszym kliknięciu */
+document.addEventListener("click", () => {
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+    document.getElementById("audioInfo").innerText =
+      "Sonar czerwia aktywny 🔊";
+  }
+});
+
+/* NAJWAŻNIEJSZA POPRAWKA – start gry dopiero po załadowaniu strony */
+window.onload = () => {
+  startGame();
+};
+</script>
+
+</body>
+</html>

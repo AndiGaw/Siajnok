@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Saper</title>
+
+<style>
+  body {
+    font-family: Arial;
+    text-align: center;
+    background: #f0f0f0;
+  }
+
+  #board {
+    display: inline-grid;
+    margin-top: 20px;
+    gap: 2px;
+  }
+
+  .cell {
+    width: 30px;
+    height: 30px;
+    background: #ccc;
+    border: 1px solid #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .revealed {
+    background: #eee;
+    cursor: default;
+  }
+
+  .mine {
+    background: red;
+    color: white;
+  }
+
+  .flag {
+    background: orange;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Saper</h1>
+
+<label>Rozmiar: 
+  <input id="size" type="number" value="10" min="5" max="20">
+</label>
+
+<label>Miny: 
+  <input id="mines" type="number" value="10" min="1" max="50">
+</label>
+
+<button onclick="startGame()">Nowa gra</button>
+
+<div id="board"></div>
+
+<script>
+let size, mines;
+let board = [];
+let revealedCount = 0;
+let gameOver = false;
+
+function startGame() {
+  size = parseInt(document.getElementById("size").value);
+  mines = parseInt(document.getElementById("mines").value);
+
+  if (mines >= size * size) {
+    alert("Za dużo min!");
+    return;
+  }
+
+  board = [];
+  revealedCount = 0;
+  gameOver = false;
+
+  const boardDiv = document.getElementById("board");
+  boardDiv.innerHTML = "";
+  boardDiv.style.gridTemplateColumns = `repeat(${size}, 30px)`;
+
+  for (let y = 0; y < size; y++) {
+    board[y] = [];
+    for (let x = 0; x < size; x++) {
+      board[y][x] = {
+        mine: false,
+        revealed: false,
+        flag: false,
+        count: 0
+      };
+
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.x = x;
+      cell.dataset.y = y;
+
+      cell.onclick = () => reveal(x, y);
+      cell.oncontextmenu = (e) => {
+        e.preventDefault();
+        toggleFlag(x, y);
+      };
+
+      boardDiv.appendChild(cell);
+    }
+  }
+
+  placeMines();
+  calculateNumbers();
+}
+
+function placeMines() {
+  let placed = 0;
+
+  while (placed < mines) {
+    let x = Math.floor(Math.random() * size);
+    let y = Math.floor(Math.random() * size);
+
+    if (!board[y][x].mine) {
+      board[y][x].mine = true;
+      placed++;
+    }
+  }
+}
+
+function calculateNumbers() {
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].mine) continue;
+
+      let count = 0;
+
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          let ny = y + dy;
+          let nx = x + dx;
+
+          if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
+            if (board[ny][nx].mine) count++;
+          }
+        }
+      }
+
+      board[y][x].count = count;
+    }
+  }
+}
+
+function reveal(x, y) {
+  if (gameOver) return;
+
+  const cell = board[y][x];
+  const div = getCellDiv(x, y);
+
+  if (cell.revealed || cell.flag) return;
+
+  cell.revealed = true;
+  div.classList.add("revealed");
+  revealedCount++;
+
+  if (cell.mine) {
+    div.classList.add("mine");
+    div.textContent = "💣";
+    endGame(false);
+    return;
+  }
+
+  if (cell.count > 0) {
+    div.textContent = cell.count;
+  } else {
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        let ny = y + dy;
+        let nx = x + dx;
+
+        if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
+          if (!board[ny][nx].revealed) {
+            reveal(nx, ny);
+          }
+        }
+      }
+    }
+  }
+
+  if (revealedCount === size * size - mines) {
+    endGame(true);
+  }
+}
+
+function toggleFlag(x, y) {
+  if (gameOver) return;
+
+  const cell = board[y][x];
+  const div = getCellDiv(x, y);
+
+  if (cell.revealed) return;
+
+  cell.flag = !cell.flag;
+
+  if (cell.flag) {
+    div.classList.add("flag");
+    div.textContent = "🚩";
+  } else {
+    div.classList.remove("flag");
+    div.textContent = "";
+  }
+}
+
+function getCellDiv(x, y) {
+  return document.querySelector(
+    `.cell[data-x='${x}'][data-y='${y}']`
+  );
+}
+
+function endGame(win) {
+  gameOver = true;
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].mine) {
+        const div = getCellDiv(x, y);
+        div.textContent = "💣";
+      }
+    }
+  }
+
+  setTimeout(() => {
+    alert(win ? "Gratulacje! Wygrałeś 🎉" : "Koniec gry 💥");
+  }, 100);
+}
+
+startGame();
+</script>
+
+</body>
+</html>

@@ -1,1 +1,124 @@
 
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Klasyczny Saper</title>
+<style>
+body { font-family: Arial, sans-serif; background: #222; color:#fff; text-align:center; }
+#board { display: inline-grid; grid-gap: 2px; margin-top:20px; }
+.cell {
+  width: 40px; height: 40px; background:#555; display:flex;
+  align-items:center; justify-content:center; font-weight:bold; font-size:1.2em; cursor:pointer;
+}
+.cell.revealed { background:#999; cursor:default; }
+.cell.mine { background:#f00; }
+</style>
+</head>
+<body>
+<h1>Klasyczny Saper</h1>
+<button onclick="startGame()">Nowa Gra</button>
+<div id="board"></div>
+
+<script>
+let size=10;
+let numMines=15;
+let board=[];
+let gameOver=false;
+
+function startGame(){
+  const boardDiv=document.getElementById("board");
+  boardDiv.innerHTML="";
+  boardDiv.style.gridTemplateColumns=`repeat(${size},40px)`;
+  board=[];
+  gameOver=false;
+
+  // Tworzymy planszę
+  for(let y=0;y<size;y++){
+    board[y]=[];
+    for(let x=0;x<size;x++){
+      board[y][x]={mine:false, revealed:false, flagged:false, adjacent:0};
+      const cell=document.createElement("div");
+      cell.className="cell";
+      cell.dataset.x=x;
+      cell.dataset.y=y;
+      cell.onclick=()=>reveal(x,y);
+      boardDiv.appendChild(cell);
+    }
+  }
+
+  // Losujemy miny
+  let placed=0;
+  while(placed<numMines){
+    let x=Math.floor(Math.random()*size);
+    let y=Math.floor(Math.random()*size);
+    if(!board[y][x].mine){
+      board[y][x].mine=true;
+      placed++;
+    }
+  }
+
+  // Liczymy sąsiadujące miny
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      let count=0;
+      for(let dy=-1;dy<=1;dy++){
+        for(let dx=-1;dx<=1;dx++){
+          if(dx===0 && dy===0) continue;
+          let nx=x+dx, ny=y+dy;
+          if(nx>=0 && nx<size && ny>=0 && ny<size && board[ny][nx].mine) count++;
+        }
+      }
+      board[y][x].adjacent=count;
+    }
+  }
+}
+
+function reveal(x,y){
+  if(gameOver) return;
+  const cell=board[y][x];
+  const cellDiv=document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+  if(cell.revealed) return;
+
+  cell.revealed=true;
+  cellDiv.classList.add("revealed");
+
+  if(cell.mine){
+    cellDiv.classList.add("mine");
+    cellDiv.textContent="💣";
+    gameOver=true;
+    revealAllMines();
+    alert("💥 Trafiłeś na minę! Gra zakończona.");
+    return;
+  }
+
+  if(cell.adjacent>0){
+    cellDiv.textContent=cell.adjacent;
+  } else {
+    // odsłaniamy sąsiadów jeśli brak sąsiadujących min
+    for(let dy=-1;dy<=1;dy++){
+      for(let dx=-1;dx<=1;dx++){
+        let nx=x+dx, ny=y+dy;
+        if(nx>=0 && nx<size && ny>=0 && ny<size) reveal(nx,ny);
+      }
+    }
+  }
+}
+
+function revealAllMines(){
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].mine){
+        const cellDiv=document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cellDiv.classList.add("mine","revealed");
+        cellDiv.textContent="💣";
+      }
+    }
+  }
+}
+
+// Uruchamiamy grę na start
+startGame();
+</script>
+</body>
+</html>

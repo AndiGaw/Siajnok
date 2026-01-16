@@ -211,7 +211,6 @@ function reveal(x,y){
 
     const cell = board[y][x];
     const cellDiv = getCell(x,y);
-    if(cell.visited) return;
 
     cell.visited = true;
     steps++;

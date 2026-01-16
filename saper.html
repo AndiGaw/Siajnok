@@ -26,7 +26,10 @@ h1 {font-size:2em; margin-bottom:15px; text-shadow:1px 1px 4px #000;}
 #controls button:hover {background:#222; box-shadow:0 0 20px rgba(230,196,122,0.8);}
 #controls label {font-size:1em; cursor:pointer; color:#e6c47a;}
 
-#board-wrapper {display:flex; justify-content:center; align-items:flex-start; gap:20px; position:relative; margin-bottom:20px;}
+#board-wrapper {
+    display:flex; flex-direction:row; justify-content:center; align-items:flex-start;
+    gap:10px; position:relative; margin-bottom:20px;
+}
 #board {display:inline-grid; gap:3px;}
 .cell {width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;}
 .visited {background:#444;}
@@ -36,37 +39,22 @@ h1 {font-size:2em; margin-bottom:15px; text-shadow:1px 1px 4px #000;}
 
 /* Lądowisko A po lewej */
 #helipad {
-    width:60px;
-    height:60px;
-    background:#444;
-    border:2px solid #e6c47a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#e6c47a;
-    font-weight:bold;
-    font-size:0.9em;
-    border-radius:8px;
-    position:relative; /* już nie absolut */
-    margin-left:10px; /* odstęp od planszy */
-}    
+    width:60px; height:60px;
+    background:#444; border:2px solid #e6c47a;
+    display:flex; align-items:center; justify-content:center;
+    color:#e6c47a; font-weight:bold; font-size:0.9em; border-radius:8px;
+    flex-shrink:0; margin-right:10px; /* odstęp od planszy */
+}
 
 /* Lądowisko B po prawej */
 #helipad-end {
-    width:60px;
-    height:60px;
-    background:#444;
-    border:2px solid #e6c47a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#e6c47a;
-    font-weight:bold;
-    font-size:0.9em;
-    border-radius:8px;
-    position:relative; /* już nie absolut */
-    margin-left:10px; /* odstęp od planszy */
-}        
+    width:60px; height:60px;
+    background:#444; border:2px solid #e6c47a;
+    display:flex; align-items:center; justify-content:center;
+    color:#e6c47a; font-weight:bold; font-size:0.9em; border-radius:8px;
+    flex-shrink:0; margin-left:10px; /* odstęp od planszy */
+    display:none;
+}
 
 #stats {margin-top:10px; font-size:1.1em; font-weight:bold;}
 #top10 {margin-top:20px; text-align:center; font-size:1em;}
@@ -74,11 +62,19 @@ h1 {font-size:2em; margin-bottom:15px; text-shadow:1px 1px 4px #000;}
 #worm-map {margin-top:15px; display:inline-grid; gap:2px; justify-content:center;}
 #worm-map .cell {width:20px; height:20px; font-size:0.8em;}
 
+body.shake {animation: shake 0.1s infinite;}
+@keyframes shake {
+    0% {transform:translate(1px,1px);}
+    25% {transform:translate(-1px,-1px);}
+    50% {transform:translate(1px,-1px);}
+    75% {transform:translate(-1px,1px);}
+    100% {transform:translate(0,0);}
+}
+
 .popup {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
     background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px;
     z-index:5; display:none; text-align:center; width:300px; border-radius:12px;
-    box-shadow:0 0 20px rgba(230,196,122,0.6);
-}
+    box-shadow:0 0 20px rgba(230,196,122,0.6);}
 .popup h2 {margin-top:0; font-size:1.5em;}
 .popup button {margin-top:10px; padding:5px 10px; cursor:pointer;}
 </style>
@@ -98,8 +94,8 @@ h1 {font-size:2em; margin-bottom:15px; text-shadow:1px 1px 4px #000;}
 <div id="board-wrapper">
     <div id="helipad">Lądowisko A</div>
     <div id="board"></div>
+    <div id="helipad-end">Lądowisko B</div>
 </div>
-<div id="helipad-end">Lądowisko B</div>
 
 <div id="worm-map"></div>
 <div id="top10"></div>
@@ -176,9 +172,8 @@ function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.curr
 function startGame(){
     const boardDiv=document.getElementById("board");
     const wormDiv=document.getElementById("worm-map");
-    document.getElementById("board-wrapper").style.visibility="visible";
-    document.getElementById("helipad-end").style.display="none";
     boardDiv.innerHTML=""; wormDiv.innerHTML="";
+    document.getElementById("helipad-end").style.display="none";
     boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
     wormDiv.style.gridTemplateColumns=`repeat(${size},20px)`;
     board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0; firstMove=true;
@@ -195,8 +190,7 @@ function startGame(){
             boardDiv.appendChild(cell);
 
             const wcell=document.createElement("div");
-            wcell.className="cell";
-            wcell.dataset.x=x; wcell.dataset.y=y;
+            wcell.className="cell"; wcell.dataset.x=x; wcell.dataset.y=y;
             wormDiv.appendChild(wcell);
         }
     }
@@ -282,13 +276,7 @@ function moveWorms(){
     }
 }
 
-function showHelipadB(){
-    const boardDiv=document.getElementById("board"), rect=boardDiv.getBoundingClientRect();
-    const helipad=document.getElementById("helipad-end");
-    helipad.style.display="flex";
-    helipad.style.left=`${rect.right+10}px`;
-    helipad.style.top=`${rect.bottom-70}px`;
-}
+function showHelipadB(){ document.getElementById("helipad-end").style.display="flex"; }
 
 function updateStats(){ document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`; }
 function closePopup(type){ document.getElementById(`popup-${type}`).style.display="none"; }

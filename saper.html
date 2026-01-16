@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – pełny klimat</title>
+<title>Przeprawa przez Arrakis – wersja z wibracjami</title>
 
 <style>
 html, body {
@@ -90,7 +90,7 @@ input, button {
   cursor:pointer;
 }
 
-#audioInfo, #stats {
+#stats, #debug {
   margin-top:10px;
   font-size:0.9em;
 }
@@ -106,8 +106,9 @@ input, button {
 
   <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
 
-  <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
+
+  <div id="debug">Diagnostyka: czekam na start...</div>
 
   <label>Rozmiar:
     <input id="size" type="number" value="10" min="5" max="20">
@@ -130,28 +131,51 @@ let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 
-/* ---- AUDIO ---- */
 let audioCtx = null;
 let oscillator = null;
 let gainNode = null;
+
+let lastVibration = 0;
+let vibrationEnabled = false;
+
+/* -------- BEZPIECZNA FUNKCJA WIBRACJI -------- */
+
+function vibrate(pattern) {
+  const now = Date.now();
+
+  if (!("vibrate" in navigator)) {
+    debug("API vibrate niedostępne w tej przeglądarce");
+    return;
+  }
+
+  if (now - lastVibration < 200) return;
+
+  navigator.vibrate(pattern);
+  lastVibration = now;
+  vibrationEnabled = true;
+
+  debug("Wibracja: " + JSON.stringify(pattern));
+}
+
+function debug(msg) {
+  document.getElementById("debug").innerText =
+    "Diagnostyka: " + msg;
+}
+
+/* -------- AUDIO -------- */
 
 function initSound() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   oscillator = audioCtx.createOscillator();
   gainNode = audioCtx.createGain();
+
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
   gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+
   oscillator.connect(gainNode);
   gainNode.connect(audioCtx.destination);
   oscillator.start();
-}
-
-/* ---- WIBRACJE ---- */
-function vibrate(pattern) {
-  if ("vibrate" in navigator) {
-    navigator.vibrate(pattern);
-  }
 }
 
 function updateSoundAndShake() {
@@ -172,13 +196,14 @@ function updateSoundAndShake() {
 
   let freq = 60 + (size - minDist) * 20;
   let volume = Math.max(0, (size - minDist) / size);
+
   oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
 
   if (minDist <= 3 && !gameOver) {
     document.body.classList.add("shake");
 
-    let intensity = (4 - minDist) * 40;
+    let intensity = (4 - minDist) * 60;
     vibrate(intensity);
 
   } else {
@@ -191,22 +216,32 @@ function stopSound() {
     gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
 }
 
-/* ---- GRA ---- */
+/* -------- GRA -------- */
+
 function startGame() {
   const boardDiv = document.getElementById("board");
   size = parseInt(document.getElementById("size").value);
   worms = parseInt(document.getElementById("mines").value);
 
-  if (worms >= size * size - 2) { alert("Za dużo czerwii!"); return; }
+  if (worms >= size * size - 2) {
+    alert("Za dużo czerwii!");
+    return;
+  }
 
   if (!audioCtx) initSound();
-  if (audioCtx.state === "suspended") audioCtx.resume();
+
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume();
+  }
+
+  debug("Vibrate API dostępne: " + ("vibrate" in navigator));
 
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
   score = 0;
+
   document.getElementById("stats").innerText = `Kroki: 0 | Punktacja: 0`;
 
   boardDiv.innerHTML = "";
@@ -232,11 +267,17 @@ function startGame() {
 
 function placeWorms() {
   let placed=0;
+
   while(placed<worms) {
     let x=Math.floor(Math.random()*size);
     let y=Math.floor(Math.random()*size);
+
     if((x===0&&y===0)||(x===size-1&&y===size-1)) continue;
-    if(!board[y][x].worm){ board[y][x].worm=true; placed++; }
+
+    if(!board[y][x].worm){
+      board[y][x].worm=true;
+      placed++;
+    }
   }
 }
 
@@ -248,24 +289,30 @@ function moveTo(x,y){
   if(gameOver) return;
   if(!isAdjacent(x,y)) return;
 
-  playerPos={x,y};
+  vibrate(30);
 
-  vibrate(20);
+  playerPos={x,y};
 
   if(!board[y][x].visited) steps++;
   board[y][x].visited=true;
+
   updateSoundAndShake();
 
-  document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+  document.getElementById("stats").innerText =
+    `Kroki: ${steps} | Punktacja: ${score}`;
 
   if(board[y][x].worm){
+
     revealWorms();
     stopSound();
 
-    vibrate([300, 100, 300, 100, 500]);
+    vibrate([300,100,300,100,600]);
 
-    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: 0`;
+    document.getElementById("stats").innerText =
+      `Kroki: ${steps} | Punktacja: 0`;
+
     alert("Pożarł Cię Czerw Pustyni! 💀");
+
     gameOver=true;
     document.body.classList.remove("shake");
     return;
@@ -273,13 +320,14 @@ function moveTo(x,y){
 
   if(x===size-1 && y===size-1){
     stopSound();
+
     score = Math.max(0, 100 - steps*2);
 
-    vibrate([100,50,100]);
-
-    drawBoard();
     alert(`Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉\nPunkty: ${score}`);
-    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+
+    document.getElementById("stats").innerText =
+      `Kroki: ${steps} | Punktacja: ${score}`;
+
     gameOver=true;
     document.body.classList.remove("shake");
     return;
@@ -304,12 +352,25 @@ function drawBoard(){
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       const div=getCell(x,y);
+
       div.className="cell";
       div.textContent="";
-      if(board[y][x].visited) div.classList.add("visited");
-      if(x===0 && y===0){ div.classList.add("start"); div.textContent="A"; }
-      if(x===size-1 && y===size-1){ div.classList.add("goal"); div.textContent="B"; }
-      if(x===playerPos.x && y===playerPos.y) div.textContent="👣";
+
+      if(board[y][x].visited)
+        div.classList.add("visited");
+
+      if(x===0 && y===0){
+        div.classList.add("start");
+        div.textContent="A";
+      }
+
+      if(x===size-1 && y===size-1){
+        div.classList.add("goal");
+        div.textContent="B";
+      }
+
+      if(x===playerPos.x && y===playerPos.y)
+        div.textContent="👣";
     }
   }
 }
@@ -318,14 +379,21 @@ function getCell(x,y){
   return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
 }
 
+/* -------- AKTYWACJA PO PIERWSZYM DOTKNIĘCIU -------- */
+
 document.addEventListener("click", ()=>{
   if(audioCtx && audioCtx.state==="suspended"){
-    audioCtx.resume();
-    document.getElementById("audioInfo").innerText="Sonar czerwia aktywny 🔊";
+     audioCtx.resume();
   }
+
+  // Jednorazowe odblokowanie haptyki
+  vibrate(1);
+  debug("Interakcja użytkownika – próba aktywacji wibracji");
 });
 
-window.onload=()=>{ startGame(); };
+window.onload=()=>{
+  startGame();
+};
 </script>
 
 </body>

@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – stała plansza</title>
+<title>Przeprawa przez pustnię</title>
 
 <style>
 html, body {
@@ -134,13 +134,26 @@ let gainNode = null;
 
 let lastVibration = 0;
 
-/* -------- WIBRACJE -------- */
-function vibrate(pattern) {
-  const now = Date.now();
+/* -------- WIBRACJE POZIOMOWE -------- */
+function vibrateLevel(distance){
   if (!("vibrate" in navigator)) return;
-  if (now - lastVibration < 200) return;
-  navigator.vibrate(pattern);
+
+  // Zabezpieczenie przed zbyt częstymi wibracjami
+  const now = Date.now();
+  if(now - lastVibration < 150) return;
   lastVibration = now;
+
+  if(distance >= 3){
+    navigator.vibrate(30);           // lekka
+  } else if(distance === 2){
+    navigator.vibrate([60,30,60]);   // mocniejsza
+  } else if(distance === 1){
+    navigator.vibrate([100,50,100]); // bardzo mocna
+  }
+}
+
+function debug(msg){
+  document.getElementById("debug").innerText = "Diagnostyka: " + msg;
 }
 
 /* -------- AUDIO -------- */
@@ -168,43 +181,46 @@ function updateSoundAndShake() {
     }
   }
   if (minDist === Infinity) minDist = size;
+
+  // Dźwięk sonarowy
   let freq = 60 + (size - minDist) * 20;
   let volume = Math.max(0, (size - minDist) / size);
   oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
 
-  if (minDist <= 3 && !gameOver) {
+  // Drżenie ekranu + wibracja poziomowa
+  if(minDist <= 3 && !gameOver){
     document.body.classList.add("shake");
-    vibrate((4 - minDist) * 60);
+    vibrateLevel(minDist);
   } else {
     document.body.classList.remove("shake");
   }
 }
 
-function stopSound() {
-  if (gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
+function stopSound(){
+  if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
 }
 
 /* -------- GRA -------- */
-function startGame() {
+function startGame(){
   const boardDiv = document.getElementById("board");
-  if (!audioCtx) initSound();
-  if (audioCtx.state === "suspended") audioCtx.resume();
+  if(!audioCtx) initSound();
+  if(audioCtx.state === "suspended") audioCtx.resume();
 
   board = [];
   gameOver = false;
-  playerPos = {x:0, y:0};
-  steps = 0;
-  score = 0;
-  document.getElementById("stats").innerText = `Kroki: 0 | Punktacja: 0`;
-  boardDiv.innerHTML = "";
-  boardDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+  playerPos={x:0,y:0};
+  steps=0;
+  score=0;
+  document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
+  boardDiv.innerHTML="";
+  boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
 
-  for (let y=0; y<size; y++){
+  for(let y=0;y<size;y++){
     board[y]=[];
-    for (let x=0; x<size; x++){
+    for(let x=0;x<size;x++){
       board[y][x]={worm:false, visited:false};
-      const cell = document.createElement("div");
+      const cell=document.createElement("div");
       cell.className="cell";
       cell.dataset.x=x;
       cell.dataset.y=y;
@@ -218,7 +234,7 @@ function startGame() {
   drawBoard();
 }
 
-function placeWorms() {
+function placeWorms(){
   let placed=0;
   while(placed<worms){
     let x=Math.floor(Math.random()*size);
@@ -228,27 +244,24 @@ function placeWorms() {
   }
 }
 
-function isAdjacent(x,y){
-  return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) ===1;
-}
+function isAdjacent(x,y){ return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1; }
 
 function moveTo(x,y){
   if(gameOver) return;
   if(!isAdjacent(x,y)) return;
 
-  vibrate(30);
   playerPos={x,y};
   if(!board[y][x].visited) steps++;
   board[y][x].visited=true;
 
   updateSoundAndShake();
-  document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+  document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
 
   if(board[y][x].worm){
     revealWorms();
     stopSound();
-    vibrate([300,100,300,100,600]);
-    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: 0`;
+    navigator.vibrate([300,100,300,100,600]);
+    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: 0`;
     alert("Pożarł Cię Czerw Pustyni! 💀");
     gameOver=true;
     document.body.classList.remove("shake");
@@ -257,9 +270,9 @@ function moveTo(x,y){
 
   if(x===size-1 && y===size-1){
     stopSound();
-    score = Math.max(0, 100 - steps*2);
+    score=Math.max(0,100-steps*2);
     alert(`Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉\nPunkty: ${score}`);
-    document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
     gameOver=true;
     document.body.classList.remove("shake");
     return;
@@ -287,9 +300,9 @@ function drawBoard(){
       div.className="cell";
       div.textContent="";
       if(board[y][x].visited) div.classList.add("visited");
-      if(x===0 && y===0){ div.classList.add("start"); div.textContent="A"; }
-      if(x===size-1 && y===size-1){ div.classList.add("goal"); div.textContent="B"; }
-      if(x===playerPos.x && y===playerPos.y) div.textContent="👣";
+      if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
+      if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
+      if(x===playerPos.x&&y===playerPos.y) div.textContent="👣";
     }
   }
 }
@@ -301,7 +314,7 @@ function getCell(x,y){
 /* -------- AKTYWACJA AUDIO/WIBRACJI PO KLIKNIĘCIU -------- */
 document.addEventListener("click", ()=>{
   if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
-  vibrate(1);
+  navigator.vibrate(1);
 });
 
 window.onload=()=>{ startGame(); };

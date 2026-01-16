@@ -33,7 +33,8 @@ button, input[type=checkbox] {
 #stats {margin-top:10px; font-size:1em;}
 
 #board-wrapper {
-  display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px;
+  display:none; /* ukryte na start */
+  justify-content:center; align-items:flex-start; gap:20px; margin-top:20px;
 }
 
 #helipad {
@@ -157,6 +158,9 @@ function updateSoundAndShake(){
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
 function startGame(){
+  // Pokaż planszę dopiero teraz
+  document.getElementById("board-wrapper").style.display="flex";
+
   const boardDiv=document.getElementById("board");
   if(!audioCtx) initSound();
   if(audioCtx.state==="suspended") audioCtx.resume();
@@ -221,6 +225,7 @@ function moveTo(x,y){
     score=Math.max(0,100-steps*2);
     showWinMap();
     gameOver=true; document.body.classList.remove("shake");
+    drawBoard(); // żeby lądowisko B się pokazało
     return;
   }
 
@@ -256,21 +261,13 @@ function drawBoard(){
     for(let x=0;x<size;x++){
       const div=getCell(x,y); div.className="cell"; div.textContent="";
       if(board[y][x].visited) div.classList.add("visited");
+      if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
+      if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
 
-      if(x===0&&y===0){ 
-        div.classList.add("start"); 
-        div.textContent="A";
-      }
+      if(playerPos.x===x && playerPos.y===y) div.textContent="👣";
 
-      if(x===size-1&&y===size-1){ 
-        div.classList.add("goal"); 
-        div.textContent="B";
-      }
-
-      if(x===playerPos.x&&y===playerPos.y) div.textContent="👣";
-
-      // Dodanie lądowiska przy B po wygranej
-      if(x===size-1&&y===size-1 && gameOver){
+      // Lądowisko przy B po wygranej
+      if(gameOver && x===size-1 && y===size-1){
         div.textContent="🏁";
         div.style.background="#444";
         div.style.color="#e6c47a";

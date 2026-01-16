@@ -64,7 +64,7 @@ body.shake {
 }
 
 .cell {
-  width: 50px;  /* większe pola */
+  width: 50px;
   height: 50px;
   background: #222;
   border: 2px solid #e6c47a;
@@ -147,6 +147,13 @@ function initSound() {
   oscillator.start();
 }
 
+/* ---- WIBRACJE ---- */
+function vibrate(pattern) {
+  if ("vibrate" in navigator) {
+    navigator.vibrate(pattern);
+  }
+}
+
 function updateSoundAndShake() {
   if (!audioCtx) return;
 
@@ -168,9 +175,12 @@ function updateSoundAndShake() {
   oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
   gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
 
-  // Efekt drżenia ekranu
   if (minDist <= 3 && !gameOver) {
     document.body.classList.add("shake");
+
+    let intensity = (4 - minDist) * 40;
+    vibrate(intensity);
+
   } else {
     document.body.classList.remove("shake");
   }
@@ -239,14 +249,21 @@ function moveTo(x,y){
   if(!isAdjacent(x,y)) return;
 
   playerPos={x,y};
+
+  vibrate(20);
+
   if(!board[y][x].visited) steps++;
   board[y][x].visited=true;
   updateSoundAndShake();
+
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
   if(board[y][x].worm){
     revealWorms();
     stopSound();
+
+    vibrate([300, 100, 300, 100, 500]);
+
     document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: 0`;
     alert("Pożarł Cię Czerw Pustyni! 💀");
     gameOver=true;
@@ -257,6 +274,9 @@ function moveTo(x,y){
   if(x===size-1 && y===size-1){
     stopSound();
     score = Math.max(0, 100 - steps*2);
+
+    vibrate([100,50,100]);
+
     drawBoard();
     alert(`Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉\nPunkty: ${score}`);
     document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
@@ -298,12 +318,13 @@ function getCell(x,y){
   return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
 }
 
-/* Odblokowanie audio po pierwszym kliknięciu */
 document.addEventListener("click", ()=>{
-  if(audioCtx && audioCtx.state==="suspended"){ audioCtx.resume(); document.getElementById("audioInfo").innerText="Sonar czerwia aktywny 🔊"; }
+  if(audioCtx && audioCtx.state==="suspended"){
+    audioCtx.resume();
+    document.getElementById("audioInfo").innerText="Sonar czerwia aktywny 🔊";
+  }
 });
 
-/* Start gry po załadowaniu strony */
 window.onload=()=>{ startGame(); };
 </script>
 

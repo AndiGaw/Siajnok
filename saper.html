@@ -10,7 +10,6 @@ html, body {
     font-family:"Georgia",serif; text-align:center;
     overflow-y:auto;
 }
-
 body.shake {animation: shake 0.1s infinite;}
 @keyframes shake {
     0% {transform:translate(1px,1px);}
@@ -19,17 +18,13 @@ body.shake {animation: shake 0.1s infinite;}
     75% {transform:translate(-1px,1px);}
     100% {transform:translate(0,0);}
 }
-
 .sand {
     position:fixed;width:100%;height:100%;
     background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
-    animation: drift 60s linear infinite;
     pointer-events:none; z-index:1;
 }
-
 .container {position:relative; z-index:2; padding:20px;}
 h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #000;}
-
 #controls {margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:10px;}
 #controls button {
     font-size:1.3em; padding:12px 24px; background:#111; color:#e6c47a;
@@ -83,16 +78,12 @@ h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #0
     <div id="helipad-end">Lądowisko B</div>
     <div id="top10"></div>
 
-    <audio id="narrator-audio"><source src="Saper_Diuny.mp3" type="audio/mpeg"></audio>
-
-    <!-- Pop-up po przegranej -->
+    <!-- Pop-upy -->
     <div id="popup-fail" class="popup">
         <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
         <p>Kroki: <span id="fail-steps"></span></p>
         <button onclick="closePopup('fail')">Zamknij</button>
     </div>
-
-    <!-- Pop-up po wygranej -->
     <div id="popup-win" class="popup">
         <h2>🏆 Dotarłeś do B!</h2>
         <p>Kroki: <span id="win-steps"></span><br> Punktacja: <span id="win-score"></span></p>
@@ -101,80 +92,20 @@ h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #0
 </div>
 
 <script>
-const size = 10, worms = 12;
-let board = [], gameOver = false, playerPos = {x:0,y:0}, steps = 0, score = 0;
-let audioCtx = null, oscillator = null, gainNode = null;
-let lastVibration = 0;
+const size=10, worms=12;
+let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
+let pathCompleted=false;
 
-// Wibracje w zależności od odległości od czerwia
-function vibrateLevel(d){
-    if(!("vibrate" in navigator)) return;
-    const now = Date.now();
-    if(now - lastVibration < 150) return;
-    lastVibration = now;
-    if(d>=4) navigator.vibrate(10);
-    else if(d===3) navigator.vibrate(30);
-    else if(d===2) navigator.vibrate([60,30,60]);
-    else if(d===1) navigator.vibrate([100,50,100]);
-    else if(d===0) navigator.vibrate([200,100,200]);
-}
-
-// Inicjalizacja dźwięku
-function initSound(){
-    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-    oscillator = audioCtx.createOscillator();
-    gainNode = audioCtx.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(50,audioCtx.currentTime);
-    gainNode.gain.setValueAtTime(0,audioCtx.currentTime);
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-    oscillator.start();
-}
-
-// Aktualizacja dźwięku i wibracji
-function updateSoundAndShake(){
-    if(!audioCtx) return;
-    let minDist = Infinity;
-    for(let y=0;y<size;y++)
-        for(let x=0;x<size;x++)
-            if(board[y][x].worm){
-                let dist = Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
-                if(dist<minDist) minDist = dist;
-            }
-    if(minDist===Infinity) minDist=size;
-
-    let freq=50, vol=0;
-    if(minDist>=4){ freq=50; vol=0; }
-    else if(minDist===3){ freq=150; vol=0.1; }
-    else if(minDist===2){ freq=300; vol=0.2; }
-    else if(minDist===1){ freq=500; vol=0.35; }
-    else if(minDist===0){ freq=800; vol=0.5; }
-
-    oscillator.frequency.setTargetAtTime(freq,audioCtx.currentTime,0.05);
-    gainNode.gain.setTargetAtTime(vol,audioCtx.currentTime,0.05);
-
-    if(minDist<=3 && !gameOver) document.body.classList.add("shake");
-    else document.body.classList.remove("shake");
-
-    vibrateLevel(minDist);
-}
-
-function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
-
-// Rozpoczęcie gry
+// Start gry
 function startGame(){
     const boardDiv=document.getElementById("board");
     document.getElementById("board-wrapper").style.visibility="visible";
     boardDiv.innerHTML="";
     boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
-    board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
+    board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0; pathCompleted=false;
     document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
     document.getElementById("helipad-end").style.display="none";
-
-    if(!audioCtx) initSound();
-    if(audioCtx.state==="suspended") audioCtx.resume();
 
     for(let y=0;y<size;y++){
         board[y]=[];
@@ -191,7 +122,6 @@ function startGame(){
 
     placeWorms();
     drawBoard();
-    updateSoundAndShake();
 }
 
 // Rozstawienie czerwii
@@ -205,34 +135,34 @@ function placeWorms(){
     }
 }
 
-// Funkcja odkrycia pola (klasyczny Saper)
+// Odkrycie pola
 function reveal(x,y){
     if(gameOver) return;
     const cell = board[y][x];
     const cellDiv = getCell(x,y);
-    cell.visited=true;
+    if(cell.visited) return;
+
+    cell.visited = true;
     steps++;
+    cellDiv.classList.add("visited");
+
+    // Trafienie czerwia
     if(cell.worm){
         cellDiv.classList.add("worm");
         cellDiv.textContent="🪱";
         gameOver=true;
         revealAllWorms();
-        stopSound();
-        navigator.vibrate([300,100,300,100,600]);
-        document.body.classList.remove("shake");
-        document.getElementById("fail-steps").innerText = steps;
+        document.getElementById("fail-steps").innerText=steps;
         document.getElementById("popup-fail").style.display="block";
         return;
     }
-    cellDiv.classList.add("visited");
-    updateStats();
 
-    // Jeśli dotarł do B
+    // Sprawdzenie czy cała trasa została pokonana (od A do B)
     if(x===size-1 && y===size-1){
+        pathCompleted = true;
         gameOver=true;
-        score = Math.max(0,100-steps*2);
+        score=Math.max(0,100-steps*2);
         if(document.getElementById("hardMode").checked) score*=3;
-        stopSound();
         document.getElementById("win-steps").innerText=steps;
         document.getElementById("win-score").innerText=score;
         document.getElementById("popup-win").style.display="block";
@@ -240,8 +170,10 @@ function reveal(x,y){
         updateTop10();
     }
 
+    drawBoard();
+    updateStats();
+
     if(document.getElementById("hardMode").checked) moveWorms();
-    updateSoundAndShake();
 }
 
 // Odkrycie wszystkich czerwii
@@ -271,7 +203,7 @@ function drawBoard(){
 
 function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
 function updateStats(){ document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`; }
-function playNarrator(){ const audio=document.getElementById("narrator-audio"); if(audioCtx && audioCtx.state==="suspended") audioCtx.resume(); audio.play(); }
+function playNarrator(){ const audio=document.getElementById("narrator-audio"); audio.play(); }
 
 function moveWorms(){
     const dirs=[[0,1],[1,0],[0,-1],[-1,0]];
@@ -286,9 +218,7 @@ function moveWorms(){
             }
 }
 
-function closePopup(type){
-    document.getElementById(`popup-${type}`).style.display="none";
-}
+function closePopup(type){ document.getElementById(`popup-${type}`).style.display="none"; }
 
 function updateTop10(){
     let name=prompt("Wpisz swój nick:") || "Anonim";
@@ -302,10 +232,6 @@ function updateTop10(){
     topScores.forEach((s,i)=> topDiv.innerHTML+=`${i+1}. ${s.name} – ${s.score}<br>`);
 }
 
-document.addEventListener("click",()=>{
-    if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
-    if("vibrate" in navigator) navigator.vibrate(1);
-});
 </script>
 </body>
 </html>

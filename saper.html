@@ -34,8 +34,39 @@ h1 {font-size:2em; margin-bottom:15px; text-shadow:1px 1px 4px #000;}
 .goal {background:darkblue; color:#fff; font-weight:bold;}
 .worm {background:darkred; color:white;}
 
-#helipad, #helipad-end {width:60px; height:60px; display:flex; align-items:center; justify-content:center; font-weight:bold; border-radius:8px; border:2px solid #e6c47a; background:#444; position:absolute;}
-#helipad-end {display:none;}
+/* Lądowisko A po lewej */
+#helipad {
+    width:60px;
+    height:60px;
+    background:#444;
+    border:2px solid #e6c47a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#e6c47a;
+    font-weight:bold;
+    font-size:0.9em;
+    border-radius:8px;
+    position:relative; /* już nie absolut */
+    margin-left:10px; /* odstęp od planszy */
+}    
+
+/* Lądowisko B po prawej */
+#helipad-end {
+    width:60px;
+    height:60px;
+    background:#444;
+    border:2px solid #e6c47a;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#e6c47a;
+    font-weight:bold;
+    font-size:0.9em;
+    border-radius:8px;
+    position:relative; /* już nie absolut */
+    margin-left:10px; /* odstęp od planszy */
+}        
 
 #stats {margin-top:10px; font-size:1.1em; font-weight:bold;}
 #top10 {margin-top:20px; text-align:center; font-size:1em;}

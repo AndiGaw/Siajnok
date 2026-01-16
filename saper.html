@@ -8,23 +8,35 @@
 html, body {
     margin:0; padding:0; height:100%;
     background:#000; color:#e6c47a;
-    font-family:"Georgia",serif; text-align:center;
+    font-family:"Georgia",serif;
+    text-align:center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
 .container {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    min-height:100vh;
+    width:90%;
+    max-width:900px;
+}
+
+body.shake {animation: shake 0.1s infinite;}
+@keyframes shake {
+    0% {transform:translate(1px,1px);}
+    25% {transform:translate(-1px,-1px);}
+    50% {transform:translate(1px,-1px);}
+    75% {transform:translate(-1px,1px);}
+    100% {transform:translate(0,0);}
 }
 
 #board-wrapper {
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
     gap:20px;
     margin-top:20px;
+    visibility:hidden;
+    position:relative;
 }
 
 #board {
@@ -33,7 +45,8 @@ html, body {
 }
 
 .cell {
-    width:50px; height:50px;
+    width:50px;
+    height:50px;
     background:#222;
     border:2px solid #e6c47a;
     display:flex;
@@ -44,12 +57,12 @@ html, body {
     font-size:1.2em;
 }
 
-.visited { background:#444; }
-.start { background:darkgreen; color:white; }
-.goal  { background:darkblue;  color:white; }
-.worm  { background:darkred;   color:white; }
+.visited {background:#444;}
+.start {background:darkgreen; color:white;}
+.goal {background:darkblue; color:white;}
+.worm {background:darkred; color:white;}
 
-.helipad {
+#helipad, #helipad-end {
     width:70px;
     height:70px;
     background:#333;
@@ -57,13 +70,24 @@ html, body {
     display:flex;
     align-items:center;
     justify-content:center;
-    color:#e6c47a;
     font-weight:bold;
     border-radius:8px;
 }
 
 #helipad-end {
-    visibility:hidden;
+    position:absolute;
+    display:none;
+}
+
+.popup {
+    position:fixed;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    background:#111;
+    color:#e6c47a;
+    border:3px solid #e6c47a;
+    padding:20px;
+    display:none;
 }
 </style>
 </head>
@@ -71,18 +95,20 @@ html, body {
 <body>
 
 <div class="container">
-
 <h1>Przeprawa przez Arrakis</h1>
 
-<button onclick="startGame()">Nowa Wyprawa</button>
+<button onclick="startGame()">Nowa gra</button>
 
 <div id="stats">Kroki: 0</div>
 
 <div id="board-wrapper">
-    <div id="helipad-start" class="helipad">A</div>
+    <div id="helipad">A</div>
     <div id="board"></div>
-    <div id="helipad-end" class="helipad">B</div>
 </div>
+
+<div id="helipad-end">B</div>
+
+<div id="popup" class="popup"></div>
 
 </div>
 
@@ -92,36 +118,31 @@ const size = 10;
 const worms = 12;
 
 let board = [];
+let gameOver = false;
 let playerPos = {x:0, y:0};
 let steps = 0;
-let gameOver = false;
 let firstMove = true;
-
-// Sprawdzenie ruchu sąsiedniego
-function isAdjacent(x, y) {
-    const dx = Math.abs(playerPos.x - x);
-    const dy = Math.abs(playerPos.y - y);
-    return dx + dy === 1;
-}
 
 function startGame() {
 
     const boardDiv = document.getElementById("board");
+
+    document.getElementById("board-wrapper").style.visibility = "visible";
+    document.getElementById("helipad-end").style.display = "none";
+
     boardDiv.innerHTML = "";
-    boardDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+    boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
 
     board = [];
-    steps = 0;
     gameOver = false;
+    steps = 0;
+    playerPos = {x:0,y:0};
     firstMove = true;
-    playerPos = {x:0, y:0};
 
     document.getElementById("stats").innerText = "Kroki: 0";
-    document.getElementById("helipad-end").style.visibility = "hidden";
 
     for(let y=0; y<size; y++) {
         board[y] = [];
-
         for(let x=0; x<size; x++) {
 
             board[y][x] = {
@@ -129,12 +150,12 @@ function startGame() {
                 visited:false
             };
 
-            let cell = document.createElement("div");
+            const cell = document.createElement("div");
             cell.className = "cell";
             cell.dataset.x = x;
             cell.dataset.y = y;
 
-            cell.onclick = () => reveal(x,y);
+            cell.onclick = () => moveTo(x,y);
 
             boardDiv.appendChild(cell);
         }
@@ -145,10 +166,10 @@ function startGame() {
 }
 
 function placeWorms() {
+
     let placed = 0;
 
     while(placed < worms) {
-
         let x = Math.floor(Math.random()*size);
         let y = Math.floor(Math.random()*size);
 
@@ -162,73 +183,83 @@ function placeWorms() {
     }
 }
 
-function reveal(x, y) {
+function isAdjacent(x,y) {
+
+    const dx = Math.abs(playerPos.x - x);
+    const dy = Math.abs(playerPos.y - y);
+
+    return (dx + dy === 1);
+}
+
+function moveTo(x,y) {
 
     if(gameOver) return;
 
-    // --- NOWA LOGIKA: pierwszy krok tylko obok A ---
+    // --- BLOKADA PIERWSZEGO RUCHU ---
     if(firstMove) {
-
-        if(!(Math.abs(x-0) + Math.abs(y-0) === 1)) {
-            alert("Pierwszy krok musi być o 1 pole od A!");
+        if(!isAdjacent(x,y))
             return;
-        }
-
         firstMove = false;
     }
-    else {
-        if(!isAdjacent(x,y)) return;
-    }
-    // -----------------------------------------------
 
-    const cell = board[y][x];
-    const cellDiv = getCell(x,y);
+    // --- RUCH TYLKO O 1 POLE ---
+    if(!isAdjacent(x,y))
+        return;
 
     playerPos = {x,y};
     steps++;
+
+    const cell = board[y][x];
     cell.visited = true;
 
-    updateStats();
+    document.getElementById("stats").innerText = `Kroki: ${steps}`;
 
     if(cell.worm) {
-        cellDiv.classList.add("worm");
-        cellDiv.textContent = "🪱";
-
         gameOver = true;
         revealAllWorms();
-
-        alert("💀 Pożarł Cię Czerw Pustyni!");
+        showPopup("💀 Pożarł Cię Czerw!");
         return;
     }
 
+    // WYGRANA
     if(x === size-1 && y === size-1) {
         gameOver = true;
+        revealAllWorms();
+        showPopup("🏆 Dotarłeś do celu!");
 
-        document.getElementById("helipad-end").style.visibility = "visible";
-
-        alert("🏆 Dotarłeś do celu w " + steps + " krokach!");
-        return;
+        showHelipadB();
     }
 
     drawBoard();
 }
 
+function showHelipadB() {
+
+    const boardDiv = document.getElementById("board");
+    const rect = boardDiv.getBoundingClientRect();
+
+    const helipad = document.getElementById("helipad-end");
+
+    helipad.style.display = "flex";
+
+    helipad.style.left = (rect.right + 10) + "px";
+    helipad.style.top = (rect.bottom - 70) + "px";
+}
+
 function revealAllWorms() {
-    for(let y=0; y<size; y++) {
-        for(let x=0; x<size; x++) {
+    for(let y=0;y<size;y++)
+        for(let x=0;x<size;x++)
             if(board[y][x].worm) {
-                let div = getCell(x,y);
+                const div = getCell(x,y);
                 div.classList.add("worm");
                 div.textContent = "🪱";
             }
-        }
-    }
 }
 
 function drawBoard() {
 
-    for(let y=0; y<size; y++) {
-        for(let x=0; x<size; x++) {
+    for(let y=0;y<size;y++) {
+        for(let x=0;x<size;x++) {
 
             const div = getCell(x,y);
 
@@ -258,12 +289,12 @@ function getCell(x,y) {
     return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
 }
 
-function updateStats() {
-    document.getElementById("stats").innerText =
-        `Kroki: ${steps}`;
+function showPopup(text) {
+    const p = document.getElementById("popup");
+    p.innerText = text;
+    p.style.display = "block";
 }
 
 </script>
-
 </body>
 </html>

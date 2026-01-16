@@ -10,6 +10,7 @@ html, body {
     font-family:"Georgia",serif; text-align:center;
     overflow-y:auto;
 }
+
 body.shake {animation: shake 0.1s infinite;}
 @keyframes shake {
     0% {transform:translate(1px,1px);}
@@ -18,13 +19,17 @@ body.shake {animation: shake 0.1s infinite;}
     75% {transform:translate(-1px,1px);}
     100% {transform:translate(0,0);}
 }
+
 .sand {
     position:fixed;width:100%;height:100%;
     background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
+    animation: drift 60s linear infinite;
     pointer-events:none; z-index:1;
 }
+
 .container {position:relative; z-index:2; padding:20px;}
 h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #000;}
+
 #controls {margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:10px;}
 #controls button {
     font-size:1.3em; padding:12px 24px; background:#111; color:#e6c47a;
@@ -85,6 +90,7 @@ h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #0
         <p>Kroki: <span id="fail-steps"></span></p>
         <button onclick="closePopup('fail')">Zamknij</button>
     </div>
+
     <div id="popup-win" class="popup">
         <h2>🏆 Dotarłeś do B!</h2>
         <p>Kroki: <span id="win-steps"></span><br> Punktacja: <span id="win-score"></span></p>
@@ -93,14 +99,31 @@ h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #0
 </div>
 
 <script>
-const size=10, worms=12;
-let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
+const size = 10, worms = 12;
+let board = [], gameOver = false, playerPos = {x:0,y:0}, steps = 0, score = 0;
+let audioCtx = null, oscillator = null, gainNode = null;
+let lastVibration = 0;
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
-let pathCompleted=false;
 
-// Audio
-let audioCtx=null, oscillator=null, gainNode=null;
-let lastVibration=0;
+// Sprawdza czy pole jest sąsiednie (poziomo lub pionowo)
+function isAdjacent(x, y) {
+    const dx = Math.abs(playerPos.x - x);
+    const dy = Math.abs(playerPos.y - y);
+    return dx + dy === 1 || (playerPos.x===0 && playerPos.y===0);
+}
+
+function vibrateLevel(d){
+    if(!("vibrate" in navigator)) return;
+    const now = Date.now();
+    if(now - lastVibration < 150) return;
+    lastVibration = now;
+    if(d>=4) navigator.vibrate(10);
+    else if(d===3) navigator.vibrate(30);
+    else if(d===2) navigator.vibrate([60,30,60]);
+    else if(d===1) navigator.vibrate([100,50,100]);
+    else if(d===0) navigator.vibrate([200,100,200]);
+}
+
 function initSound(){
     audioCtx = new (window.AudioContext||window.webkitAudioContext)();
     oscillator = audioCtx.createOscillator();
@@ -112,13 +135,14 @@ function initSound(){
     gainNode.connect(audioCtx.destination);
     oscillator.start();
 }
+
 function updateSoundAndShake(){
     if(!audioCtx) return;
-    let minDist=Infinity;
+    let minDist = Infinity;
     for(let y=0;y<size;y++)
         for(let x=0;x<size;x++)
             if(board[y][x].worm){
-                let dist=Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
+                let dist = Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
                 if(dist<minDist) minDist=dist;
             }
     if(minDist===Infinity) minDist=size;
@@ -136,28 +160,17 @@ function updateSoundAndShake(){
     if(minDist<=3 && !gameOver) document.body.classList.add("shake");
     else document.body.classList.remove("shake");
 
-    if("vibrate" in navigator){
-        const now=Date.now();
-        if(now-lastVibration>150){
-            lastVibration=now;
-            if(minDist>=4) navigator.vibrate(10);
-            else if(minDist===3) navigator.vibrate(30);
-            else if(minDist===2) navigator.vibrate([60,30,60]);
-            else if(minDist===1) navigator.vibrate([100,50,100]);
-            else if(minDist===0) navigator.vibrate([200,100,200]);
-        }
-    }
+    vibrateLevel(minDist);
 }
 
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-// Start gry
 function startGame(){
     const boardDiv=document.getElementById("board");
     document.getElementById("board-wrapper").style.visibility="visible";
     boardDiv.innerHTML="";
     boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
-    board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0; pathCompleted=false;
+    board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
     document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
     document.getElementById("helipad-end").style.display="none";
 
@@ -182,7 +195,6 @@ function startGame(){
     updateSoundAndShake();
 }
 
-// Rozstawienie czerwii
 function placeWorms(){
     let placed=0;
     while(placed<worms){
@@ -193,18 +205,20 @@ function placeWorms(){
     }
 }
 
-// Odkrycie pola
 function reveal(x,y){
     if(gameOver) return;
-    const cell=board[y][x];
-    const cellDiv=getCell(x,y);
+    if(!isAdjacent(x,y)) return;
+
+    const cell = board[y][x];
+    const cellDiv = getCell(x,y);
     if(cell.visited) return;
 
-    cell.visited=true;
+    cell.visited = true;
     steps++;
+    playerPos={x,y};
     cellDiv.classList.add("visited");
+    updateStats();
 
-    // Trafienie czerwia
     if(cell.worm){
         cellDiv.classList.add("worm");
         cellDiv.textContent="🪱";
@@ -213,31 +227,27 @@ function reveal(x,y){
         stopSound();
         navigator.vibrate([300,100,300,100,600]);
         document.body.classList.remove("shake");
-        document.getElementById("fail-steps").innerText=steps;
+        document.getElementById("fail-steps").innerText = steps;
         document.getElementById("popup-fail").style.display="block";
         return;
     }
 
-    // Przejście do B dopiero po odwiedzeniu całej trasy
     if(x===size-1 && y===size-1){
-        pathCompleted=true;
         gameOver=true;
-        score=Math.max(0,100-steps*2);
+        score = Math.max(0,100-steps*2);
         if(document.getElementById("hardMode").checked) score*=3;
-        document.getElementById("win-steps").innerText=steps;
-        document.getElementById("win-score").innerText=score;
+        stopSound();
+        document.getElementById("win-steps").innerText = steps;
+        document.getElementById("win-score").innerText = score;
         document.getElementById("popup-win").style.display="block";
         revealAllWorms();
         updateTop10();
     }
 
-    drawBoard();
-    updateStats();
     if(document.getElementById("hardMode").checked) moveWorms();
     updateSoundAndShake();
 }
 
-// Odkrycie wszystkich czerwii
 function revealAllWorms(){
     for(let y=0;y<size;y++)
         for(let x=0;x<size;x++)
@@ -248,7 +258,6 @@ function revealAllWorms(){
             }
 }
 
-// Rysowanie planszy
 function drawBoard(){
     for(let y=0;y<size;y++)
         for(let x=0;x<size;x++){
@@ -264,7 +273,7 @@ function drawBoard(){
 
 function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
 function updateStats(){ document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`; }
-function playNarrator(){ const audio=document.getElementById("narrator-audio"); audio.play(); }
+function playNarrator(){ const audio=document.getElementById("narrator-audio"); if(audioCtx && audioCtx.state==="suspended") audioCtx.resume(); audio.play(); }
 
 function moveWorms(){
     const dirs=[[0,1],[1,0],[0,-1],[-1,0]];
@@ -284,7 +293,7 @@ function closePopup(type){ document.getElementById(`popup-${type}`).style.displa
 function updateTop10(){
     let name=prompt("Wpisz swój nick:") || "Anonim";
     topScores.push({name,score});
-    topScores.sort((a,b)=>b.score-b.score);
+    topScores.sort((a,b)=>b.score-a.score);
     if(topScores.length>10) topScores=topScores.slice(0,10);
     localStorage.setItem("topScores",JSON.stringify(topScores));
 
@@ -292,6 +301,11 @@ function updateTop10(){
     topDiv.innerHTML="<h3>TOP 10</h3>";
     topScores.forEach((s,i)=> topDiv.innerHTML+=`${i+1}. ${s.name} – ${s.score}<br>`);
 }
+
+document.addEventListener("click",()=>{
+    if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
+    if("vibrate" in navigator) navigator.vibrate(1);
+});
 </script>
 </body>
 </html>

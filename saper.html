@@ -8,14 +8,14 @@ html, body {
     margin:0; padding:0; height:100%;
     background:#000; color:#e6c47a;
     font-family:"Georgia",serif;
-    display:flex; justify-content:center; align-items:flex-start;
 }
 
 body {
     min-width:800px;
+    display:flex; justify-content:center; align-items:flex-start;
 }
 
-.container {
+.container-wrapper {
     display:flex; flex-direction:row; justify-content:center; align-items:flex-start;
     gap:20px; width:100%; max-width:1400px; margin-top:20px;
 }
@@ -27,6 +27,7 @@ body {
     display:flex; align-items:center; justify-content:center;
     color:#e6c47a; font-weight:bold; font-size:1.2em; border-radius:8px;
     flex-shrink:0;
+    position: relative;
 }
 
 /* Lądowisko B po prawej, pojawia się po zakończeniu gry */
@@ -37,6 +38,7 @@ body {
     color:#e6c47a; font-weight:bold; font-size:1.2em; border-radius:8px;
     flex-shrink:0;
     display:none;
+    position: absolute;
 }
 
 /* Plansza gry na środku */
@@ -87,20 +89,22 @@ body.shake { animation: shake 0.1s infinite; }
 
 <div id="helipad">Lądowisko A</div>
 
-<div class="container">
-    <div id="board-wrapper">
-        <h1>Przeprawa przez Arrakis</h1>
+<div class="container-wrapper">
+    <div class="container">
+        <div id="board-wrapper">
+            <h1>Przeprawa przez Arrakis</h1>
 
-        <div id="controls">
-            <button onclick="playNarrator()">🎙️ Narrator</button>
-            <button onclick="startGame()">🏜️ Wyrusz w drogę przez piaski</button>
-            <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+            <div id="controls">
+                <button onclick="playNarrator()">🎙️ Narrator</button>
+                <button onclick="startGame()">🏜️ Wyrusz w drogę przez piaski</button>
+                <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+            </div>
+
+            <div id="board"></div>
+            <div id="worm-map"></div>
+            <div id="stats">Kroki: 0 | Punktacja: 0</div>
+            <div id="top10"></div>
         </div>
-
-        <div id="board"></div>
-        <div id="worm-map"></div>
-        <div id="stats">Kroki: 0 | Punktacja: 0</div>
-        <div id="top10"></div>
     </div>
 </div>
 
@@ -181,7 +185,9 @@ function startGame(){
     const boardDiv=document.getElementById("board");
     const wormDiv=document.getElementById("worm-map");
     boardDiv.innerHTML=""; wormDiv.innerHTML="";
-    document.getElementById("helipad-end").style.display="none";
+    const helipadB=document.getElementById("helipad-end");
+    helipadB.style.display="none";
+
     boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
     wormDiv.style.gridTemplateColumns=`repeat(${size},20px)`;
     board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0; firstMove=true;
@@ -203,6 +209,9 @@ function startGame(){
         }
     }
     placeWorms(); drawBoard(); updateWormMap(); updateSoundAndShake();
+    // ustawienie helipad A na wysokości pola startowego
+    const startCell=getCell(0,0);
+    document.getElementById("helipad").style.marginTop=startCell.offsetTop+"px";
 }
 
 function placeWorms(){
@@ -269,6 +278,14 @@ function moveWorms(){
             board[ny][nx].worm=true; board[y][x].worm=false;
         }
     }
+}
+
+function showHelipadB(){
+    const helipadB=document.getElementById("helipad-end");
+    const goalCell=getCell(size-1,size-1);
+    helipadB.style.top=goalCell.offsetTop+"px";
+    helipadB.style.left=(goalCell.offsetLeft + 300)+"px"; // 300px przesunięcie w prawo
+    helipadB.style.display="flex";
 }
 
 function updateStats(){ document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`; }

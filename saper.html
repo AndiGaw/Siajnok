@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez pustnię</title>
+<title>Przeprawa przez Arrakis – Hard Mode</title>
 
 <style>
 html, body {
@@ -17,10 +17,7 @@ html, body {
   position:relative;
 }
 
-body.shake {
-  animation: shake 0.1s infinite;
-}
-
+body.shake { animation: shake 0.1s infinite; }
 @keyframes shake {
   0% { transform: translate(1px, 1px); }
   25% { transform: translate(-1px, -1px); }
@@ -33,71 +30,36 @@ body.shake {
   position:fixed;
   width:100%;
   height:100%;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(230,196,122,0.2),
-      rgba(230,196,122,0.2) 2px,
-      rgba(0,0,0,0) 6px
-    );
+  background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
   animation: drift 60s linear infinite;
-  pointer-events:none;
-  z-index:1;
+  pointer-events:none; z-index:1;
 }
+@keyframes drift { from {background-position:0 0;} to {background-position:1000px 1000px;} }
 
-@keyframes drift {
-  from { background-position:0 0; }
-  to { background-position:1000px 1000px; }
-}
+.container { position:relative; z-index:2; padding:20px; }
 
-.container {
-  position:relative;
-  z-index:2;
-  padding:20px;
-}
+#board-wrapper { display:flex; justify-content:center; margin-top:20px; }
 
-#board-wrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
+#board { display:inline-grid; gap:3px; }
 
-#board {
-  display: inline-grid;
-  gap: 3px;
-}
+.cell { width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em; }
+.visited { background:#444; }
+.start { background:darkgreen; }
+.goal { background:darkblue; }
+.worm { background:darkred; color:white; }
 
-.cell {
-  width: 50px;
-  height: 50px;
-  background: #222;
-  border: 2px solid #e6c47a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2em;
-}
+button { background:black; color:#e6c47a; border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer; }
 
-.visited { background: #444; }
-.start   { background: darkgreen; }
-.goal    { background: darkblue; }
-.worm    { background: darkred; color:white; }
+#stats,#debug { margin-top:10px; font-size:0.9em; }
 
-button {
-  background:black;
-  color:#e6c47a;
-  border:1px solid #e6c47a;
-  padding:8px;
-  margin:5px;
-  cursor:pointer;
-}
+/* Pop-upy Duna */
+.popup { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px; z-index:5; display:none; text-align:center; width:320px; border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6); }
+.popup h2 { margin-top:0; font-size:1.5em; }
+.popup button { margin-top:10px; padding:5px 10px; cursor:pointer; }
 
-#stats, #debug {
-  margin-top:10px;
-  font-size:0.9em;
-}
+#map-container { margin-top:10px; }
+.worm-cell { width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.5s ease; }
+.worm-cell.active { background: darkred; }
 </style>
 </head>
 
@@ -112,6 +74,8 @@ button {
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
   <div id="debug">Diagnostyka: czekam na start...</div>
 
+  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+  <br>
   <button onclick="startGame()">Nowa wyprawa</button>
 
   <div id="board-wrapper">
@@ -119,99 +83,79 @@ button {
   </div>
 </div>
 
+<!-- Pop-upy -->
+<div id="popup-fail" class="popup">
+  <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
+  <p>Kroki: <span id="fail-steps"></span></p>
+  <button onclick="closePopup('fail')">Zamknij</button>
+</div>
+
+<div id="popup-win" class="popup">
+  <h2>Złoty Szlak zwyciężył! 🎉</h2>
+  <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
+  <div id="map-container"></div>
+  <button onclick="closePopup('win')">Zamknij</button>
+</div>
+
 <script>
-const size = 10;
-const worms = 12;
-let board = [];
-let gameOver = false;
-let playerPos = {x:0, y:0};
-let steps = 0;
-let score = 0;
+const size=10;
+const worms=12;
+let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
+let audioCtx=null, oscillator=null, gainNode=null;
+let lastVibration=0;
 
-let audioCtx = null;
-let oscillator = null;
-let gainNode = null;
-
-let lastVibration = 0;
-
-/* -------- WIBRACJE POZIOMOWE -------- */
 function vibrateLevel(distance){
-  if (!("vibrate" in navigator)) return;
-
-  // Zabezpieczenie przed zbyt częstymi wibracjami
-  const now = Date.now();
-  if(now - lastVibration < 150) return;
-  lastVibration = now;
-
-  if(distance >= 3){
-    navigator.vibrate(30);           // lekka
-  } else if(distance === 2){
-    navigator.vibrate([60,30,60]);   // mocniejsza
-  } else if(distance === 1){
-    navigator.vibrate([100,50,100]); // bardzo mocna
-  }
+  if(!("vibrate" in navigator)) return;
+  const now=Date.now();
+  if(now-lastVibration<150) return;
+  lastVibration=now;
+  if(distance>=3) navigator.vibrate(30);
+  else if(distance===2) navigator.vibrate([60,30,60]);
+  else if(distance===1) navigator.vibrate([100,50,100]);
 }
 
-function debug(msg){
-  document.getElementById("debug").innerText = "Diagnostyka: " + msg;
-}
+function debug(msg){ document.getElementById("debug").innerText="Diagnostyka: "+msg; }
 
-/* -------- AUDIO -------- */
-function initSound() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  oscillator = audioCtx.createOscillator();
-  gainNode = audioCtx.createGain();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
-  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+function initSound(){
+  audioCtx=new (window.AudioContext || window.webkitAudioContext)();
+  oscillator=audioCtx.createOscillator();
+  gainNode=audioCtx.createGain();
+  oscillator.type="sine";
+  oscillator.frequency.setValueAtTime(50,audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(0,audioCtx.currentTime);
   oscillator.connect(gainNode);
   gainNode.connect(audioCtx.destination);
   oscillator.start();
 }
 
-function updateSoundAndShake() {
-  if (!audioCtx) return;
-  let minDist = Infinity;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
-        let dist = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-        if (dist < minDist) minDist = dist;
+function updateSoundAndShake(){
+  if(!audioCtx) return;
+  let minDist=Infinity;
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        let dist=Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
+        if(dist<minDist) minDist=dist;
       }
     }
   }
-  if (minDist === Infinity) minDist = size;
-
-  // Dźwięk sonarowy
-  let freq = 60 + (size - minDist) * 20;
-  let volume = Math.max(0, (size - minDist) / size);
-  oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
-  gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
-
-  // Drżenie ekranu + wibracja poziomowa
-  if(minDist <= 3 && !gameOver){
+  if(minDist===Infinity) minDist=size;
+  oscillator.frequency.setTargetAtTime(60+(size-minDist)*20,audioCtx.currentTime,0.1);
+  gainNode.gain.setTargetAtTime(Math.max(0,(size-minDist)/size)*0.35,audioCtx.currentTime,0.1);
+  if(minDist<=3 && !gameOver){
     document.body.classList.add("shake");
     vibrateLevel(minDist);
-  } else {
-    document.body.classList.remove("shake");
-  }
+  } else document.body.classList.remove("shake");
 }
 
-function stopSound(){
-  if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
-}
+function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-/* -------- GRA -------- */
 function startGame(){
-  const boardDiv = document.getElementById("board");
+  const boardDiv=document.getElementById("board");
   if(!audioCtx) initSound();
-  if(audioCtx.state === "suspended") audioCtx.resume();
+  if(audioCtx.state==="suspended") audioCtx.resume();
 
-  board = [];
-  gameOver = false;
-  playerPos={x:0,y:0};
-  steps=0;
-  score=0;
+  board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
   document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
   boardDiv.innerHTML="";
   boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
@@ -228,10 +172,7 @@ function startGame(){
       boardDiv.appendChild(cell);
     }
   }
-
-  placeWorms();
-  updateSoundAndShake();
-  drawBoard();
+  placeWorms(); updateSoundAndShake(); drawBoard();
 }
 
 function placeWorms(){
@@ -261,24 +202,38 @@ function moveTo(x,y){
     revealWorms();
     stopSound();
     navigator.vibrate([300,100,300,100,600]);
-    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: 0`;
-    alert("Pożarł Cię Czerw Pustyni! 💀");
-    gameOver=true;
-    document.body.classList.remove("shake");
+    showFailPopup();
+    gameOver=true; document.body.classList.remove("shake");
     return;
   }
+
+  if(document.getElementById("hardMode").checked) moveWorms();
 
   if(x===size-1 && y===size-1){
     stopSound();
     score=Math.max(0,100-steps*2);
-    alert(`Dotarłeś do celu! Złoty Szlak zwyciężył! 🎉\nPunkty: ${score}`);
-    document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
-    gameOver=true;
-    document.body.classList.remove("shake");
+    showWinPopup();
+    gameOver=true; document.body.classList.remove("shake");
     return;
   }
 
   drawBoard();
+}
+
+function moveWorms(){
+  const directions=[[0,1],[1,0],[0,-1],[-1,0]];
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        let [dx,dy]=directions[Math.floor(Math.random()*4)];
+        let nx=x+dx, ny=y+dy;
+        if(nx>=0 && nx<size && ny>=0 && ny<size && !board[ny][nx].worm && !(nx===0&&ny===0) && !(nx===size-1&&ny===size-1)){
+          board[ny][nx].worm=true;
+          board[y][x].worm=false;
+        }
+      }
+    }
+  }
 }
 
 function revealWorms(){
@@ -286,8 +241,7 @@ function revealWorms(){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
         const div=getCell(x,y);
-        div.classList.add("worm");
-        div.textContent="🪱";
+        div.classList.add("worm"); div.textContent="🪱";
       }
     }
   }
@@ -296,9 +250,7 @@ function revealWorms(){
 function drawBoard(){
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      const div=getCell(x,y);
-      div.className="cell";
-      div.textContent="";
+      const div=getCell(x,y); div.className="cell"; div.textContent="";
       if(board[y][x].visited) div.classList.add("visited");
       if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
       if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
@@ -307,11 +259,37 @@ function drawBoard(){
   }
 }
 
-function getCell(x,y){
-  return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
+
+function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
+function showWinPopup(){
+  document.getElementById("win-steps").innerText=steps;
+  document.getElementById("win-score").innerText=score;
+  const mapContainer=document.getElementById("map-container");
+  mapContainer.innerHTML="";
+  for(let y=0;y<size;y++){
+    const row=document.createElement("div");
+    for(let x=0;x<size;x++){
+      const cell=document.createElement("div");
+      cell.className="worm-cell";
+      if(board[y][x].worm) cell.classList.add("active");
+      row.appendChild(cell);
+    }
+    mapContainer.appendChild(row);
+  }
+  let pulse=true;
+  setInterval(()=>{
+    mapContainer.querySelectorAll(".worm-cell.active").forEach(c=>{ c.style.background=pulse?"#800000":"darkred"; });
+    pulse=!pulse;
+  },500);
+  document.getElementById("popup-win").style.display="block";
+}
+function closePopup(type){
+  if(type==="win") document.getElementById("popup-win").style.display="none";
+  if(type==="fail") document.getElementById("popup-fail").style.display="none";
 }
 
-/* -------- AKTYWACJA AUDIO/WIBRACJI PO KLIKNIĘCIU -------- */
+/* --- AUDIO/WIBRACJE --- */
 document.addEventListener("click", ()=>{
   if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
   navigator.vibrate(1);
@@ -319,6 +297,5 @@ document.addEventListener("click", ()=>{
 
 window.onload=()=>{ startGame(); };
 </script>
-
 </body>
 </html>

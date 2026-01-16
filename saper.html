@@ -237,6 +237,7 @@ function disableBoard(){
     for(let x=0; x<size; x++){
       const cell=getCell(x,y);
       cell.onclick=null;
+      return;
     }
   }
 }

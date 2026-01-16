@@ -10,8 +10,6 @@ html, body {
   font-family:"Georgia",serif; text-align:center;
   overflow-y:auto; position:relative;
 }
-
-
 body.shake {animation: shake 0.1s infinite;}
 @keyframes shake {0%{transform:translate(1px,1px);}25%{transform:translate(-1px,-1px);}50%{transform:translate(1px,-1px);}75%{transform:translate(-1px,1px);}100%{transform:translate(0,0);}}
 
@@ -23,54 +21,37 @@ body.shake {animation: shake 0.1s infinite;}
 }
 @keyframes drift {from{background-position:0 0;}to{background-position:1000px 1000px;}}
 
-.container {position:relative; z-index:2; padding:20px;}
+.container {position:relative; z-index:2; padding:20px; display:flex; flex-direction:column; align-items:center;}
+
+h1 {margin-bottom:10px;}
+
+button, input[type=checkbox] {
+  background:black; color:#e6c47a; border:2px solid #e6c47a;
+  padding:12px 20px; margin:5px; cursor:pointer; font-size:1.1em;
+}
+
+#stats {margin-top:10px; font-size:1em;}
 
 #board-wrapper {
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  gap:20px;
-  margin-top:20px;
+  display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px;
 }
 
 #helipad {
-  width:60px;
-  height:60px;
+  width:104px; height:104px;  /* 2x2 komórki po 50px + gap */
   background:#444;
   border:2px solid #e6c47a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#e6c47a;
-  font-weight:bold;
-  font-size:0.9em;
-  border-radius:8px;
-}
-
-#board {
-  display:inline-grid;
-  gap:3px;
-}
-
-.cell {
-  width:50px; height:50px;
-  background:#222;
-  border:2px solid #e6c47a;
   display:flex; align-items:center; justify-content:center;
-  cursor:pointer; font-weight:bold; font-size:1.2em;
+  color:#e6c47a; font-weight:bold; font-size:1em;
+  border-radius:8px;
+  flex-direction:column;
 }
 
+#board {display:inline-grid; gap:3px;}
+.cell {width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;}
 .visited {background:#444;}
 .start {background:darkgreen; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
 .goal {background:darkblue; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
 .worm {background:darkred; color:white;}
-
-button, input[type=checkbox] {
-  background:black; color:#e6c47a; border:1px solid #e6c47a;
-  padding:8px; margin:5px; cursor:pointer;
-}
-
-#stats {margin-top:10px; font-size:0.9em;}
 
 .worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.3s ease;}
 .worm-cell.active {background: darkred;}
@@ -94,20 +75,19 @@ button, input[type=checkbox] {
 <div class="sand"></div>
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-  <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
 
-  <div id="stats">Kroki: 0 | Punktacja: 0</div>
-
-  <button onclick="playNarrator()" style="text-decoration:underline;">Narrator – Saper_Diuny.mp3</button>
+  <button onclick="playNarrator()" style="text-decoration:underline; font-size:1.2em;">Narrator – Saper_Diuny.mp3</button>
   <audio id="narrator-audio">
     <source src="Saper_Diuny.mp3" type="audio/mpeg">
   </audio>
 
-  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label><br>
-  <button onclick="startGame()">Nowa wyprawa</button>
+  <button onclick="startGame()" style="font-size:1.2em;">Nowa wyprawa</button>
+  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+
+  <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="board-wrapper">
-    <div id="helipad">Lądowisko</div>
+    <div id="helipad">Lądowisko<br>🛩️</div>
     <div id="board"></div>
   </div>
 
@@ -121,6 +101,7 @@ button, input[type=checkbox] {
     <h2>Złoty Szlak zwyciężył! 🎉</h2>
     <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
     <div id="worm-map-end" style="margin-top:10px;"></div>
+    <div id="helipad-end" style="margin-top:10px;"></div>
     <button onclick="closePopup('win')">Zamknij</button>
   </div>
 </div>
@@ -275,9 +256,25 @@ function drawBoard(){
     for(let x=0;x<size;x++){
       const div=getCell(x,y); div.className="cell"; div.textContent="";
       if(board[y][x].visited) div.classList.add("visited");
-      if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
-      if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
+
+      if(x===0&&y===0){ 
+        div.classList.add("start"); 
+        div.textContent="A";
+      }
+
+      if(x===size-1&&y===size-1){ 
+        div.classList.add("goal"); 
+        div.textContent="B";
+      }
+
       if(x===playerPos.x&&y===playerPos.y) div.textContent="👣";
+
+      // Dodanie lądowiska przy B po wygranej
+      if(x===size-1&&y===size-1 && gameOver){
+        div.textContent="🏁";
+        div.style.background="#444";
+        div.style.color="#e6c47a";
+      }
     }
   }
 }
@@ -321,8 +318,6 @@ document.addEventListener("click",()=>{
   if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
   if("vibrate" in navigator) navigator.vibrate(1);
 });
-
-window.onload=()=>{ startGame(); };
 </script>
 </body>
 </html>

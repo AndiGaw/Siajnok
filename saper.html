@@ -4,30 +4,86 @@
 <meta charset="UTF-8">
 <title>Przeprawa przez Arrakis – Hard Mode</title>
 <style>
-html, body {margin:0; padding:0; height:100%; background:#000; color:#e6c47a; font-family:"Georgia",serif; text-align:center; overflow-y:auto; position:relative;}
+html, body {
+  margin:0; padding:0; height:100%;
+  background:#000; color:#e6c47a;
+  font-family:"Georgia",serif; text-align:center;
+  overflow-y:auto; position:relative;
+}
+
 body.shake {animation: shake 0.1s infinite;}
 @keyframes shake {0%{transform:translate(1px,1px);}25%{transform:translate(-1px,-1px);}50%{transform:translate(1px,-1px);}75%{transform:translate(-1px,1px);}100%{transform:translate(0,0);}}
 
-.sand {position:fixed;width:100%;height:100%;background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);animation: drift 60s linear infinite;pointer-events:none; z-index:1;}
+.sand {
+  position:fixed;width:100%;height:100%;
+  background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
+  animation: drift 60s linear infinite;
+  pointer-events:none; z-index:1;
+}
 @keyframes drift {from{background-position:0 0;}to{background-position:1000px 1000px;}}
 
 .container {position:relative; z-index:2; padding:20px;}
-#board-wrapper {display:flex; justify-content:center; margin-top:20px;}
-#board {display:inline-grid; gap:3px;}
-.cell {width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;}
+
+#board-wrapper {
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:20px;
+  margin-top:20px;
+}
+
+#helipad {
+  width:60px;
+  height:60px;
+  background:#444;
+  border:2px solid #e6c47a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#e6c47a;
+  font-weight:bold;
+  font-size:0.9em;
+  border-radius:8px;
+}
+
+#board {
+  display:inline-grid;
+  gap:3px;
+}
+
+.cell {
+  width:50px; height:50px;
+  background:#222;
+  border:2px solid #e6c47a;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-weight:bold; font-size:1.2em;
+}
+
 .visited {background:#444;}
-.start {background:darkgreen;}
-.goal {background:darkblue;}
+.start {background:darkgreen; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
+.goal {background:darkblue; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
 .worm {background:darkred; color:white;}
 
-button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer;}
+button, input[type=checkbox] {
+  background:black; color:#e6c47a; border:1px solid #e6c47a;
+  padding:8px; margin:5px; cursor:pointer;
+}
 
-#stats,#debug {margin-top:10px; font-size:0.9em;}
+#stats {margin-top:10px; font-size:0.9em;}
+
 .worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.3s ease;}
 .worm-cell.active {background: darkred;}
 
 /* Pop-upy Duna */
-.popup {position:fixed;top:50%;left:50%; transform:translate(-50%,-50%); background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px; z-index:5; display:none; text-align:center; width:340px; border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6);}
+.popup {
+  position:fixed; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  background:#111; color:#e6c47a;
+  border:3px solid #e6c47a;
+  padding:20px; z-index:5;
+  display:none; text-align:center; width:340px;
+  border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6);
+}
 .popup h2 {margin-top:0; font-size:1.5em;}
 .popup button {margin-top:10px; padding:5px 10px; cursor:pointer;}
 </style>
@@ -40,32 +96,32 @@ button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e
   <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
 
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
-  <div id="debug">Diagnostyka: czekam na start...</div>
+
+  <button onclick="playNarrator()" style="text-decoration:underline;">Narrator – Saper_Diuny.mp3</button>
+  <audio id="narrator-audio">
+    <source src="Saper_Diuny.mp3" type="audio/mpeg">
+  </audio>
 
   <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label><br>
   <button onclick="startGame()">Nowa wyprawa</button>
 
-  <div id="board-wrapper"><div id="board"></div></div>
-
-  <!--
-  <div id="worm-map-container" style="margin-top:15px;">
-    <h3>Pozycje Czerwi:</h3>
-    <div id="worm-map"></div>
+  <div id="board-wrapper">
+    <div id="helipad">Lądowisko</div>
+    <div id="board"></div>
   </div>
-</div>
-  -->
 
-<div id="popup-fail" class="popup">
-  <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
-  <p>Kroki: <span id="fail-steps"></span></p>
-  <button onclick="closePopup('fail')">Zamknij</button>
-</div>
+  <div id="popup-fail" class="popup">
+    <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
+    <p>Kroki: <span id="fail-steps"></span></p>
+    <button onclick="closePopup('fail')">Zamknij</button>
+  </div>
 
-<div id="popup-win" class="popup">
-  <h2>Złoty Szlak zwyciężył! 🎉</h2>
-  <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
-  <div id="worm-map-end" style="margin-top:10px;"></div>
-  <button onclick="closePopup('win')">Zamknij</button>
+  <div id="popup-win" class="popup">
+    <h2>Złoty Szlak zwyciężył! 🎉</h2>
+    <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
+    <div id="worm-map-end" style="margin-top:10px;"></div>
+    <button onclick="closePopup('win')">Zamknij</button>
+  </div>
 </div>
 
 <script>
@@ -74,7 +130,6 @@ let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let audioCtx=null, oscillator=null, gainNode=null;
 let lastVibration=0;
 
-// Wibracje wg poziomu odległości
 function vibrateLevel(distance){
   if(!("vibrate" in navigator)) return;
   const now=Date.now();
@@ -84,8 +139,6 @@ function vibrateLevel(distance){
   else if(distance===2) navigator.vibrate([60,30,60]);
   else if(distance===1) navigator.vibrate([100,50,100]);
 }
-
-function debug(msg){ document.getElementById("debug").innerText="Diagnostyka: "+msg; }
 
 function initSound(){
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
@@ -143,7 +196,7 @@ function startGame(){
       boardDiv.appendChild(cell);
     }
   }
-  placeWorms(); updateWormMap(); updateSoundAndShake(); drawBoard();
+  placeWorms(); drawBoard(); updateWormMap(); updateSoundAndShake();
 }
 
 function placeWorms(){
@@ -180,6 +233,7 @@ function moveTo(x,y){
   }
 
   if(document.getElementById("hardMode").checked) moveWorms();
+
   if(x===size-1 && y===size-1){
     stopSound();
     score=Math.max(0,100-steps*2);
@@ -230,25 +284,6 @@ function drawBoard(){
 function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
 
 function updateWormMap(){
-  const map=document.getElementById("worm-map");
-  map.innerHTML="";
-  for(let y=0;y<size;y++){
-    const row=document.createElement("div");
-    for(let x=0;x<size;x++){
-      const cell=document.createElement("div");
-      cell.className="worm-cell";
-      if(board[y][x].worm) cell.classList.add("active");
-      row.appendChild(cell);
-    }
-    map.appendChild(row);
-  }
-}
-
-function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
-function showWinMap(){
-  document.getElementById("win-steps").innerText=steps;
-  document.getElementById("win-score").innerText=score;
-
   const mapEnd=document.getElementById("worm-map-end");
   mapEnd.innerHTML="";
   for(let y=0;y<size;y++){
@@ -261,13 +296,24 @@ function showWinMap(){
     }
     mapEnd.appendChild(row);
   }
+}
 
+function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
+function showWinMap(){
+  document.getElementById("win-steps").innerText=steps;
+  document.getElementById("win-score").innerText=score;
   document.getElementById("popup-win").style.display="block";
 }
 
 function closePopup(type){
   if(type==="win") document.getElementById("popup-win").style.display="none";
   if(type==="fail") document.getElementById("popup-fail").style.display="none";
+}
+
+function playNarrator(){
+  const audio=document.getElementById("narrator-audio");
+  if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
+  audio.play();
 }
 
 document.addEventListener("click",()=>{

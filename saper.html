@@ -78,7 +78,8 @@ h1 {font-size:2em; margin-bottom:15px; color:#e6c47a; text-shadow:1px 1px 4px #0
     <div id="helipad-end">Lądowisko B</div>
     <div id="top10"></div>
 
-    <!-- Pop-upy -->
+    <audio id="narrator-audio"><source src="Saper_Diuny.mp3" type="audio/mpeg"></audio>
+
     <div id="popup-fail" class="popup">
         <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
         <p>Kroki: <span id="fail-steps"></span></p>
@@ -97,6 +98,59 @@ let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
 let pathCompleted=false;
 
+// Audio
+let audioCtx=null, oscillator=null, gainNode=null;
+let lastVibration=0;
+function initSound(){
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    oscillator = audioCtx.createOscillator();
+    gainNode = audioCtx.createGain();
+    oscillator.type="sine";
+    oscillator.frequency.setValueAtTime(50,audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(0,audioCtx.currentTime);
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.start();
+}
+function updateSoundAndShake(){
+    if(!audioCtx) return;
+    let minDist=Infinity;
+    for(let y=0;y<size;y++)
+        for(let x=0;x<size;x++)
+            if(board[y][x].worm){
+                let dist=Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
+                if(dist<minDist) minDist=dist;
+            }
+    if(minDist===Infinity) minDist=size;
+
+    let freq=50, vol=0;
+    if(minDist>=4){ freq=50; vol=0; }
+    else if(minDist===3){ freq=150; vol=0.1; }
+    else if(minDist===2){ freq=300; vol=0.2; }
+    else if(minDist===1){ freq=500; vol=0.35; }
+    else if(minDist===0){ freq=800; vol=0.5; }
+
+    oscillator.frequency.setTargetAtTime(freq,audioCtx.currentTime,0.05);
+    gainNode.gain.setTargetAtTime(vol,audioCtx.currentTime,0.05);
+
+    if(minDist<=3 && !gameOver) document.body.classList.add("shake");
+    else document.body.classList.remove("shake");
+
+    if("vibrate" in navigator){
+        const now=Date.now();
+        if(now-lastVibration>150){
+            lastVibration=now;
+            if(minDist>=4) navigator.vibrate(10);
+            else if(minDist===3) navigator.vibrate(30);
+            else if(minDist===2) navigator.vibrate([60,30,60]);
+            else if(minDist===1) navigator.vibrate([100,50,100]);
+            else if(minDist===0) navigator.vibrate([200,100,200]);
+        }
+    }
+}
+
+function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
+
 // Start gry
 function startGame(){
     const boardDiv=document.getElementById("board");
@@ -106,6 +160,9 @@ function startGame(){
     board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0; pathCompleted=false;
     document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
     document.getElementById("helipad-end").style.display="none";
+
+    if(!audioCtx) initSound();
+    if(audioCtx.state==="suspended") audioCtx.resume();
 
     for(let y=0;y<size;y++){
         board[y]=[];
@@ -122,6 +179,7 @@ function startGame(){
 
     placeWorms();
     drawBoard();
+    updateSoundAndShake();
 }
 
 // Rozstawienie czerwii
@@ -138,11 +196,11 @@ function placeWorms(){
 // Odkrycie pola
 function reveal(x,y){
     if(gameOver) return;
-    const cell = board[y][x];
-    const cellDiv = getCell(x,y);
+    const cell=board[y][x];
+    const cellDiv=getCell(x,y);
     if(cell.visited) return;
 
-    cell.visited = true;
+    cell.visited=true;
     steps++;
     cellDiv.classList.add("visited");
 
@@ -152,14 +210,17 @@ function reveal(x,y){
         cellDiv.textContent="🪱";
         gameOver=true;
         revealAllWorms();
+        stopSound();
+        navigator.vibrate([300,100,300,100,600]);
+        document.body.classList.remove("shake");
         document.getElementById("fail-steps").innerText=steps;
         document.getElementById("popup-fail").style.display="block";
         return;
     }
 
-    // Sprawdzenie czy cała trasa została pokonana (od A do B)
+    // Przejście do B dopiero po odwiedzeniu całej trasy
     if(x===size-1 && y===size-1){
-        pathCompleted = true;
+        pathCompleted=true;
         gameOver=true;
         score=Math.max(0,100-steps*2);
         if(document.getElementById("hardMode").checked) score*=3;
@@ -172,8 +233,8 @@ function reveal(x,y){
 
     drawBoard();
     updateStats();
-
     if(document.getElementById("hardMode").checked) moveWorms();
+    updateSoundAndShake();
 }
 
 // Odkrycie wszystkich czerwii
@@ -231,7 +292,6 @@ function updateTop10(){
     topDiv.innerHTML="<h3>TOP 10</h3>";
     topScores.forEach((s,i)=> topDiv.innerHTML+=`${i+1}. ${s.name} – ${s.score}<br>`);
 }
-
 </script>
 </body>
 </html>

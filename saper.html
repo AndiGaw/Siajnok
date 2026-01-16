@@ -2,69 +2,30 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Hard Mode</title>
+<title>Skoczek pustynny</title>
 <style>
-html, body {
-  margin:0; padding:0; height:100%;
-  background:#000; color:#e6c47a;
-  font-family:"Georgia",serif; text-align:center;
-  overflow-y:auto; position:relative;
-}
+html, body {margin:0; padding:0; height:100%; background:#000; color:#e6c47a; font-family:"Georgia",serif; text-align:center; overflow-y:auto; position:relative;}
 body.shake {animation: shake 0.1s infinite;}
 @keyframes shake {0%{transform:translate(1px,1px);}25%{transform:translate(-1px,-1px);}50%{transform:translate(1px,-1px);}75%{transform:translate(-1px,1px);}100%{transform:translate(0,0);}}
-
-.sand {
-  position:fixed;width:100%;height:100%;
-  background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
-  animation: drift 60s linear infinite;
-  pointer-events:none; z-index:1;
-}
-
-.container {position:relative; z-index:2; padding:20px; display:flex; flex-direction:column; align-items:center;}
-
-h1 {margin-bottom:10px;}
-button, input[type=checkbox] {
-  background:black; color:#e6c47a; border:2px solid #e6c47a;
-  padding:12px 20px; margin:5px; cursor:pointer; font-size:1.1em;
-}
-#stats {margin-top:10px; font-size:1em;}
-
-#board-wrapper {
-  display:none; /* ukryte na start */
-  justify-content:center; align-items:flex-start; gap:20px; margin-top:20px;
-}
-
-#helipad, #helipad-end {
-  width:104px; height:104px;  /* 2x2 komórki */
-  background:#444;
-  border:2px solid #e6c47a;
-  display:flex; align-items:center; justify-content:center;
-  color:#e6c47a; font-weight:bold; font-size:1em;
-  border-radius:8px; flex-direction:column;
-}
-
+.sand {position:fixed;width:100%;height:100%;background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);animation: drift 60s linear infinite; pointer-events:none; z-index:1;}
+@keyframes drift {from{background-position:0 0;}to{background-position:1000px 1000px;}}
+.container {position:relative; z-index:2; padding:20px;}
+#board-wrapper {display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px;}
+#helipad,#helipad-end {width:60px; height:60px; background:#444; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; color:#e6c47a; font-weight:bold; font-size:0.9em; border-radius:8px;}
+#helipad-end {display:none; flex-direction:column; font-size:0.8em;}
 #board {display:inline-grid; gap:3px;}
 .cell {width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;}
 .visited {background:#444;}
 .start {background:darkgreen; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
 .goal {background:darkblue; color:#fff; font-weight:bold; text-shadow:1px 1px 2px #000;}
 .worm {background:darkred; color:white;}
-
+button, input[type=checkbox] {background:black; color:#e6c47a; border:1px solid #e6c47a; padding:10px; margin:5px; cursor:pointer;}
+#stats {margin-top:10px; font-size:0.9em;}
 .worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.3s ease;}
 .worm-cell.active {background: darkred;}
-
-/* Pop-upy Duna */
-.popup {
-  position:fixed; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  background:#111; color:#e6c47a;
-  border:3px solid #e6c47a;
-  padding:20px; z-index:5;
-  display:none; text-align:center; width:340px;
-  border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6);
-}
-.popup h2 {margin-top:0; font-size:1.5em;}
-.popup button {margin-top:10px; padding:5px 10px; cursor:pointer;}
+#top-scores-container {margin-top:20px; text-align:left; max-width:600px; margin-left:auto; margin-right:auto;}
+#top-scores-container h3 {margin-bottom:5px;}
+#top-scores-container ol {padding-left:20px;}
 </style>
 </head>
 <body>
@@ -73,20 +34,20 @@ button, input[type=checkbox] {
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
 
-  <button onclick="playNarrator()" style="text-decoration:underline; font-size:1.2em;">Narrator – Saper_Diuny.mp3</button>
-  <audio id="narrator-audio">
-    <source src="Saper_Diuny.mp3" type="audio/mpeg">
-  </audio>
-
-  <button onclick="startGame()" style="font-size:1.2em;">Nowa wyprawa</button>
-  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
-
+  <button onclick="playNarrator()" style="text-decoration:underline; font-size:1.2em; padding:10px 20px;">Narrator – Saper_Diuny.mp3</button><br>
+  <button onclick="startGame()" style="font-size:1.2em; padding:10px 20px;">Nowa wyprawa</button><br>
+  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label><br>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="board-wrapper">
-    <div id="helipad">Lądowisko<br>🛩️</div>
+    <div id="helipad">Lądowisko A</div>
     <div id="board"></div>
+    <div id="helipad-end">Lądowisko B</div>
   </div>
+
+  <audio id="narrator-audio">
+    <source src="Saper_Diuny.mp3" type="audio/mpeg">
+  </audio>
 
   <div id="popup-fail" class="popup">
     <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
@@ -94,20 +55,16 @@ button, input[type=checkbox] {
     <button onclick="closePopup('fail')">Zamknij</button>
   </div>
 
-  <div id="popup-win" class="popup">
-    <h2>Złoty Szlak zwyciężył! 🎉</h2>
-    <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
-    <div id="worm-map-end" style="margin-top:10px;"></div>
-    <div id="helipad-end" style="margin-top:10px; display:flex; justify-content:center; align-items:center;">Lądowisko B<br>🛩️</div>
-    <button onclick="closePopup('win')">Zamknij</button>
+  <div id="top-scores-container" style="display:none;">
+    <h3>Top 10 wyników</h3>
+    <div id="top-scores"></div>
   </div>
 </div>
 
 <script>
 const size=10, worms=12;
 let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
-let audioCtx=null, oscillator=null, gainNode=null;
-let lastVibration=0;
+let audioCtx=null, oscillator=null, gainNode=null, lastVibration=0;
 
 function vibrateLevel(distance){
   if(!("vibrate" in navigator)) return;
@@ -154,25 +111,23 @@ function updateSoundAndShake(){
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
 function startGame(){
-  document.getElementById("board-wrapper").style.display="flex";
   const boardDiv=document.getElementById("board");
+  boardDiv.innerHTML="";
+  document.getElementById("helipad-end").style.display="none";
+  document.getElementById("top-scores-container").style.display="none";
   if(!audioCtx) initSound();
   if(audioCtx.state==="suspended") audioCtx.resume();
-
   board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
   document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
-  boardDiv.innerHTML="";
   boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
-
   for(let y=0;y<size;y++){
     board[y]=[];
     for(let x=0;x<size;x++){
       board[y][x]={worm:false, visited:false};
       const cell=document.createElement("div");
       cell.className="cell";
-      cell.dataset.x=x;
-      cell.dataset.y=y;
-      cell.onclick=()=>{if(!gameOver) moveTo(x,y);}; // zablokowane po gameOver
+      cell.dataset.x=x; cell.dataset.y=y;
+      cell.onclick=()=>moveTo(x,y);
       boardDiv.appendChild(cell);
     }
   }
@@ -193,23 +148,16 @@ function isAdjacent(x,y){ return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)
 
 function moveTo(x,y){
   if(gameOver) return;
-
+  if(!isAdjacent(x,y)) return;
   playerPos={x,y};
   if(!board[y][x].visited) steps++;
   board[y][x].visited=true;
-
   updateSoundAndShake();
   document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
 
   if(board[y][x].worm){
-    revealWorms();
-    stopSound();
-    navigator.vibrate([300,100,300,100,600]);
-    showFailPopup();
-    gameOver=true;
-    document.body.classList.remove("shake");
-    updateWormMap();
-    return;
+    revealWorms(); stopSound(); navigator.vibrate([300,100,300,100,600]);
+    showFailPopup(); gameOver=true; document.body.classList.remove("shake"); return;
   }
 
   if(document.getElementById("hardMode").checked) moveWorms();
@@ -217,15 +165,16 @@ function moveTo(x,y){
   if(x===size-1 && y===size-1){
     stopSound();
     score=Math.max(0,100-steps*2);
-    showWinMap();
-    gameOver=true;
-    document.body.classList.remove("shake");
-    drawBoard();
+    if(document.getElementById("hardMode").checked) score *=3;
+    document.getElementById("helipad-end").style.display="flex";
+    const nick = prompt("Wygrałeś! Podaj swój nick do rankingu:");
+    if(nick) saveScore(nick, score);
+    showTopScores();
+    gameOver=true; document.body.classList.remove("shake");
     return;
   }
 
-  drawBoard();
-  updateWormMap();
+  drawBoard(); updateWormMap();
 }
 
 function moveWorms(){
@@ -258,45 +207,49 @@ function drawBoard(){
       if(board[y][x].visited) div.classList.add("visited");
       if(x===0&&y===0){ div.classList.add("start"); div.textContent="A"; }
       if(x===size-1&&y===size-1){ div.classList.add("goal"); div.textContent="B"; }
-      if(playerPos.x===x && playerPos.y===y) div.textContent="👣";
+      if(x===playerPos.x&&y===playerPos.y) div.textContent="👣";
     }
   }
 }
 
 function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
 
-function updateWormMap(){
-  const mapEnd=document.getElementById("worm-map-end");
-  mapEnd.innerHTML="";
-  for(let y=0;y<size;y++){
-    const row=document.createElement("div");
-    for(let x=0;x<size;x++){
-      const cell=document.createElement("div");
-      cell.className="worm-cell";
-      if(board[y][x].worm) cell.classList.add("active");
-      row.appendChild(cell);
-    }
-    mapEnd.appendChild(row);
-  }
-}
+function updateWormMap(){}
 
 function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
-function showWinMap(){
-  document.getElementById("win-steps").innerText=steps;
-  document.getElementById("win-score").innerText=score;
-  document.getElementById("helipad-end").style.display="flex";
-  document.getElementById("popup-win").style.display="block";
-}
-
-function closePopup(type){
-  if(type==="win") document.getElementById("popup-win").style.display="none";
-  if(type==="fail") document.getElementById("popup-fail").style.display="none";
-}
 
 function playNarrator(){
   const audio=document.getElementById("narrator-audio");
   if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
   audio.play();
+}
+
+function closePopup(type){
+  if(type==="fail") document.getElementById("popup-fail").style.display="none";
+}
+
+function saveScore(nick, score){
+  let scores = JSON.parse(localStorage.getItem("arrakisScores")) || [];
+  scores.push({nick, score});
+  scores.sort((a,b)=>b.score-a.score);
+  scores = scores.slice(0,10);
+  localStorage.setItem("arrakisScores", JSON.stringify(scores));
+}
+
+function showTopScores(){
+  const scores = JSON.parse(localStorage.getItem("arrakisScores")) || [];
+  const container=document.getElementById("top-scores-container");
+  const div=document.getElementById("top-scores");
+  div.innerHTML="";
+  if(scores.length===0){ div.innerHTML="<p>Brak zapisanych wyników.</p>"; return; }
+  const ul=document.createElement("ol");
+  scores.forEach(s=>{
+    const li=document.createElement("li");
+    li.textContent=`${s.nick}: ${s.score} pkt`;
+    ul.appendChild(li);
+  });
+  div.appendChild(ul);
+  container.style.display="block";
 }
 
 document.addEventListener("click",()=>{

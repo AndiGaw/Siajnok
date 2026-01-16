@@ -2,71 +2,41 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Hard Mode</title>
+<title>Przeprawa przez Arrakis – Hard Mode i Wibracje</title>
 
 <style>
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-  background: #000;
-  color:#e6c47a;
-  font-family: "Georgia", serif;
-  text-align:center;
-  overflow-y: auto;
-  position:relative;
-}
+html, body { margin:0; padding:0; height:100%; background:#000; color:#e6c47a; font-family:"Georgia",serif; text-align:center; overflow-y:auto; position:relative;}
+body.shake { animation: shake 0.1s infinite;}
+@keyframes shake {0% {transform: translate(1px,1px);}25%{transform: translate(-1px,-1px);}50%{transform: translate(1px,-1px);}75%{transform: translate(-1px,1px);}100%{transform:translate(0,0);}}
 
-body.shake { animation: shake 0.1s infinite; }
-@keyframes shake {
-  0% { transform: translate(1px, 1px); }
-  25% { transform: translate(-1px, -1px); }
-  50% { transform: translate(1px, -1px); }
-  75% { transform: translate(-1px, 1px); }
-  100% { transform: translate(0,0); }
-}
+.sand {position:fixed;width:100%;height:100%;background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);animation: drift 60s linear infinite;pointer-events:none;z-index:1;}
+@keyframes drift {from {background-position:0 0;} to {background-position:1000px 1000px;}}
 
-.sand {
-  position:fixed;
-  width:100%;
-  height:100%;
-  background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
-  animation: drift 60s linear infinite;
-  pointer-events:none; z-index:1;
-}
-@keyframes drift { from {background-position:0 0;} to {background-position:1000px 1000px;} }
+.container {position:relative; z-index:2; padding:20px;}
+#board-wrapper {display:flex; justify-content:center; margin-top:20px;}
+#board {display:inline-grid; gap:3px;}
+.cell {width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em;}
+.visited {background:#444;}
+.start {background:darkgreen;}
+.goal {background:darkblue;}
+.worm {background:darkred; color:white;}
 
-.container { position:relative; z-index:2; padding:20px; }
+button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer;}
 
-#board-wrapper { display:flex; justify-content:center; margin-top:20px; }
-
-#board { display:inline-grid; gap:3px; }
-
-.cell { width:50px; height:50px; background:#222; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; cursor:pointer; font-weight:bold; font-size:1.2em; }
-.visited { background:#444; }
-.start { background:darkgreen; }
-.goal { background:darkblue; }
-.worm { background:darkred; color:white; }
-
-button { background:black; color:#e6c47a; border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer; }
-
-#stats,#debug { margin-top:10px; font-size:0.9em; }
+#stats,#debug {margin-top:10px; font-size:0.9em;}
 
 /* Pop-upy Duna */
-.popup { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px; z-index:5; display:none; text-align:center; width:320px; border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6); }
-.popup h2 { margin-top:0; font-size:1.5em; }
-.popup button { margin-top:10px; padding:5px 10px; cursor:pointer; }
-
-#map-container { margin-top:10px; }
-.worm-cell { width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.5s ease; }
-.worm-cell.active { background: darkred; }
+.popup {position:fixed;top:50%;left:50%; transform:translate(-50%,-50%); background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px; z-index:5; display:none; text-align:center; width:340px; border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6);}
+.popup h2 {margin-top:0; font-size:1.5em;}
+.popup button {margin-top:10px; padding:5px 10px; cursor:pointer;}
+#map-container {margin-top:10px;}
+.worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.5s ease;}
+.worm-cell.active {background: darkred;}
 </style>
 </head>
-
 <body>
 
 <div class="sand"></div>
-
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
   <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
@@ -74,16 +44,12 @@ button { background:black; color:#e6c47a; border:1px solid #e6c47a; padding:8px;
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
   <div id="debug">Diagnostyka: czekam na start...</div>
 
-  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
-  <br>
+  <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label><br>
   <button onclick="startGame()">Nowa wyprawa</button>
 
-  <div id="board-wrapper">
-    <div id="board"></div>
-  </div>
+  <div id="board-wrapper"><div id="board"></div></div>
 </div>
 
-<!-- Pop-upy -->
 <div id="popup-fail" class="popup">
   <h2>💀 Pożarł Cię Czerw Pustyni!</h2>
   <p>Kroki: <span id="fail-steps"></span></p>
@@ -98,8 +64,7 @@ button { background:black; color:#e6c47a; border:1px solid #e6c47a; padding:8px;
 </div>
 
 <script>
-const size=10;
-const worms=12;
+const size=10; const worms=12;
 let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let audioCtx=null, oscillator=null, gainNode=null;
 let lastVibration=0;
@@ -117,7 +82,7 @@ function vibrateLevel(distance){
 function debug(msg){ document.getElementById("debug").innerText="Diagnostyka: "+msg; }
 
 function initSound(){
-  audioCtx=new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   oscillator=audioCtx.createOscillator();
   gainNode=audioCtx.createGain();
   oscillator.type="sine";
@@ -208,7 +173,6 @@ function moveTo(x,y){
   }
 
   if(document.getElementById("hardMode").checked) moveWorms();
-
   if(x===size-1 && y===size-1){
     stopSound();
     score=Math.max(0,100-steps*2);
@@ -216,7 +180,6 @@ function moveTo(x,y){
     gameOver=true; document.body.classList.remove("shake");
     return;
   }
-
   drawBoard();
 }
 
@@ -227,9 +190,8 @@ function moveWorms(){
       if(board[y][x].worm){
         let [dx,dy]=directions[Math.floor(Math.random()*4)];
         let nx=x+dx, ny=y+dy;
-        if(nx>=0 && nx<size && ny>=0 && ny<size && !board[ny][nx].worm && !(nx===0&&ny===0) && !(nx===size-1&&ny===size-1)){
-          board[ny][nx].worm=true;
-          board[y][x].worm=false;
+        if(nx>=0&&nx<size&&ny>=0&&ny<size && !board[ny][nx].worm && !(nx===0&&ny===0) && !(nx===size-1&&ny===size-1)){
+          board[ny][nx].worm=true; board[y][x].worm=false;
         }
       }
     }
@@ -239,10 +201,7 @@ function moveWorms(){
 function revealWorms(){
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      if(board[y][x].worm){
-        const div=getCell(x,y);
-        div.classList.add("worm"); div.textContent="🪱";
-      }
+      if(board[y][x].worm){ const div=getCell(x,y); div.classList.add("worm"); div.textContent="🪱"; }
     }
   }
 }
@@ -270,29 +229,25 @@ function showWinPopup(){
   for(let y=0;y<size;y++){
     const row=document.createElement("div");
     for(let x=0;x<size;x++){
-      const cell=document.createElement("div");
-      cell.className="worm-cell";
+      const cell=document.createElement("div"); cell.className="worm-cell";
       if(board[y][x].worm) cell.classList.add("active");
       row.appendChild(cell);
     }
     mapContainer.appendChild(row);
   }
   let pulse=true;
-  setInterval(()=>{
-    mapContainer.querySelectorAll(".worm-cell.active").forEach(c=>{ c.style.background=pulse?"#800000":"darkred"; });
-    pulse=!pulse;
-  },500);
+  setInterval(()=>{ mapContainer.querySelectorAll(".worm-cell.active").forEach(c=>c.style.background=pulse?"#800000":"darkred"); pulse=!pulse; },500);
   document.getElementById("popup-win").style.display="block";
 }
+
 function closePopup(type){
   if(type==="win") document.getElementById("popup-win").style.display="none";
   if(type==="fail") document.getElementById("popup-fail").style.display="none";
 }
 
-/* --- AUDIO/WIBRACJE --- */
-document.addEventListener("click", ()=>{
+document.addEventListener("click",()=>{
   if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
-  navigator.vibrate(1);
+  if("vibrate" in navigator) navigator.vibrate(1);
 });
 
 window.onload=()=>{ startGame(); };

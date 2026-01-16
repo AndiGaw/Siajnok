@@ -23,10 +23,10 @@ body.shake {animation: shake 0.1s infinite;}
 
 .container {position:relative; z-index:2; padding:20px;}
 #controls {margin-bottom:20px;}
-#controls button {font-size:1.2em; padding:10px 20px;}
+#controls button {font-size:1.2em; padding:10px 20px; margin:5px;}
 #controls label {font-size:1em; margin-left:10px; cursor:pointer;}
 
-#board-wrapper {display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px; visibility:hidden;}
+#board-wrapper {display:flex; justify-content:center; align-items:flex-start; gap:20px; margin-top:20px; visibility:hidden; position:relative;}
 #helipad {width:60px; height:60px; background:#444; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; color:#e6c47a; font-weight:bold; font-size:0.9em; border-radius:8px;}
 #helipad-end {width:60px; height:60px; background:#444; border:2px solid #e6c47a; display:flex; align-items:center; justify-content:center; color:#e6c47a; font-weight:bold; font-size:0.9em; border-radius:8px; position:absolute; display:none;}
 
@@ -38,7 +38,6 @@ body.shake {animation: shake 0.1s infinite;}
 .worm {background:darkred; color:white;}
 
 #stats {margin-top:10px; font-size:1em;}
-
 .worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.3s ease;}
 .worm-cell.active {background: darkred;}
 #top10 {margin-top:20px; text-align:center; font-size:0.95em;}
@@ -55,18 +54,17 @@ body.shake {animation: shake 0.1s infinite;}
   <h1>Przeprawa przez Arrakis</h1>
 
   <div id="controls">
-    <button onclick="playNarrator()">Narrator</button><br><br>
+    <button onclick="playNarrator()">Narrator</button><br>
     <button onclick="startGame()">Wyrusz w drogę przez piaski</button><br>
     <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label><br>
     <div id="stats">Kroki: 0 | Punktacja: 0</div>
   </div>
 
   <div id="board-wrapper">
-    <div id="helipad">Lądowisko</div>
+    <div id="helipad">Lądowisko A</div>
     <div id="board"></div>
+    <div id="helipad-end">Lądowisko B</div>
   </div>
-
-  <div id="helipad-end">Wrota</div>
 
   <div id="top10"></div>
 
@@ -84,8 +82,6 @@ const size=10, worms=12;
 let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let audioCtx=null, oscillator=null, gainNode=null;
 let lastVibration=0;
-
-// Top 10 wyniki
 let topScores = JSON.parse(localStorage.getItem("topScores") || "[]");
 
 function vibrateLevel(distance){
@@ -125,7 +121,6 @@ function updateSoundAndShake(){
   }
   if(minDist===Infinity) minDist=size;
 
-  // 4 poziomy + gracz na czerwiu
   let freq=50, vol=0;
   if(minDist>=4){ freq=50; vol=0; }
   else if(minDist===3){ freq=150; vol=0.1; }
@@ -214,9 +209,11 @@ function moveTo(x,y){
     if(document.getElementById("hardMode").checked) score*=3;
     gameOver=true;
     document.body.classList.remove("shake");
-    document.getElementById("helipad-end").style.display="flex";
-    document.getElementById("helipad-end").style.top=`${document.getElementById("board-wrapper").offsetTop + size*50 - 60}px`;
-    document.getElementById("helipad-end").style.left=`${document.getElementById("board-wrapper").offsetLeft + size*50 - 60}px`;
+    const endPad=document.getElementById("helipad-end");
+    endPad.style.display="flex";
+    const boardWrapper=document.getElementById("board-wrapper");
+    endPad.style.top=(boardWrapper.offsetTop + boardWrapper.offsetHeight - 60) + "px";
+    endPad.style.left=(boardWrapper.offsetLeft + boardWrapper.offsetWidth - 60) + "px";
     updateTop10();
   }
 }
@@ -275,7 +272,7 @@ function updateTop10(){
   if(!name) name="Anonim";
 
   topScores.push({name,score});
-  topScores.sort((a,b)=>b.score-a.score);
+  topScores.sort((a,b)=>b.score-b.score);
   if(topScores.length>10) topScores=topScores.slice(0,10);
   localStorage.setItem("topScores", JSON.stringify(topScores));
 

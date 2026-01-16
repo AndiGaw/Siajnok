@@ -2,15 +2,14 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Hard Mode i Wibracje</title>
-
+<title>Przeprawa przez Arrakis – Hard Mode</title>
 <style>
-html, body { margin:0; padding:0; height:100%; background:#000; color:#e6c47a; font-family:"Georgia",serif; text-align:center; overflow-y:auto; position:relative;}
-body.shake { animation: shake 0.1s infinite;}
-@keyframes shake {0% {transform: translate(1px,1px);}25%{transform: translate(-1px,-1px);}50%{transform: translate(1px,-1px);}75%{transform: translate(-1px,1px);}100%{transform:translate(0,0);}}
+html, body {margin:0; padding:0; height:100%; background:#000; color:#e6c47a; font-family:"Georgia",serif; text-align:center; overflow-y:auto; position:relative;}
+body.shake {animation: shake 0.1s infinite;}
+@keyframes shake {0%{transform:translate(1px,1px);}25%{transform:translate(-1px,-1px);}50%{transform:translate(1px,-1px);}75%{transform:translate(-1px,1px);}100%{transform:translate(0,0);}}
 
-.sand {position:fixed;width:100%;height:100%;background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);animation: drift 60s linear infinite;pointer-events:none;z-index:1;}
-@keyframes drift {from {background-position:0 0;} to {background-position:1000px 1000px;}}
+.sand {position:fixed;width:100%;height:100%;background:repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);animation: drift 60s linear infinite;pointer-events:none; z-index:1;}
+@keyframes drift {from{background-position:0 0;}to{background-position:1000px 1000px;}}
 
 .container {position:relative; z-index:2; padding:20px;}
 #board-wrapper {display:flex; justify-content:center; margin-top:20px;}
@@ -24,14 +23,13 @@ body.shake { animation: shake 0.1s infinite;}
 button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e6c47a; padding:8px; margin:5px; cursor:pointer;}
 
 #stats,#debug {margin-top:10px; font-size:0.9em;}
+.worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.3s ease;}
+.worm-cell.active {background: darkred;}
 
 /* Pop-upy Duna */
 .popup {position:fixed;top:50%;left:50%; transform:translate(-50%,-50%); background:#111; color:#e6c47a; border:3px solid #e6c47a; padding:20px; z-index:5; display:none; text-align:center; width:340px; border-radius:12px; box-shadow:0 0 20px rgba(230,196,122,0.6);}
 .popup h2 {margin-top:0; font-size:1.5em;}
 .popup button {margin-top:10px; padding:5px 10px; cursor:pointer;}
-#map-container {margin-top:10px;}
-.worm-cell {width:20px; height:20px; margin:1px; background:#333; display:inline-block; border-radius:3px; transition:background 0.5s ease;}
-.worm-cell.active {background: darkred;}
 </style>
 </head>
 <body>
@@ -48,6 +46,11 @@ button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e
   <button onclick="startGame()">Nowa wyprawa</button>
 
   <div id="board-wrapper"><div id="board"></div></div>
+
+  <div id="worm-map-container" style="margin-top:15px;">
+    <h3>Pozycje Czerwi:</h3>
+    <div id="worm-map"></div>
+  </div>
 </div>
 
 <div id="popup-fail" class="popup">
@@ -59,16 +62,17 @@ button, input[type=checkbox] {background:black;color:#e6c47a;border:1px solid #e
 <div id="popup-win" class="popup">
   <h2>Złoty Szlak zwyciężył! 🎉</h2>
   <p>Kroki: <span id="win-steps"></span> | Punktacja: <span id="win-score"></span></p>
-  <div id="map-container"></div>
+  <div id="worm-map-end" style="margin-top:10px;"></div>
   <button onclick="closePopup('win')">Zamknij</button>
 </div>
 
 <script>
-const size=10; const worms=12;
+const size=10, worms=12;
 let board=[], gameOver=false, playerPos={x:0,y:0}, steps=0, score=0;
 let audioCtx=null, oscillator=null, gainNode=null;
 let lastVibration=0;
 
+// Wibracje wg poziomu odległości
 function vibrateLevel(distance){
   if(!("vibrate" in navigator)) return;
   const now=Date.now();
@@ -137,7 +141,7 @@ function startGame(){
       boardDiv.appendChild(cell);
     }
   }
-  placeWorms(); updateSoundAndShake(); drawBoard();
+  placeWorms(); updateWormMap(); updateSoundAndShake(); drawBoard();
 }
 
 function placeWorms(){
@@ -169,6 +173,7 @@ function moveTo(x,y){
     navigator.vibrate([300,100,300,100,600]);
     showFailPopup();
     gameOver=true; document.body.classList.remove("shake");
+    updateWormMap();
     return;
   }
 
@@ -176,11 +181,13 @@ function moveTo(x,y){
   if(x===size-1 && y===size-1){
     stopSound();
     score=Math.max(0,100-steps*2);
-    showWinPopup();
+    showWinMap();
     gameOver=true; document.body.classList.remove("shake");
     return;
   }
+
   drawBoard();
+  updateWormMap();
 }
 
 function moveWorms(){
@@ -220,23 +227,39 @@ function drawBoard(){
 
 function getCell(x,y){ return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`); }
 
-function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
-function showWinPopup(){
-  document.getElementById("win-steps").innerText=steps;
-  document.getElementById("win-score").innerText=score;
-  const mapContainer=document.getElementById("map-container");
-  mapContainer.innerHTML="";
+function updateWormMap(){
+  const map=document.getElementById("worm-map");
+  map.innerHTML="";
   for(let y=0;y<size;y++){
     const row=document.createElement("div");
     for(let x=0;x<size;x++){
-      const cell=document.createElement("div"); cell.className="worm-cell";
+      const cell=document.createElement("div");
+      cell.className="worm-cell";
       if(board[y][x].worm) cell.classList.add("active");
       row.appendChild(cell);
     }
-    mapContainer.appendChild(row);
+    map.appendChild(row);
   }
-  let pulse=true;
-  setInterval(()=>{ mapContainer.querySelectorAll(".worm-cell.active").forEach(c=>c.style.background=pulse?"#800000":"darkred"); pulse=!pulse; },500);
+}
+
+function showFailPopup(){ document.getElementById("fail-steps").innerText=steps; document.getElementById("popup-fail").style.display="block"; }
+function showWinMap(){
+  document.getElementById("win-steps").innerText=steps;
+  document.getElementById("win-score").innerText=score;
+
+  const mapEnd=document.getElementById("worm-map-end");
+  mapEnd.innerHTML="";
+  for(let y=0;y<size;y++){
+    const row=document.createElement("div");
+    for(let x=0;x<size;x++){
+      const cell=document.createElement("div");
+      cell.className="worm-cell";
+      if(board[y][x].worm) cell.classList.add("active");
+      row.appendChild(cell);
+    }
+    mapEnd.appendChild(row);
+  }
+
   document.getElementById("popup-win").style.display="block";
 }
 

@@ -80,25 +80,27 @@ body.shake {
 
 /* ===== GAME AREA ===== */
 #game-area {
-  display:flex;
-  justify-content:center; /* plansza wyśrodkowana poziomo */
+  display: none;                 /* domyślnie ukryte */
+  justify-content:center;
   align-items:flex-start;
-  margin-top:40px;
-  gap:20px; /* odstęp między planszą a lądowiskami */
+  gap: 30px;
+  margin-top:20px;
 }
 
-#helipadA, #helipadB {
+/* Lądowisko A – statyczne i bliżej planszy */
+#helipadA, helipadB {
   width:120px;
   height:120px;
-  border:2px solid #e6c47a;
-  background:#111;
-  color:#e6c47a;
+  background:#333;
+  border:3px solid #e6c47a;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   font-weight:bold;
   border-radius:10px;
-  cursor:pointer;
+
+  margin-right:20px;   /* normalny odstęp – brak nachodzenia */
+  margin-top:20px;     /* wyrównanie z planszą */
 }
 
 /* ===== PLANSZA ===== */

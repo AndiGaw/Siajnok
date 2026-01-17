@@ -165,7 +165,8 @@ body.shake {
 
   <div id="controls">
     <button onclick="playNarrator()">🎙️ Narrator</button>
-    <button onclick="startGame()">🏜️ Wyrusz w drogę przez piaski</button>
+    <button onclick="showGame(); startGame()">🏜️ Wyrusz w drogę przez piaski</button>
+    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
 
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
@@ -243,6 +244,47 @@ function placeWorms() {
     }
   }
 }
+
+function moveWorms() {
+  if (!document.getElementById("hardMode").checked) return;
+
+  // nowa plansza do aktualizacji pozycji
+  let newBoard = board.map(row => row.map(cell => ({...cell, worm: false})));
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].worm) {
+        // możliwe kierunki: góra, dół, lewo, prawo, lub zostań
+        const dirs = [
+          [0, 0],
+          [0, -1], [0, 1],
+          [-1, 0], [1, 0]
+        ];
+        // losowy kierunek
+        const [dx, dy] = dirs[Math.floor(Math.random() * dirs.length)];
+        let nx = x + dx;
+        let ny = y + dy;
+
+        // sprawdzamy granice planszy i nie nakładamy na start/goal
+        if (nx >= 0 && nx < size && ny >= 0 && ny < size &&
+            !(nx === 0 && ny === 0) && !(nx === size-1 && ny === size-1)) {
+          newBoard[ny][nx].worm = true;
+        } else {
+          newBoard[y][x].worm = true; // zostaje w miejscu
+        }
+      }
+    }
+  }
+
+  // kopiujemy z powrotem
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      board[y][x].worm = newBoard[y][x].worm;
+    }
+  }
+
+  updateWormMap();
+}
   
 function updateWormMap() {
   const wormDiv = document.getElementById("worm-map");
@@ -276,15 +318,26 @@ function moveTo(x,y) {
     return;
   }
 
-  if (x === size-1 && y === size-1) {
-    score = Math.max(0, 100 - steps * 2);
-    alert(`Dotarłeś do celu! Punkty: ${score}`);
-    document.getElementById("helipadB").style.visibility = "visible";
-    gameOver = true;
-  }
+if (board[y][x].worm) {
+  revealWorms();
+  updateWormMap();
+  alert("Pożarł Cię Czerw Pustyni!");
+  gameOver = true;
+  return;
+}
 
-  drawBoard();
-  updateWormMap();  
+moveWorms(); // ← Hard Mode porusza czerwia, jeśli zaznaczone
+
+if (x === size-1 && y === size-1) {
+  score = Math.max(0, 100 - steps * 2);
+  alert(`Dotarłeś do celu! Punkty: ${score}`);
+  document.getElementById("helipadB").style.visibility = "visible";
+  gameOver = true;
+}
+
+drawBoard();
+updateWormMap();
+
 }
 
 function drawBoard() {

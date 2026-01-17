@@ -92,6 +92,7 @@ body.shake {
 }
 
 /* ----- UKŁAD PLANSZY Z LĄDOWISKIEM ----- */
+#game-area { display: none; }
 
 #game-area {
   display:flex;
@@ -245,6 +246,10 @@ function stopSound() {
     gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
 }
 
+function showGame() {
+  document.getElementById("game-area").style.display = "flex";
+}
+  
 function startGame() {
   const boardDiv = document.getElementById("board");
 

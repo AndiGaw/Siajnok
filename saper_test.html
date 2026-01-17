@@ -248,35 +248,27 @@ function placeWorms() {
 function moveWorms() {
   if (!document.getElementById("hardMode").checked) return;
 
-  // nowa plansza do aktualizacji pozycji
-  let newBoard = board.map(row => row.map(cell => ({...cell, worm: false})));
+  let newBoard = board.map(row => row.map(cell => ({...cell, worm:false})));
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       if (board[y][x].worm) {
-        // możliwe kierunki: góra, dół, lewo, prawo, lub zostań
         const dirs = [
-          [0, 0],
-          [0, -1], [0, 1],
-          [-1, 0], [1, 0]
+          [0,0],[0,-1],[0,1],[-1,0],[1,0]
         ];
-        // losowy kierunek
-        const [dx, dy] = dirs[Math.floor(Math.random() * dirs.length)];
-        let nx = x + dx;
-        let ny = y + dy;
+        const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
+        let nx = x+dx, ny = y+dy;
 
-        // sprawdzamy granice planszy i nie nakładamy na start/goal
-        if (nx >= 0 && nx < size && ny >= 0 && ny < size &&
-            !(nx === 0 && ny === 0) && !(nx === size-1 && ny === size-1)) {
+        if (nx>=0 && nx<size && ny>=0 && ny<size &&
+            !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
           newBoard[ny][nx].worm = true;
         } else {
-          newBoard[y][x].worm = true; // zostaje w miejscu
+          newBoard[y][x].worm = true;
         }
       }
     }
   }
 
-  // kopiujemy z powrotem
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       board[y][x].worm = newBoard[y][x].worm;
@@ -285,26 +277,23 @@ function moveWorms() {
 
   updateWormMap();
 }
-  
+
 function updateWormMap() {
   const wormDiv = document.getElementById("worm-map");
-
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const cell = wormDiv.querySelector(
-        `.cell[data-x='${x}'][data-y='${y}']`
-      );
+      const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
       cell.textContent = board[y][x].worm ? "🪱" : "";
     }
   }
 }
- 
+
 function isAdjacent(x,y) {
-  return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) === 1;
+  return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1;
 }
 
 function moveTo(x,y) {
-  if (gameOver || !isAdjacent(x,y)) return;
+  if(gameOver || !isAdjacent(x,y)) return;
 
   playerPos = {x,y};
   steps++;
@@ -312,56 +301,46 @@ function moveTo(x,y) {
 
   if (board[y][x].worm) {
     revealWorms();
-    updateWormMap();  // ← dodane, aby mapa pokazywała czerwia
+    updateWormMap();
     alert("Pożarł Cię Czerw Pustyni!");
     gameOver = true;
     return;
   }
 
-if (board[y][x].worm) {
-  revealWorms();
+  moveWorms(); // Hard Mode: porusz czerwia
+
+  if (x===size-1 && y===size-1) {
+    score = Math.max(0, 100-steps*2);
+    alert(`Dotarłeś do celu! Punkty: ${score}`);
+    document.getElementById("helipadB").style.visibility = "visible";
+    gameOver = true;
+  }
+
+  drawBoard();
   updateWormMap();
-  alert("Pożarł Cię Czerw Pustyni!");
-  gameOver = true;
-  return;
-}
-
-moveWorms(); // ← Hard Mode porusza czerwia, jeśli zaznaczone
-
-if (x === size-1 && y === size-1) {
-  score = Math.max(0, 100 - steps * 2);
-  alert(`Dotarłeś do celu! Punkty: ${score}`);
-  document.getElementById("helipadB").style.visibility = "visible";
-  gameOver = true;
-}
-
-drawBoard();
-updateWormMap();
-
 }
 
 function drawBoard() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
       const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      cell.className = "cell";
-      cell.textContent = "";
-
-      if (board[y][x].visited) cell.classList.add("visited");
-      if (x === 0 && y === 0) { cell.classList.add("start"); cell.textContent = "A"; }
-      if (x === size-1 && y === size-1) { cell.classList.add("goal"); cell.textContent = "B"; }
-      if (x === playerPos.x && y === playerPos.y) cell.textContent = "👣";
+      cell.className="cell";
+      cell.textContent="";
+      if(board[y][x].visited) cell.classList.add("visited");
+      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) cell.textContent="👣";
     }
   }
 }
 
 function revealWorms() {
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
         const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
         cell.classList.add("worm");
-        cell.textContent = "🪱";
+        cell.textContent="🪱";
       }
     }
   }

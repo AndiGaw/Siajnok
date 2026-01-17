@@ -75,13 +75,11 @@ body.shake {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin: 15px auto 0 auto;   /* WYŚRODKOWANIE */
+  margin: 15px auto 0 auto;
   gap: 20px;
-  position: relative;
 
-  width: max-content;        /* 🔑 KLUCZ */
+  visibility: hidden;   /* 🔑 */
 }
-
 
 /* Lądowiska jako przyciski z ramką */
 #helipadA, #helipadB {
@@ -204,7 +202,9 @@ function updateSoundAndShake(){
 
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-function showGame(){ document.getElementById("game-area").style.display="flex"; }
+function showGame(){
+  document.getElementById("game-area").style.visibility = "visible";
+}
 
 function startGame(){
   const boardDiv=document.getElementById("board");

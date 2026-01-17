@@ -3,44 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <title>Przeprawa przez Arrakis – pełny klimat</title>
+
 <style>
 html, body {
-  margin:0; padding:0; height:100%;
-  background:#000;
+  margin:0;
+  padding:0;
+  height:100%;
+  background: #000;
   color:#e6c47a;
-  font-family:"Georgia", serif;
-  text-align:center;
-  overflow-y:auto;
-  position:relative;
+  font-family: "Georgia", serif;
+  overflow: hidden;
 }
 
-/* ===== EFEKTY TŁA ===== */
-body.shake { animation: shake 0.1s infinite; }
-@keyframes shake {
-  0% {transform: translate(1px,1px);}
-  25% {transform: translate(-1px,-1px);}
-  50% {transform: translate(1px,-1px);}
-  75% {transform: translate(-1px,1px);}
-  100% {transform: translate(0,0);}
+/* ===== TŁO ===== */
+body.shake {
+  animation: shake 0.1s infinite;
 }
+
+@keyframes shake {
+  0% { transform: translate(1px, 1px); }
+  25% { transform: translate(-1px, -1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0,0); }
+}
+
 .sand {
   position:fixed;
-  width:100%; height:100%;
+  width:100%;
+  height:100%;
   background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
   animation: drift 60s linear infinite;
   pointer-events:none;
   z-index:1;
 }
-@keyframes drift { from {background-position:0 0;} to {background-position:1000px 1000px;} }
 
-/* ===== GŁÓWNY LAYOUT ===== */
+@keyframes drift { from { background-position:0 0; } to { background-position:1000px 1000px; } }
+
+/* ===== KONTAINER ===== */
 .container {
   position:relative;
   z-index:2;
-  padding:20px;
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:20px;
 }
 
-/* ----- STEROWANIE ----- */
+/* ===== STEROWANIE ===== */
 #controls {
   display:flex;
   flex-direction:column;
@@ -48,6 +61,7 @@ body.shake { animation: shake 0.1s infinite; }
   gap:12px;
   margin-bottom:20px;
 }
+
 #controls button {
   font-size:1.2em;
   padding:10px 20px;
@@ -57,25 +71,51 @@ body.shake { animation: shake 0.1s infinite; }
   border-radius:8px;
   cursor:pointer;
   box-shadow:0 0 10px rgba(230,196,122,0.5);
-  transition:all 0.2s;
   width:320px;
 }
-#controls button:hover {
-  background:#222;
-  box-shadow:0 0 20px rgba(230,196,122,0.8);
-}
+
+#controls button:hover { background:#222; box-shadow:0 0 20px rgba(230,196,122,0.8); }
+
 #controls label { font-size:1em; cursor:pointer; }
 
-/* ----- GAME AREA ----- */
+/* ===== GAME AREA ===== */
 #game-area {
   display:flex;
   justify-content:center;
   align-items:flex-start;
   position:relative;
-  gap:30px;
-  margin-top:20px;
+  margin-top:40px;
 }
-/* Plansza i mapa czerwii */
+
+/* ===== LĄDOWISKA ===== */
+.helipad {
+  width:120px;
+  height:120px;
+  border:2px solid #e6c47a;
+  background:#111;
+  color:#e6c47a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+#helipadA {
+  position:absolute;
+  left:-160px;
+  top:0;
+}
+
+#helipadB {
+  position:absolute;
+  right:-160px;
+  bottom:0;
+  display:none;
+}
+
+/* ===== PLANSZA ===== */
 #board-wrapper {
   display:flex;
   flex-direction:column;
@@ -83,18 +123,20 @@ body.shake { animation: shake 0.1s infinite; }
 }
 
 #board {
-  display:inline-grid;
+  display: inline-grid;
   gap:3px;
 }
+
 #worm-map {
   margin-top:15px;
   display:inline-grid;
   gap:2px;
 }
 
-/* ----- KOMÓRKI ----- */
+/* ===== KOMÓRKI ===== */
 .cell {
-  width:50px; height:50px;
+  width:50px;
+  height:50px;
   background:#222;
   border:2px solid #e6c47a;
   display:flex;
@@ -104,21 +146,13 @@ body.shake { animation: shake 0.1s infinite; }
   font-weight:bold;
   font-size:1.2em;
 }
+
 #worm-map .cell { width:20px; height:20px; font-size:0.8em; }
 
 .visited { background:#444; }
-.start   { background:darkgreen; }
-.goal    { background:darkblue; }
-.worm    { background:darkred; color:white; }
-
-input, button {
-  background:black;
-  color:#e6c47a;
-  border:1px solid #e6c47a;
-  padding:8px;
-  margin:5px;
-  cursor:pointer;
-}
+.start { background:darkgreen; }
+.goal { background:darkblue; }
+.worm { background:darkred; color:white; }
 
 #audioInfo, #stats { margin-top:10px; font-size:0.9em; }
 </style>
@@ -141,20 +175,20 @@ input, button {
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="game-area">
-  <div id="helipadA">Lądowisko A</div>
+    <div id="helipadA" class="helipad">A</div>
 
-  <div id="board-wrapper">
-    <div id="board"></div>
-    <div id="worm-map"></div>
+    <div id="board-wrapper">
+      <div id="board"></div>
+      <div id="worm-map"></div>
+    </div>
+
+    <div id="helipadB" class="helipad">B</div>
   </div>
-
-  <div id="helipadB" style="display:none;">Lądowisko B</div>
 </div>
 
 <script>
 let size = 10;
 let worms = 12;
-
 let board = [];
 let gameOver = false;
 let playerPos = {x:0, y:0};
@@ -162,14 +196,11 @@ let steps = 0;
 let score = 0;
 
 /* ---- AUDIO ---- */
-let audioCtx = null;
-let oscillator = null;
-let gainNode = null;
-
+let audioCtx=null, oscillator=null, gainNode=null;
 function initSound() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  oscillator = audioCtx.createOscillator();
-  gainNode = audioCtx.createGain();
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  oscillator=audioCtx.createOscillator();
+  gainNode=audioCtx.createGain();
   oscillator.type="sine";
   oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
   gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
@@ -178,58 +209,50 @@ function initSound() {
   oscillator.start();
 }
 
-function updateSoundAndShake() {
+function updateSoundAndShake(){
   if(!audioCtx) return;
-  let minDist = Infinity;
-  for(let y=0; y<size; y++){
-    for(let x=0; x<size; x++){
+  let minDist=Infinity;
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
       if(board[y][x].worm){
-        let dist = Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
+        let dist=Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y);
         if(dist<minDist) minDist=dist;
       }
     }
   }
   if(minDist===Infinity) minDist=size;
-  let freq = 60 + (size - minDist)*20;
-  let volume = Math.max(0,(size-minDist)/size);
+  let freq=60+(size-minDist)*20;
+  let vol=Math.max(0,(size-minDist)/size);
   oscillator.frequency.setTargetAtTime(freq,audioCtx.currentTime,0.1);
-  gainNode.gain.setTargetAtTime(volume*0.35,audioCtx.currentTime,0.1);
+  gainNode.gain.setTargetAtTime(vol*0.35,audioCtx.currentTime,0.1);
   if(minDist<=3 && !gameOver) document.body.classList.add("shake");
   else document.body.classList.remove("shake");
 }
 
-function stopSound() { if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
+function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-function showGame() { document.getElementById("game-area").style.display="flex"; }
+function showGame(){ document.getElementById("game-area").style.display="flex"; }
 
 function startGame(){
-  const boardDiv = document.getElementById("board");
-  const wormDiv = document.getElementById("worm-map");
-  board = [];
-  gameOver=false;
-  playerPos={x:0,y:0};
-  steps=0; score=0;
+  const boardDiv=document.getElementById("board");
+  const wormDiv=document.getElementById("worm-map");
+  board=[]; gameOver=false; playerPos={x:0,y:0}; steps=0; score=0;
   document.getElementById("stats").innerText=`Kroki: 0 | Punktacja: 0`;
   boardDiv.innerHTML=""; wormDiv.innerHTML="";
   boardDiv.style.gridTemplateColumns=`repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns=`repeat(${size},20px)`;
-
-  for(let y=0; y<size; y++){
+  for(let y=0;y<size;y++){
     board[y]=[];
-    for(let x=0; x<size; x++){
+    for(let x=0;x<size;x++){
       board[y][x]={worm:false, visited:false};
-      const cell = document.createElement("div");
+      const cell=document.createElement("div");
       cell.className="cell"; cell.dataset.x=x; cell.dataset.y=y;
-      cell.onclick=()=>moveTo(x,y);
-      boardDiv.appendChild(cell);
-      const wcell=document.createElement("div");
-      wcell.className="cell"; wcell.dataset.x=x; wcell.dataset.y=y;
-      wormDiv.appendChild(wcell);
+      cell.onclick=()=>moveTo(x,y); boardDiv.appendChild(cell);
+      const wcell=document.createElement("div"); wcell.className="cell";
+      wcell.dataset.x=x; wcell.dataset.y=y; wormDiv.appendChild(wcell);
     }
   }
-
   placeWorms(); drawBoard(); updateWormMap();
-
   if(!audioCtx) initSound();
 }
 
@@ -253,45 +276,21 @@ function moveTo(x,y){
   board[y][x].visited=true;
   updateSoundAndShake();
   document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
-
-  if(board[y][x].worm){
-    revealWorms(); stopSound();
-    alert("Pożarł Cię Czerw Pustyni! 💀");
-    gameOver=true;
-    return;
-  }
-
+  if(board[y][x].worm){ revealWorms(); stopSound(); alert("Pożarł Cię Czerw Pustyni! 💀"); gameOver=true; return; }
   if(x===size-1 && y===size-1){
-    stopSound();
-    score=Math.max(0,100-steps*2);
-    alert(`Dotarłeś do celu! Punkty: ${score}`);
-    gameOver=true;
-    
-    // pokazujemy Lądowisko B
-    document.getElementById("helipadB").style.display = "flex";
+    stopSound(); score=Math.max(0,100-steps*2); alert(`Dotarłeś do celu! Punkty: ${score}`); gameOver=true;
+    document.getElementById("helipadB").style.display="flex"; // pokaż B
     return;
   }
-
   drawBoard();
 }
 
-function revealWorms(){
-  for(let y=0; y<size; y++){
-    for(let x=0; x<size; x++){
-      if(board[y][x].worm){
-        const div=getCell(x,y);
-        div.classList.add("worm");
-        div.textContent="🪱";
-      }
-    }
-  }
-}
+function revealWorms(){ for(let y=0;y<size;y++){ for(let x=0;x<size;x++){ if(board[y][x].worm){ const div=getCell(x,y); div.classList.add("worm"); div.textContent="🪱"; } } } }
 
 function drawBoard(){
-  for(let y=0; y<size; y++){
-    for(let x=0; x<size; x++){
-      const div=getCell(x,y);
-      div.className="cell"; div.textContent="";
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const div=getCell(x,y); div.className="cell"; div.textContent="";
       if(board[y][x].visited) div.classList.add("visited");
       if(x===0 && y===0){ div.classList.add("start"); div.textContent="A"; }
       if(x===size-1 && y===size-1){ div.classList.add("goal"); div.textContent="B"; }
@@ -308,17 +307,13 @@ function updateWormMap(){
   const wormDiv=document.getElementById("worm-map");
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      const div=wormDiv.children[y*size+x];
-      div.className="cell";
-      if(board[y][x].worm) div.classList.add("worm");
-      else div.classList.remove("worm");
+      const div=wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      div.textContent=board[y][x].worm ? "🪱" : "";
     }
   }
 }
 
-document.addEventListener("click", ()=>{
-  if(audioCtx && audioCtx.state==="suspended") audioCtx.resume();
-});
+document.addEventListener("click",()=>{ if(audioCtx && audioCtx.state==="suspended") audioCtx.resume(); });
 </script>
 </body>
 </html>

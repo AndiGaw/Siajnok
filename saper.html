@@ -99,8 +99,9 @@ body.shake {
   /* display: flex */
   justify-content:center;
   align-items:flex-start;
-  position:relative;
-  gap: 20px;
+  /* position:relative; */
+  gap: 30px;
+  margin-top:20px;
 }
     
 /* Lądowisko A – statyczne i bliżej planszy */
@@ -120,11 +121,21 @@ body.shake {
 }
 
 /* Plansza */
+#board-wrapper {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
 #board {
   display: inline-grid;
-  margin-top: 20px;
   gap: 3px;
-  min-height: 50px;
+}
+  
+#worm-map {
+  margin-top:15px;
+  display:inline-grid;
+  gap:2px;
 }
 
 /* ----- KOMÓRKI ----- */
@@ -140,6 +151,12 @@ body.shake {
   cursor: pointer;
   font-weight: bold;
   font-size: 1.2em;
+}
+
+#worm-map .cell {
+  width:20px;
+  height:20px;
+  font-size:0.8em;
 }
 
 .visited { background: #444; }
@@ -181,10 +198,25 @@ input, button {
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
+  <!--
   <div id="game-area">
     <div id="helipadA">Lądowisko A</div>
     <div id="board"></div>
   </div>
+  -->
+  
+  <div id="game-area">
+
+  <div class="helipad">Lądowisko A</div>
+
+  <div id="board-wrapper">
+    <div id="board"></div>
+    <div id="worm-map"></div>
+  </div>
+
+  <div class="helipad">Lądowisko B</div>
+
+</div>
 
 </div>
 
@@ -253,6 +285,7 @@ function showGame() {
   
 function startGame() {
   const boardDiv = document.getElementById("board");
+  const wormDiv = document.getElementById("worm-map");
 
   board = [];
   gameOver = false;
@@ -263,23 +296,34 @@ function startGame() {
   document.getElementById("stats").innerText = `Kroki: 0 | Punktacja: 0`;
 
   boardDiv.innerHTML = "";
+  wormDiv.innerHTML = "";
+
   boardDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
+  wormDiv.style.gridTemplateColumns = `repeat(${size}, 20px)`;
 
   for (let y=0;y<size;y++) {
     board[y]=[];
     for (let x=0;x<size;x++) {
       board[y][x]={worm:false, visited:false};
+
       const cell = document.createElement("div");
       cell.className="cell";
       cell.dataset.x=x;
       cell.dataset.y=y;
       cell.onclick=()=>moveTo(x,y);
       boardDiv.appendChild(cell);
+
+      const wcell = document.createElement("div");
+      wcell.className="cell";
+      wcell.dataset.x=x;
+      wcell.dataset.y=y;
+      wormDiv.appendChild(wcell);
     }
   }
 
   placeWorms();
   drawBoard();
+  updateWormMap();
 
   if (!audioCtx) initSound();
 }

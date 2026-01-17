@@ -356,7 +356,8 @@ function revealWorms() {
 }
 
 function playNarrator() {
-  alert("Narrator Diuny: Witaj podróżniku na Arrakis...");
+  const audio = new Audio("Saper_Diuny.mp3");
+  audio.play().catch(err => console.log("Nie udało się odtworzyć audio:", err));
 }
 </script>
 </body>

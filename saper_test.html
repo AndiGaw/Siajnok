@@ -191,6 +191,10 @@ let board = [], gameOver = false;
 let playerPos = {x:0, y:0};
 let steps = 0, score = 0;
 
+function showGame() {
+  document.getElementById("game-area").style.display = "flex";
+}
+  
 function startGame() {
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");

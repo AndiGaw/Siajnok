@@ -75,38 +75,43 @@ body.shake {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin: 15px auto 0 auto;
   gap: 20px;
 
-  visibility: hidden;   /* 🔑 */
+  margin: 20px auto;
+  width: max-content;   /* 🔒 szerokość = A + plansza + B */
 }
-
-/* Lądowiska jako przyciski z ramką */
+  
 #helipadA, #helipadB {
-  width:120px; height:120px;
-  border:2px solid #e6c47a;
-  background:#111;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-weight:bold;
-  border-radius:10px;
-  cursor:pointer;
-  flex-shrink:0;
+  width: 120px;
+  height: 120px;
+  border: 2px solid #e6c47a;
+  background: #111;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
+  border-radius: 10px;
+  flex-shrink: 0;   /* 🔒 NIGDY się nie kurczą */
 }
 
 /* A wyjustowane do góry planszy */
 #helipadA { flex-shrink: 0;}
 
-/* B wyjustowane do dołu planszy, domyślnie ukryte */
-#helipadB { flex-shrink: 0; }
+#helipadB {
+  visibility: hidden;   /* 🔑 zajmuje miejsce */
+}
 
 /* ===== PLANSZA ===== */
 #board-wrapper {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  min-width: calc(50px * 10 + 3px * 9); /* 10 pól + przerwy */
 }
+
 
 #board {
   display:inline-grid;
@@ -202,10 +207,6 @@ function updateSoundAndShake(){
 
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-function showGame(){
-  document.getElementById("game-area").style.visibility = "visible";
-}
-
 function startGame(){
   const boardDiv=document.getElementById("board");
   const wormDiv=document.getElementById("worm-map");
@@ -252,13 +253,16 @@ function moveTo(x,y){
   updateSoundAndShake();
   document.getElementById("stats").innerText=`Kroki: ${steps} | Punktacja: ${score}`;
   if(board[y][x].worm){ revealWorms(); stopSound(); alert("Pożarł Cię Czerw Pustyni! 💀"); gameOver=true; return; }
-  if(x===size-1 && y===size-1){
-    stopSound(); score=Math.max(0,100-steps*2);
+  if (x === size-1 && y === size-1) {
+    stopSound();
+    score = Math.max(0, 100 - steps * 2);
     alert(`Dotarłeś do celu! Punkty: ${score}`);
-    gameOver=true;
-    document.getElementById("helipadB").style.display="flex"; // pokaż B
+
+    document.getElementById("helipadB").style.visibility = "visible";
+    gameOver = true;
     return;
-  }
+}
+
   drawBoard();
 }
 

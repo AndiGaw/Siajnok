@@ -199,11 +199,15 @@ function startGame() {
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
 
+  // 🔹 reset zmiennych i widoczności
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
   score = 0;
+
+  // 🔹 chowanie Lądowiska B przy starcie
+  document.getElementById("helipadB").style.visibility = "hidden";
 
   boardDiv.innerHTML = "";
   wormDiv.innerHTML = "";
@@ -211,6 +215,7 @@ function startGame() {
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
 
+  // 🔹 tworzymy planszę i mapę czerwii
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {

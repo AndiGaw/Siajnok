@@ -227,6 +227,7 @@ function startGame() {
   }
 
   placeWorms();
+  updateWormMap();
   drawBoard();
 }
 
@@ -242,7 +243,20 @@ function placeWorms() {
     }
   }
 }
+  
+function updateWormMap() {
+  const wormDiv = document.getElementById("worm-map");
 
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const cell = wormDiv.querySelector(
+        `.cell[data-x='${x}'][data-y='${y}']`
+      );
+      cell.textContent = board[y][x].worm ? "🪱" : "";
+    }
+  }
+}
+ 
 function isAdjacent(x,y) {
   return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) === 1;
 }

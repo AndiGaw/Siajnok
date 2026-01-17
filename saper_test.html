@@ -270,6 +270,7 @@ function moveTo(x,y) {
 
   if (board[y][x].worm) {
     revealWorms();
+    updateWormMap();  // ← dodane, aby mapa pokazywała czerwia
     alert("Pożarł Cię Czerw Pustyni!");
     gameOver = true;
     return;
@@ -283,6 +284,7 @@ function moveTo(x,y) {
   }
 
   drawBoard();
+  updateWormMap();  
 }
 
 function drawBoard() {

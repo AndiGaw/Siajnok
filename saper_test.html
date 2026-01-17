@@ -80,28 +80,26 @@ body.shake {
 
 /* ===== GAME AREA ===== */
 #game-area {
-  display: none;                 /* domyślnie ukryte */
-  justify-content:center;
+  display:flex;
+  justify-content:center; /* wyśrodkowanie planszy + lądowisk po bokach */
   align-items:flex-start;
-  gap: 30px;
-  margin-top:20px;
+  margin-top:40px;
 }
 
-/* Lądowisko A – statyczne i bliżej planszy */
-#helipadA, helipadB {
+#helipadA, #helipadB {
   width:120px;
   height:120px;
-  background:#333;
-  border:3px solid #e6c47a;
+  border:2px solid #e6c47a;
+  background:#111;
+  color:#e6c47a;
   display:flex;
-  align-items:center;
   justify-content:center;
+  align-items:center;
   font-weight:bold;
   border-radius:10px;
-
-  margin-right:20px;   /* normalny odstęp – brak nachodzenia */
-  margin-top:20px;     /* wyrównanie z planszą */
+  cursor:pointer;
 }
+
 
 /* ===== PLANSZA ===== */
 #board-wrapper {
@@ -163,14 +161,19 @@ body.shake {
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
 <div id="game-area">
+  <!-- Lądowisko A po lewej, statyczne -->
+  <div style="display:flex; flex-direction:column; justify-content:flex-start; margin-right:20px;">
+    <div id="helipadA" class="helipad">A</div>
+  </div>
+
+  <!-- Plansza i mapa czerwii -->
   <div id="board-wrapper">
     <div id="board"></div>
     <div id="worm-map"></div>
   </div>
 
-  <!-- Lądowiska po prawej od planszy -->
-  <div style="display:flex; flex-direction:column; justify-content:space-between; margin-left:20px;">
-    <div id="helipadA" class="helipad">A</div>
+  <!-- Lądowisko B po prawej, pojawia się po dojściu do B -->
+  <div style="display:flex; flex-direction:column; justify-content:flex-end; margin-left:20px;">
     <div id="helipadB" class="helipad" style="display:none;">B</div>
   </div>
 </div>

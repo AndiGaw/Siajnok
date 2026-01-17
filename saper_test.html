@@ -72,13 +72,16 @@ body.shake {
 
 /* ===== GAME AREA ===== */
 #game-area {
-  display:flex;
-  justify-content:center; /* plansza + lądowiska w rzędzie */
-  align-items:flex-start;
-  margin-top:15px;
-  gap:20px;
-  position:relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 15px auto 0 auto;   /* WYŚRODKOWANIE */
+  gap: 20px;
+  position: relative;
+
+  width: max-content;        /* 🔑 KLUCZ */
 }
+
 
 /* Lądowiska jako przyciski z ramką */
 #helipadA, #helipadB {
@@ -95,10 +98,10 @@ body.shake {
 }
 
 /* A wyjustowane do góry planszy */
-#helipadA { align-self:flex-start; }
+#helipadA { flex-shrink: 0;}
 
 /* B wyjustowane do dołu planszy, domyślnie ukryte */
-#helipadB { align-self:flex-end; display:none; }
+#helipadB { flex-shrink: 0; }
 
 /* ===== PLANSZA ===== */
 #board-wrapper {
@@ -156,14 +159,13 @@ body.shake {
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
-  <div id="game-area">
-    <div id="helipadA">Lądowisko A</div>
-    <div id="board-wrapper">
-      <div id="board"></div>
-      <div id="worm-map"></div>
-    </div>
-    <div id="helipadB">Lądowisko B</div>
+<div id="game-area">
+  <div id="board-wrapper">
+    <div id="board"></div>
+    <div id="worm-map"></div>
   </div>
+  <div id="helipadA">Lądowisko A</div>
+  <div id="helipadB">Lądowisko B</div>
 </div>
 
 <script>

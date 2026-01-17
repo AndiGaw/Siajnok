@@ -11,7 +11,7 @@ html, body {
   background:#000;
   color:#e6c47a;
   font-family:"Georgia", serif;
-  overflow:hidden;
+  overflow-x:hidden;
 }
 
 /* ===== TŁO ===== */
@@ -34,14 +34,12 @@ body.shake {
   pointer-events:none;
   z-index:1;
 }
-@keyframes drift { from {background-position:0 0;} to {background-position:1000px 1000px;} }
 
 /* ===== KONTAINER ===== */
 .container {
   position:relative;
   z-index:2;
   width:100%;
-  height:100%;
   text-align:center;
   padding-top:20px;
 }
@@ -52,7 +50,7 @@ body.shake {
   flex-direction:column;
   align-items:center;
   gap:12px;
-  margin-bottom:20px;
+  margin-bottom:10px;
 }
 #controls button {
   font-size:1.2em;
@@ -70,7 +68,19 @@ body.shake {
 }
 #controls label { font-size:1em; cursor:pointer; }
 
-/* ===== LĄDOWISKA ===== */
+#audioInfo, #stats { margin-top:10px; font-size:0.9em; }
+
+/* ===== GAME AREA ===== */
+#game-area {
+  display:flex;
+  justify-content:center; /* plansza + lądowiska w rzędzie */
+  align-items:flex-start;
+  margin-top:15px;
+  gap:20px;
+  position:relative;
+}
+
+/* Lądowiska jako przyciski z ramką */
 #helipadA, #helipadB {
   width:120px; height:120px;
   border:2px solid #e6c47a;
@@ -81,30 +91,17 @@ body.shake {
   font-weight:bold;
   border-radius:10px;
   cursor:pointer;
-  position:absolute;
+  flex-shrink:0;
 }
 
-/* A po lewej od planszy, statyczne */
-#helipadA {
-  left: calc(50% - 300px - 140px); /* przesunięcie w lewo od środka planszy (10x50px plansza + odstępy) */
-  top:50%;
-  transform: translateY(-50%);
-}
+/* A wyjustowane do góry planszy */
+#helipadA { align-self:flex-start; }
 
-/* B po prawej od planszy, pojawia się po dojściu do B, wyrównane do dołu planszy */
-#helipadB {
-  left: calc(50% + 300px + 20px); /* przesunięcie w prawo od środka planszy */
-  top:50%;
-  transform: translateY(50%);
-  display:none;
-}
+/* B wyjustowane do dołu planszy, domyślnie ukryte */
+#helipadB { align-self:flex-end; display:none; }
 
 /* ===== PLANSZA ===== */
 #board-wrapper {
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -141,11 +138,8 @@ body.shake {
 .goal { background:darkblue; }
 .worm { background:darkred; color:white; }
 
-#audioInfo, #stats { margin-top:10px; font-size:0.9em; }
-
 </style>
 </head>
-
 <body>
 <div class="sand"></div>
 
@@ -162,14 +156,14 @@ body.shake {
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
-  <div id="helipadA">Lądowisko A</div>
-
-  <div id="board-wrapper">
-    <div id="board"></div>
-    <div id="worm-map"></div>
+  <div id="game-area">
+    <div id="helipadA">Lądowisko A</div>
+    <div id="board-wrapper">
+      <div id="board"></div>
+      <div id="worm-map"></div>
+    </div>
+    <div id="helipadB">Lądowisko B</div>
   </div>
-
-  <div id="helipadB">Lądowisko B</div>
 </div>
 
 <script>
@@ -208,7 +202,7 @@ function updateSoundAndShake(){
 
 function stopSound(){ if(gainNode) gainNode.gain.setTargetAtTime(0,audioCtx.currentTime,0.2); }
 
-function showGame(){ document.getElementById("board-wrapper").style.display="flex"; }
+function showGame(){ document.getElementById("game-area").style.display="flex"; }
 
 function startGame(){
   const boardDiv=document.getElementById("board");

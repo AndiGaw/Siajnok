@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – pełny klimat</title>
+<title>Przeprawa przez Arrakis – Debug Mode</title>
 
 <style>
 html, body {
@@ -13,10 +13,10 @@ html, body {
   color: #e6c47a;
   font-family: "Georgia", serif;
   overflow-x: hidden;
-  user-select: none; /* Zapobiega zaznaczaniu tekstu przy szybkim klikaniu */
+  user-select: none;
 }
 
-/* ===== TŁO ===== */
+/* ===== TŁO I EFEKTY ===== */
 body.shake {
   animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
@@ -41,7 +41,7 @@ body.shake {
   z-index: 1;
 }
 
-/* ===== KONTAINER ===== */
+/* ===== UI GŁÓWNE ===== */
 .container {
   position: relative;
   z-index: 2;
@@ -49,7 +49,6 @@ body.shake {
   padding-top: 20px;
 }
 
-/* ===== STEROWANIE ===== */
 #controls {
   display: flex;
   flex-direction: column;
@@ -73,10 +72,10 @@ body.shake {
   box-shadow: 0 0 20px rgba(230,196,122,0.8);
 }
 
-#audioInfo, #stats {
+#stats {
   margin-top: 10px;
   font-size: 0.9em;
-  min-height: 1.2em; /* Rezerwacja miejsca */
+  min-height: 1.2em;
 }
 
 /* ===== GAME AREA ===== */
@@ -88,7 +87,6 @@ body.shake {
   width: max-content;
 }
 
-/* ===== LĄDOWISKA ===== */
 #helipadA, #helipadB {
   width: 120px;
   height: 120px;
@@ -101,12 +99,9 @@ body.shake {
   font-weight: bold;
   flex-shrink: 0;
 }
+#helipadB { visibility: hidden; }
 
-#helipadB {
-  visibility: hidden;
-}
-
-/* ===== PLANSZA ===== */
+/* ===== PLANSZA GŁÓWNA ===== */
 #board-wrapper {
   display: flex;
   flex-direction: column;
@@ -119,7 +114,6 @@ body.shake {
   gap: 3px;
 }
 
-/* ===== KOMÓRKI ===== */
 .cell {
   width: 50px;
   height: 50px;
@@ -137,10 +131,24 @@ body.shake {
 .start   { background: darkgreen; }
 .goal    { background: darkblue; }
 .worm    { background: darkred; color: white; }
-.player  { color: #fff; text-shadow: 0 0 5px #fff; }
 
-/* DEBUG ONLY (ukryty normalnie, ale zostawiam w CSS) */
-#worm-map { display: none; }
+/* ===== MAPA DEBUGOWANIA (Przywrócona) ===== */
+#worm-map {
+  margin-top: 15px;
+  display: inline-grid;
+  gap: 2px;
+  border: 1px solid #e6c47a;
+  padding: 2px;
+  background: #000;
+}
+
+#worm-map .cell {
+  width: 20px;
+  height: 20px;
+  font-size: 0.8em;
+  border: 1px solid #555;
+  cursor: default;
+}
 </style>
 </head>
 
@@ -167,6 +175,7 @@ body.shake {
 
     <div id="board-wrapper">
       <div id="board"></div>
+      <div id="worm-map"></div>
     </div>
 
     <div id="helipadB">Lądowisko B</div>
@@ -177,24 +186,26 @@ body.shake {
 // --- ZMIENNE GLOBALNE ---
 const size = 10;
 const wormsCount = 12;
-let board = []; // Przechowuje obiekty: { el: DOMNode, worm: bool, visited: bool }
+let board = []; // Główna tablica stanu gry i referencji DOM planszy
+let debugCells = []; // Tablica referencji DOM dla mapy debugowania
 let playerPos = {x:0, y:0};
 let steps = 0;
 let gameOver = false;
-let audioCtx = null; // Context dla Web Audio API (sonar)
+let audioCtx = null;
 
 // --- INICJALIZACJA ---
 function showGame() {
   document.getElementById("game-area").style.display = "flex";
-  // Inicjalizacja audio przy pierwszej interakcji użytkownika
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 }
 
 function startGame() {
   const boardDiv = document.getElementById("board");
+  const wormMapDiv = document.getElementById("worm-map");
   
-  // Reset stanu
+  // Reset
   board = [];
+  debugCells = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
@@ -202,35 +213,41 @@ function startGame() {
   // UI Reset
   document.getElementById("helipadB").style.visibility = "hidden";
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
-  document.getElementById("sonarOutput").innerText = "";
-  document.body.className = ""; // usuń efekt trzęsienia
+  document.getElementById("sonarOutput").innerText = "Systemy aktywne.";
+  document.body.className = "";
 
   boardDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
+  wormMapDiv.innerHTML = "";
+  wormMapDiv.style.gridTemplateColumns = `repeat(${size},20px)`;
 
-  // Generowanie planszy z cache'owaniem DOM
+  // Generowanie planszy głównej ORAZ mapy debugowania
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
+      // 1. Główna komórka
       const cell = document.createElement("div");
       cell.className = "cell";
-      
-      // Bezpośrednie przypisanie zdarzenia (szybsze niż onclick w HTML)
       cell.onclick = () => moveTo(x, y);
-
       boardDiv.appendChild(cell);
 
-      // Zapisujemy referencję do DIVa w tablicy
       board[y][x] = { 
         worm: false, 
         visited: false, 
         el: cell 
       };
+
+      // 2. Komórka debugowania
+      const dbgCell = document.createElement("div");
+      dbgCell.className = "cell";
+      wormMapDiv.appendChild(dbgCell);
+      debugCells.push(dbgCell); // Zapisujemy w płaskiej tablicy dla szybkiego dostępu
     }
   }
 
   placeWorms();
-  drawBoard(); // Pierwsze rysowanie
+  drawBoard();
+  drawDebugMap(); // Rysuj mapę debugowania na starcie
 }
 
 function placeWorms() {
@@ -238,7 +255,6 @@ function placeWorms() {
   while (placed < wormsCount) {
     let x = Math.floor(Math.random() * size);
     let y = Math.floor(Math.random() * size);
-    // Unikaj startu i mety
     if ((x === 0 && y === 0) || (x === size-1 && y === size-1)) continue;
     
     if (!board[y][x].worm) {
@@ -249,7 +265,6 @@ function placeWorms() {
 }
 
 // --- LOGIKA RUCHU I GRY ---
-
 function isAdjacent(x, y) {
   return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) === 1;
 }
@@ -258,68 +273,58 @@ function moveTo(x, y) {
   if (gameOver || !isAdjacent(x, y)) return;
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
-  // 1. Ruch gracza
   playerPos = {x, y};
   steps++;
   board[y][x].visited = true;
 
-  // 2. Sprawdzenie, czy weszliśmy na czerwa (przed ruchem czerwi)
   if (board[y][x].worm) {
     killPlayer("Wszedłeś prosto w paszczę Czerwia!");
+    drawDebugMap(); // Aktualizuj debug mapę przy śmierci
     return;
   }
 
-  // 3. Hard Mode: Ruch czerwii
   if (document.getElementById("hardMode").checked) {
     moveWormsLogic();
-    // Po ruchu czerwi sprawdzamy, czy któryś nie wszedł na gracza
     if (board[playerPos.y][playerPos.x].worm) {
       killPlayer("Czerw Pustyni wynurzył się pod Tobą!");
+      drawDebugMap(); // Aktualizuj debug mapę przy śmierci
       return;
     }
   }
 
-  // 4. Sprawdzenie zwycięstwa
   if (x === size - 1 && y === size - 1) {
     winGame();
+    drawDebugMap();
     return;
   }
 
-  // 5. Aktualizacja widoku i sonaru
   drawBoard();
+  drawDebugMap(); // Aktualizuj mapę debugowania po każdym ruchu
   updateSonarAndStats();
 }
 
+// Logika Hard Mode (bez zmian - czerwie nie nachodzą na siebie)
 function moveWormsLogic() {
-  // Znajdź wszystkie czerwie
   let worms = [];
   for(let y=0; y<size; y++) {
     for(let x=0; x<size; x++) {
       if(board[y][x].worm) {
         worms.push({x, y});
-        board[y][x].worm = false; // Usuwamy ze starej pozycji
+        board[y][x].worm = false;
       }
     }
   }
-
-  // Przetasuj tablicę czerwi (żeby nie ruszały się zawsze w tej samej kolejności)
   worms.sort(() => Math.random() - 0.5);
 
   worms.forEach(w => {
     const dirs = [[0,0], [0,1], [0,-1], [1,0], [-1,0]];
     let moved = false;
-    
-    // Spróbuj znaleźć legalny ruch (max 5 prób losowych)
     for(let i=0; i<5; i++) {
         const d = dirs[Math.floor(Math.random() * dirs.length)];
         const nx = w.x + d[0];
         const ny = w.y + d[1];
-
-        // Warunki: wewnątrz planszy, nie start/meta
         if (nx >= 0 && nx < size && ny >= 0 && ny < size && 
             !(nx === 0 && ny === 0) && !(nx === size-1 && ny === size-1)) {
-            
-            // KLUCZOWE: Nie wchodź na innego czerwia
             if(!board[ny][nx].worm) {
                 board[ny][nx].worm = true;
                 moved = true;
@@ -327,41 +332,61 @@ function moveWormsLogic() {
             }
         }
     }
-    // Jeśli nie udało się ruszyć (tłok), zostań w miejscu (ew. nadpisz, ale 'moved' obsłużyło 99% przypadków)
     if(!moved) board[w.y][w.x].worm = true;
   });
 }
 
-// --- OPTYMALIZACJA WYŚWIETLANIA ---
-
+// --- RENDEROWANIE (Główna plansza - zoptymalizowana) ---
 function drawBoard() {
-  // Pętla po całej planszy, ale operuje na bezpośrednich referencjach DOM (bardzo szybkie)
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const cellData = board[y][x];
       const el = cellData.el;
-
-      // Reset
       el.textContent = "";
       el.className = "cell";
-
-      // Klasy bazowe
       if (cellData.visited) el.classList.add("visited");
       if (x === 0 && y === 0) { el.classList.add("start"); el.textContent = "A"; }
       if (x === size - 1 && y === size - 1) { el.classList.add("goal"); el.textContent = "B"; }
 
-      // Gracz (nadpisuje resztę)
       if (x === playerPos.x && y === playerPos.y) {
         el.textContent = "👣";
         el.style.color = "#fff";
       } else {
-        el.style.color = ""; // reset koloru
+        el.style.color = "";
       }
     }
   }
 }
 
-function revealWorms() {
+// --- RENDEROWANIE (Mapa Debugowania - NOWE) ---
+function drawDebugMap() {
+    for(let y=0; y<size; y++) {
+        for(let x=0; x<size; x++) {
+            // Wyliczamy indeks w płaskiej tablicy debugCells
+            const index = y * size + x;
+            const el = debugCells[index];
+            const gameData = board[y][x];
+
+            el.className = "cell";
+            el.textContent = "";
+
+            if(gameData.worm) {
+                el.classList.add("worm");
+                el.textContent = "🪱";
+            }
+            
+            // Opcjonalnie: pokaż też gracza na minimapie dla ułatwienia testów
+            if(x === playerPos.x && y === playerPos.y) {
+                 el.textContent = "👣";
+                 el.style.color = "white";
+            } else {
+                 el.style.color = "";
+            }
+        }
+    }
+}
+
+function revealWormsOnMainBoard() {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       if (board[y][x].worm) {
@@ -373,10 +398,8 @@ function revealWorms() {
   }
 }
 
-// --- SONAR I AUDIO ---
-
+// --- SONAR I AUDIO (bez zmian) ---
 function updateSonarAndStats() {
-  // 1. Oblicz odległość do najbliższego czerwia
   let minDistance = 999;
   for(let y=0; y<size; y++) {
     for(let x=0; x<size; x++) {
@@ -387,7 +410,6 @@ function updateSonarAndStats() {
     }
   }
 
-  // 2. UI Tekstowe i Audio
   const sonarDiv = document.getElementById("sonarOutput");
   let score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
@@ -395,19 +417,19 @@ function updateSonarAndStats() {
   if (minDistance <= 1) {
     sonarDiv.innerText = "‼️ WYKRYTO RUCH PIONOWY! (Dystans: 1)";
     sonarDiv.style.opacity = 1;
-    playSonarSound(800, "sawtooth", 0.3); // Wysoki, ostry dźwięk
+    playSonarSound(800, "sawtooth", 0.3);
     if("vibrate" in navigator) navigator.vibrate(200); 
   } 
   else if (minDistance === 2) {
     sonarDiv.innerText = "⚠️ Silne wstrząsy... (Dystans: 2)";
     sonarDiv.style.opacity = 0.8;
-    playSonarSound(400, "square", 0.2); // Średni dźwięk
+    playSonarSound(400, "square", 0.2);
     if("vibrate" in navigator) navigator.vibrate(50);
   } 
   else if (minDistance === 3) {
     sonarDiv.innerText = "🔊 Słyszysz szum piasku (Dystans: 3)";
     sonarDiv.style.opacity = 0.5;
-    playSonarSound(150, "sine", 0.1); // Niski, cichy dźwięk
+    playSonarSound(150, "sine", 0.1);
   } 
   else {
     sonarDiv.innerText = "Stan stabilny.";
@@ -415,54 +437,29 @@ function updateSonarAndStats() {
   }
 }
 
-// Syntetyzator dźwięku (Web Audio API) - nie wymaga plików
 function playSonarSound(freq, type, vol) {
   if (!audioCtx) return;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-
   osc.type = type;
   osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  // Efekt opadania dźwięku (ping)
   osc.frequency.exponentialRampToValueAtTime(freq * 0.5, audioCtx.currentTime + 0.3);
-
   gain.gain.setValueAtTime(vol, audioCtx.currentTime);
   gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-
   osc.start();
   osc.stop(audioCtx.currentTime + 0.3);
 }
 
 // --- KONIEC GRY ---
-
 function killPlayer(msg) {
   gameOver = true;
-  revealWorms();
+  revealWormsOnMainBoard();
   document.body.classList.add("shake");
   document.getElementById("sonarOutput").innerText = "💀 " + msg;
-  playSonarSound(100, "sawtooth", 0.8); // Dźwięk śmierci
+  playSonarSound(100, "sawtooth", 0.8);
 }
 
 function winGame() {
-  gameOver = true;
-  let score = Math.max(0, 100 - steps * 2);
-  document.getElementById("helipadB").style.visibility = "visible";
-  document.getElementById("sonarOutput").innerText = `🏆 CEL OSIĄGNIĘTY! Wynik: ${score}`;
-  document.getElementById("sonarOutput").style.color = "#e6c47a";
-  // Fanfara (prosta sekwencja)
-  setTimeout(() => playSonarSound(400, "sine", 0.2), 0);
-  setTimeout(() => playSonarSound(500, "sine", 0.2), 200);
-  setTimeout(() => playSonarSound(800, "sine", 0.4), 400);
-}
-
-// --- AUDIO BUTTON ---
-function playNarrator() {
-  const audio = new Audio("Saper_Diuny.mp3");
-  audio.play().catch(err => alert("Brak pliku Saper_Diuny.mp3. Gra działa, ale bez muzyki tła."));
-}
-</script>
-</body>
-</html>
+  gameOver = true

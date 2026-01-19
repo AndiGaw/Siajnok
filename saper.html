@@ -2,420 +2,452 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – pełny klimat</title>
+<title>Przeprawa przez Arrakis v2.0</title>
 
 <style>
+/* ===== STYLE BAZOWE ===== */
 html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-  background: #000;
-  color:#e6c47a;
-  font-family: "Georgia", serif;
-  text-align:center;
-  overflow-y: auto;
-  position:relative;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #050505;
+  color: #e6c47a;
+  font-family: "Segoe UI", "Georgia", serif;
+  overflow: hidden; /* Brak paska przewijania */
+  user-select: none;
 }
 
-/* ====== EFEKTY TŁA ====== */
-body.shake {
-  animation: shake 0.1s infinite;
-}
-
+/* Animacja trzęsienia (używana przy śmierci/ruchu) */
 @keyframes shake {
-  0% { transform: translate(1px, 1px); }
-  25% { transform: translate(-1px, -1px); }
-  50% { transform: translate(1px, -1px); }
-  75% { transform: translate(-1px, 1px); }
-  100% { transform: translate(0,0); }
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
-.sand {
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(230,196,122,0.2),
-      rgba(230,196,122,0.2) 2px,
-      rgba(0,0,0,0) 6px
-    );
-  animation: drift 60s linear infinite;
-  pointer-events:none;
-  z-index:1;
+.shake-effect {
+  animation: shake 0.5s;
 }
 
-@keyframes drift {
-  from { background-position:0 0; }
-  to { background-position:1000px 1000px; }
+/* Tło piasku */
+.sand-bg {
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(230, 196, 122, 0.1), transparent 80%),
+    repeating-linear-gradient(45deg, rgba(200, 150, 50, 0.05) 0px, rgba(0,0,0,0) 2px);
+  z-index: -1;
+  pointer-events: none;
 }
 
-/* ====== GŁÓWNY LAYOUT ====== */
-
+/* ===== UI ===== */
 .container {
-  position:relative;
-  z-index:2;
-  padding:20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 15px;
 }
 
-/* ----- STEROWANIE W KLIMACIE DIUNY ----- */
-#controls {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:12px;
-  margin-bottom:20px;
+h1 { margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #e6c47a; }
+
+.controls {
+  display: flex;
+  gap: 15px;
+  background: rgba(20, 20, 20, 0.9);
+  padding: 15px;
+  border: 1px solid #444;
+  border-radius: 8px;
 }
 
-#controls button {
-  font-size:1.2em;
-  padding:10px 20px;
-  background:#111;
-  color:#e6c47a;
-  border:2px solid #e6c47a;
-  border-radius:8px;
-  cursor:pointer;
-  box-shadow:0 0 10px rgba(230,196,122,0.5);
-  transition:all 0.2s;
-  width:320px;
+button {
+  background: #222;
+  color: #e6c47a;
+  border: 1px solid #e6c47a;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+button:hover { background: #e6c47a; color: #000; }
+
+.status-bar {
+  display: flex;
+  gap: 20px;
+  font-size: 1.1em;
+  min-height: 1.5em;
 }
 
-#controls button:hover {
-  background:#222;
-  box-shadow:0 0 20px rgba(230,196,122,0.8);
+.sonar-text {
+  color: #ff4444;
+  font-weight: bold;
+  text-shadow: 0 0 5px red;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
-#controls label {
-  font-size:1em;
-  cursor:pointer;
+/* ===== PLANSZA ===== */
+#game-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  opacity: 0.3; /* Przygaszone przed startem */
+  transition: opacity 0.5s;
 }
 
-/* ----- UKŁAD PLANSZY Z LĄDOWISKIEM ----- */
-#game-area { display: none; }
-
-#game-area {
-  display: none;                 /* domyślnie ukryte */
-  justify-content:center;
-  align-items:flex-start;
-  gap: 30px;
-  margin-top:20px;
+.helipad {
+  width: 60px;
+  height: 60px;
+  border: 2px dashed #e6c47a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #666;
 }
-    
-/* Lądowisko A – statyczne i bliżej planszy */
-#helipadA {
-  width:120px;
-  height:120px;
-  background:#333;
-  border:3px solid #e6c47a;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  border-radius:10px;
-
-  margin-right:20px;   /* normalny odstęp – brak nachodzenia */
-  margin-top:20px;     /* wyrównanie z planszą */
-}
-
-/* Plansza */
-#board-wrapper {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
+.helipad.active { color: #e6c47a; border-style: solid; box-shadow: 0 0 15px #e6c47a; }
 
 #board {
-  display: inline-grid;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
+  gap: 4px;
+  background: rgba(0,0,0,0.5);
+  padding: 5px;
+  border: 1px solid #333;
 }
-  
-#worm-map {
-  margin-top:15px;
-  display:inline-grid;
-  gap:2px;
-}
-
-/* ----- KOMÓRKI ----- */
 
 .cell {
   width: 50px;
   height: 50px;
-  background: #222;
-  border: 2px solid #e6c47a;
+  background: #1a1a1a;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.5em;
   cursor: pointer;
-  font-weight: bold;
-  font-size: 1.2em;
+  transition: background 0.2s;
+  border-radius: 4px;
 }
 
-#worm-map .cell {
-  width:20px;
-  height:20px;
-  font-size:0.8em;
-}
+.cell:hover { background: #2a2a2a; }
+.cell.visited { background: #332a1a; border: 1px solid #554422; }
+.cell.player { background: #e6c47a; color: #000; box-shadow: 0 0 10px #e6c47a; }
+.cell.worm { background: #800; color: #fff; }
+.cell.start { border: 2px solid green; }
+.cell.goal { border: 2px solid blue; }
 
-.visited { background: #444; }
-.start   { background: darkgreen; }
-.goal    { background: darkblue; }
-.worm    { background: darkred; color:white; }
-
-input, button {
-  background:black;
-  color:#e6c47a;
-  border:1px solid #e6c47a;
-  padding:8px;
-  margin:5px;
-  cursor:pointer;
+/* ===== OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.3s;
 }
-
-#audioInfo, #stats {
-  margin-top:10px;
-  font-size:0.9em;
-}
+#overlay.show { visibility: visible; opacity: 1; }
+#overlay h2 { font-size: 3em; margin-bottom: 20px; }
 </style>
 </head>
-
 <body>
 
-<div class="sand"></div>
+<div class="sand-bg"></div>
 
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-
-  <p>Przejdź z punktu <b>A</b> do <b>B</b> unikając Czerwii Pustyni!</p>
-
-  <div id="controls">
-    <button onclick="playNarrator()">🎙️ Narrator</button>
-    <button onclick="showGame(); startGame()">🏜️ Wyrusz w drogę przez piaski</button>
-    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+  
+  <div class="controls">
+    <button onclick="initGame()">🔄 Nowa Gra</button>
+    <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+      <input type="checkbox" id="hardMode"> Hard Mode (Ruchome czerwie)
+    </label>
+    <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+      <input type="checkbox" id="cheatMode" onchange="toggleCheat()"> 🗺️ Mapa (Cheat)
+    </label>
   </div>
 
-  <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
-  <div id="stats">Kroki: 0 | Punktacja: 0</div>
+  <div class="status-bar">
+    <span>Kroki: <b id="stepCount">0</b></span>
+    <span id="sonarMsg" class="sonar-text">⚠️ WYKRYTO DRGANIA ⚠️</span>
+  </div>
 
-  <div id="game-area">
-
-  <div class="helipadA">Lądowisko A</div>
-
-  <div id="board-wrapper">
+  <div id="game-wrapper">
+    <div class="helipad active">A</div>
     <div id="board"></div>
-    <div id="worm-map"></div>
+    <div class="helipad" id="goalPad">B</div>
   </div>
-
-  <div class="helipadA">Lądowisko B</div>
-
 </div>
 
+<div id="overlay">
+  <h2 id="endTitle">Koniec Gry</h2>
+  <p id="endDesc">Opis</p>
+  <button onclick="document.getElementById('overlay').classList.remove('show'); initGame()" style="font-size:1.5em; margin-top:20px;">Zagraj ponownie</button>
 </div>
 
 <script>
-let size = 10;
-let worms = 12;
+// --- KONFIGURACJA ---
+const SIZE = 10;
+const WORM_COUNT = 12;
 
-let board = [];
-let gameOver = false;
-let playerPos = {x:0, y:0};
+// --- STAN GRY ---
+let boardState = []; // Tablica 2D przechowująca obiekty { worm, visited, element }
+let player = { x: 0, y: 0 };
 let steps = 0;
-let score = 0;
+let isGameOver = false;
 
-/* ---- AUDIO ---- */
-let audioCtx = null;
-let oscillator = null;
-let gainNode = null;
-
-function initSound() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  oscillator = audioCtx.createOscillator();
-  gainNode = audioCtx.createGain();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(50, audioCtx.currentTime);
-  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  oscillator.start();
-}
-
-function updateSoundAndShake() {
-  if (!audioCtx) return;
-
-  let minDist = Infinity;
-
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
-        let dist = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-        if (dist < minDist) minDist = dist;
-      }
-    }
-  }
-
-  if (minDist === Infinity) minDist = size;
-
-  let freq = 60 + (size - minDist) * 20;
-  let volume = Math.max(0, (size - minDist) / size);
-  oscillator.frequency.setTargetAtTime(freq, audioCtx.currentTime, 0.1);
-  gainNode.gain.setTargetAtTime(volume * 0.35, audioCtx.currentTime, 0.1);
-
-  if (minDist <= 3 && !gameOver)
-    document.body.classList.add("shake");
-  else
-    document.body.classList.remove("shake");
-}
-
-function stopSound() {
-  if (gainNode)
-    gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.2);
-}
-
-function showGame() {
-  document.getElementById("game-area").style.display = "flex";
-}
+// --- INICJALIZACJA ---
+function initGame() {
+  const boardEl = document.getElementById("board");
+  boardEl.innerHTML = "";
+  boardState = [];
   
-function startGame() {
-  const boardDiv = document.getElementById("board");
-  const wormDiv = document.getElementById("worm-map");
-
-  board = [];
-  gameOver = false;
-  playerPos = {x:0, y:0};
+  // Reset UI
+  document.getElementById("game-wrapper").style.opacity = "1";
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("goalPad").classList.remove("active");
+  document.getElementById("stepCount").innerText = "0";
+  updateSonar(false);
+  
   steps = 0;
-  score = 0;
+  isGameOver = false;
+  player = { x: 0, y: 0 };
 
-  document.getElementById("stats").innerText = `Kroki: 0 | Punktacja: 0`;
-
-  boardDiv.innerHTML = "";
-  wormDiv.innerHTML = "";
-
-  boardDiv.style.gridTemplateColumns = `repeat(${size}, 50px)`;
-  wormDiv.style.gridTemplateColumns = `repeat(${size}, 20px)`;
-
-  for (let y=0;y<size;y++) {
-    board[y]=[];
-    for (let x=0;x<size;x++) {
-      board[y][x]={worm:false, visited:false};
-
+  // Generowanie planszy i cache'owanie elementów DOM
+  for (let y = 0; y < SIZE; y++) {
+    const row = [];
+    for (let x = 0; x < SIZE; x++) {
       const cell = document.createElement("div");
-      cell.className="cell";
-      cell.dataset.x=x;
-      cell.dataset.y=y;
-      cell.onclick=()=>moveTo(x,y);
-      boardDiv.appendChild(cell);
+      cell.className = "cell";
+      if (x === 0 && y === 0) cell.classList.add("start");
+      if (x === SIZE - 1 && y === SIZE - 1) cell.classList.add("goal");
+      
+      // Event Listener (zamiast inline onclick)
+      cell.addEventListener("click", () => handleMove(x, y));
 
-      const wcell = document.createElement("div");
-      wcell.className="cell";
-      wcell.dataset.x=x;
-      wcell.dataset.y=y;
-      wormDiv.appendChild(wcell);
+      boardEl.appendChild(cell);
+      
+      // Zapisujemy stan logiczny I referencję do DOM w jednym obiekcie
+      row.push({
+        x, y,
+        worm: false,
+        visited: false,
+        element: cell // <-- TO JEST KLUCZ DO WYDAJNOŚCI
+      });
     }
+    boardState.push(row);
   }
 
   placeWorms();
-  drawBoard();
-  updateWormMap();
-
-  if (!audioCtx) initSound();
+  render();
 }
 
+// --- LOGIKA CZERWI ---
 function placeWorms() {
-  let placed=0;
-  while(placed<worms) {
-    let x=Math.floor(Math.random()*size);
-    let y=Math.floor(Math.random()*size);
-    if((x===0&&y===0)||(x===size-1&&y===size-1)) continue;
-    if(!board[y][x].worm){ board[y][x].worm=true; placed++; }
+  let placed = 0;
+  while (placed < WORM_COUNT) {
+    const rx = Math.floor(Math.random() * SIZE);
+    const ry = Math.floor(Math.random() * SIZE);
+    // Nie stawiaj na starcie ani na mecie
+    if ((rx === 0 && ry === 0) || (rx === SIZE-1 && ry === SIZE-1)) continue;
+    
+    if (!boardState[ry][rx].worm) {
+      boardState[ry][rx].worm = true;
+      placed++;
+    }
   }
 }
 
-function isAdjacent(x,y){
-  return Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y) ===1;
+function moveWorms() {
+  // Kopia lokalizacji czerwi
+  const currentWorms = [];
+  for(let y=0; y<SIZE; y++) {
+    for(let x=0; x<SIZE; x++) {
+      if(boardState[y][x].worm) {
+        currentWorms.push({x, y});
+        boardState[y][x].worm = false; // Usuwamy stare
+      }
+    }
+  }
+
+  // Przesuwamy każdego
+  currentWorms.forEach(w => {
+    const dirs = [[0,0], [0,1], [0,-1], [1,0], [-1,0]];
+    // Próbuj znaleźć wolne miejsce (3 próby losowe)
+    let moved = false;
+    for(let i=0; i<3; i++) {
+        const d = dirs[Math.floor(Math.random() * dirs.length)];
+        const nx = w.x + d[0];
+        const ny = w.y + d[1];
+
+        if (nx >= 0 && nx < SIZE && ny >= 0 && ny < SIZE && 
+            !(nx === 0 && ny === 0) && !(nx === SIZE-1 && ny === SIZE-1)) { // Nie wchodź na start/meta
+            
+            // Unikaj nadpisywania innego czerwia w tym samym ruchu (prosta heurystyka)
+            if(!boardState[ny][nx].worm) {
+                boardState[ny][nx].worm = true;
+                moved = true;
+                break;
+            }
+        }
+    }
+    // Jeśli nie udało się ruszyć (np. tłok), zostań w miejscu (lub nadpisz jeśli musisz)
+    if(!moved) boardState[w.y][w.x].worm = true;
+  });
 }
 
-function moveTo(x,y){
-  if(gameOver) return;
-  if(!isAdjacent(x,y)) return;
+// --- RUCH GRACZA ---
+function handleMove(x, y) {
+  if (isGameOver) return;
+  
+  // Sprawdzenie sąsiedztwa (Manhattan distance = 1)
+  const dist = Math.abs(player.x - x) + Math.abs(player.y - y);
+  if (dist !== 1) return;
 
-  playerPos={x,y};
-  if(!board[y][x].visited) steps++;
-  board[y][x].visited=true;
+  // Logika ruchu
+  player = { x, y };
+  steps++;
+  boardState[y][x].visited = true;
+  document.getElementById("stepCount").innerText = steps;
 
-  updateSoundAndShake();
-  document.getElementById("stats").innerText =
-    `Kroki: ${steps} | Punktacja: ${score}`;
-
-  if(board[y][x].worm){
-    revealWorms();
-    stopSound();
-    alert("Pożarł Cię Czerw Pustyni! 💀");
-    gameOver=true;
+  // 1. Sprawdź śmierć
+  if (boardState[y][x].worm) {
+    endGame(false);
     return;
   }
 
-  if(x===size-1 && y===size-1){
-    stopSound();
-    score = Math.max(0, 100 - steps*2);
-    alert(`Dotarłeś do celu! Punkty: ${score}`);
-    gameOver=true;
+  // 2. Hard Mode
+  if (document.getElementById("hardMode").checked) {
+    moveWorms();
+    // Po ruchu czerwi, sprawdź czy czer wlazł na gracza
+    if (boardState[player.y][player.x].worm) {
+        endGame(false);
+        return;
+    }
+  }
+
+  // 3. Sprawdź wygraną
+  if (x === SIZE - 1 && y === SIZE - 1) {
+    endGame(true);
     return;
   }
 
-  drawBoard();
+  render();
+  checkSonar();
 }
 
-function revealWorms() {
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      if(board[y][x].worm){
-        const div=getCell(x,y);
-        div.classList.add("worm");
-        div.textContent="🪱";
+// --- RENDEROWANIE ---
+function render() {
+  const cheat = document.getElementById("cheatMode").checked;
+
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const cellData = boardState[y][x];
+      const el = cellData.element;
+
+      // Reset klas
+      el.className = "cell"; 
+      el.textContent = "";
+
+      if (x === 0 && y === 0) { el.classList.add("start"); el.textContent = "A"; }
+      else if (x === SIZE-1 && y === SIZE-1) { el.classList.add("goal"); el.textContent = "B"; }
+
+      if (cellData.visited) el.classList.add("visited");
+
+      // Gracz
+      if (x === player.x && y === player.y) {
+        el.classList.add("player");
+        el.textContent = "👣";
+      }
+
+      // Cheat mode / Debug
+      if (cellData.worm && cheat) {
+        el.textContent = "🪱";
+        el.style.opacity = "0.5";
       }
     }
   }
 }
 
-function drawBoard(){
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      const div=getCell(x,y);
-      div.className="cell";
-      div.textContent="";
-
-      if(board[y][x].visited) div.classList.add("visited");
-
-      if(x===0 && y===0){
-        div.classList.add("start");
-        div.textContent="A";
+// --- DODATKI (Sonar & EndGame) ---
+function checkSonar() {
+  let minDistance = Infinity;
+  
+  // Szukamy najbliższego czerwia
+  for(let y=0; y<SIZE; y++) {
+    for(let x=0; x<SIZE; x++) {
+      if(boardState[y][x].worm) {
+        const dist = Math.abs(player.x - x) + Math.abs(player.y - y);
+        if(dist < minDistance) minDistance = dist;
       }
-
-      if(x===size-1 && y===size-1){
-        div.classList.add("goal");
-        div.textContent="B";
-      }
-
-      if(x===playerPos.x && y===playerPos.y)
-        div.textContent="👣";
     }
   }
+
+  // Jeśli czer jest w odległości 1 lub 2 pól
+  updateSonar(minDistance <= 2);
 }
 
-function getCell(x,y){
-  return document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+function updateSonar(isDanger) {
+  const el = document.getElementById("sonarMsg");
+  el.style.opacity = isDanger ? "1" : "0";
+  if(isDanger && "vibrate" in navigator) navigator.vibrate(50); // Wibracja na telefonie
 }
 
-function playNarrator(){
-  alert("Narrator Diuny: Witaj podróżniku na Arrakis...");
+function toggleCheat() {
+  render();
 }
 
-document.addEventListener("click", ()=>{
-  if(audioCtx && audioCtx.state==="suspended")
-    audioCtx.resume();
-});
+function endGame(win) {
+  isGameOver = true;
+  
+  // Odsłoń wszystkie czerwie
+  for(let y=0; y<SIZE; y++) {
+    for(let x=0; x<SIZE; x++) {
+      if(boardState[y][x].worm) {
+        const el = boardState[y][x].element;
+        el.classList.add("worm");
+        el.textContent = "🪱";
+      }
+    }
+  }
 
-// window.onload=()=>{ startGame(); }; //
+  // Overlay
+  const overlay = document.getElementById("overlay");
+  const title = document.getElementById("endTitle");
+  const desc = document.getElementById("endDesc");
+
+  if (win) {
+    title.innerText = "ZWYCIĘSTWO!";
+    title.style.color = "#e6c47a";
+    desc.innerText = `Dotarłeś do lądowiska B w ${steps} krokach.`;
+    document.getElementById("goalPad").classList.add("active");
+  } else {
+    document.body.classList.add("shake-effect");
+    setTimeout(() => document.body.classList.remove("shake-effect"), 500);
+    
+    title.innerText = "POŻARTY...";
+    title.style.color = "#800";
+    desc.innerText = "Shai-Hulud upomniał się o Ciebie.";
+  }
+  
+  setTimeout(() => overlay.classList.add("show"), 800);
+}
+
+// Start
+initGame();
+
 </script>
-
 </body>
 </html>

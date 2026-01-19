@@ -172,7 +172,6 @@ body.shake {
   <div id="audioInfo">Kliknij gdziekolwiek aby aktywować sonar 🔊</div>
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
-  <!-- STAŁY LAYOUT -->
   <div id="game-area">
     <div id="helipadA">Lądowisko A</div>
 
@@ -292,7 +291,12 @@ function updateWormMap() {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      cell.textContent = board[y][x].worm ? "🪱" : "";
+      // Zmiana: Jeśli to pozycja gracza, pokaż stopę, w przeciwnym razie sprawdź czy jest czerw
+      if (x === playerPos.x && y === playerPos.y) {
+          cell.textContent = "👣";
+      } else {
+          cell.textContent = board[y][x].worm ? "🪱" : "";
+      }
     }
   }
 }

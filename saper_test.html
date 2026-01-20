@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Narrator Toggle</title>
+<title>Przeprawa przez Arrakis – Piaskowy Szum</title>
 
 <style>
 html, body {
@@ -175,7 +175,7 @@ html, body {
 
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-  <p>Częstotliwość szumu rośnie wraz ze zbliżaniem się do Czerwia.</p>
+  <p>Nasłuchuj piasku. Syczenie oznacza śmierć.</p>
 
   <div id="controls">
     <button id="narratorBtn" onclick="toggleNarrator()">🎙️ Narrator (Start)</button>
@@ -215,18 +215,14 @@ let narratorAudio = null;
 function toggleNarrator() {
   const btn = document.getElementById("narratorBtn");
   
-  // Inicjalizacja przy pierwszym kliknięciu
   if (!narratorAudio) {
     narratorAudio = new Audio("Saper_Diuny.mp3");
-    
-    // Gdy nagranie się skończy, zresetuj przycisk
     narratorAudio.addEventListener('ended', () => {
        btn.innerText = "🎙️ Narrator (Start)";
        btn.classList.remove("active");
     });
   }
 
-  // Logika Start/Stop
   if (narratorAudio.paused) {
     narratorAudio.play().then(() => {
       btn.innerText = "⏹️ Narrator (Stop)";
@@ -237,16 +233,17 @@ function toggleNarrator() {
     });
   } else {
     narratorAudio.pause();
-    narratorAudio.currentTime = 0; // Przewiń do początku
+    narratorAudio.currentTime = 0;
     btn.innerText = "🎙️ Narrator (Start)";
     btn.classList.remove("active");
   }
 }
 
-// --- SYSTEM AUDIO (DRONE) ---
+// --- NOWY SYSTEM AUDIO (SZUM PIASKU) ---
 let audioCtx = null;
-let bgOsc = null;  
-let bgGain = null; 
+let noiseSource = null; // Źródło szumu (bufor)
+let noiseFilter = null; // Filtr (LowPass) - to on robi efekt "piasku"
+let noiseGain = null;   // Głośność
 
 function initAudioContext() {
   if (!audioCtx) {
@@ -257,61 +254,97 @@ function initAudioContext() {
   }
 }
 
+// Funkcja generująca bufor białego szumu (statyki)
+function createNoiseBuffer() {
+  const bufferSize = audioCtx.sampleRate * 2; // 2 sekundy bufora
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+
+  for (let i = 0; i < bufferSize; i++) {
+    // Generujemy losowe wartości -1 do 1 (biały szum)
+    data[i] = Math.random() * 2 - 1;
+  }
+  return buffer;
+}
+
 function startBackgroundDrone() {
   initAudioContext();
-  if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
+  if (noiseSource) { try { noiseSource.stop(); } catch(e){} noiseSource = null; }
 
-  bgOsc = audioCtx.createOscillator();
-  bgGain = audioCtx.createGain();
+  // 1. Stwórz biały szum
+  noiseSource = audioCtx.createBufferSource();
+  noiseSource.buffer = createNoiseBuffer();
+  noiseSource.loop = true;
 
-  bgOsc.type = 'sawtooth'; 
+  // 2. Stwórz filtr dolnoprzepustowy (Lowpass)
+  // To on zmienia "statykę" w "wiatr/piasek"
+  noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 150; // Startujemy nisko (tłumienie)
+
+  // 3. Wzmocnienie
+  noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.05;
+
+  // 4. Połącz: Szum -> Filtr -> Gain -> Głośniki
+  noiseSource.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
   
-  bgOsc.frequency.value = 50; 
-  bgGain.gain.value = 0.03;   
-
-  bgOsc.connect(bgGain);
-  bgGain.connect(audioCtx.destination);
-  
-  bgOsc.start();
+  noiseSource.start();
 }
 
 function stopBackgroundDrone() {
-  if (bgOsc) {
+  if (noiseSource) {
     const now = audioCtx.currentTime;
-    bgGain.gain.exponentialRampToValueAtTime(0.001, now + 1);
-    bgOsc.stop(now + 1);
-    bgOsc = null;
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5); // Dłuższe wygaszanie (wiatr cichnie)
+    noiseSource.stop(now + 1.5);
+    noiseSource = null;
   }
 }
 
-// --- 5 POZIOMÓW AUDIO ---
+// --- 5 POZIOMÓW AUDIO (Modyfikacja Filtra) ---
 function updateDroneSound(distance) {
-  if (!bgOsc || !audioCtx) return;
+  if (!noiseFilter || !audioCtx) return;
 
   const now = audioCtx.currentTime;
   let targetFreq, targetVol;
 
+  // Zamiast zmieniać wysokość tonu (pitch), zmieniamy "otwarcie" filtra.
+  // Im bliżej, tym więcej wysokich tonów (syczenia) przepuszczamy.
+
   if (distance === 0) {
-    targetFreq = 800; targetVol = 0; 
+    // 0 PÓL: Kolizja - Ostry syk, jak lawina tuż obok
+    targetFreq = 3000; 
+    targetVol = 0; // Wyciszamy tło dla efektu śmierci
   } 
   else if (distance === 1) {
-    targetFreq = 500; targetVol = 0.15; 
+    // 1 POLE: Zagrożenie - Wyraźny szum przesypującego się piasku (wyższe pasmo)
+    targetFreq = 1200; 
+    targetVol = 0.50; 
   } 
   else if (distance === 2) {
-    targetFreq = 220; targetVol = 0.10;
+    // 2 POLA: Ostrzeżenie - Średni wiatr, słychać ruch
+    targetFreq = 600; 
+    targetVol = 0.25;
   } 
   else if (distance === 3) {
-    targetFreq = 100; targetVol = 0.06;
+    // 3 POLA: Wykrycie - Głęboki pomruk wiatru
+    targetFreq = 300; 
+    targetVol = 0.15;
   } 
   else {
-    targetFreq = 50; targetVol = 0.03;
+    // 3+ PÓL: Bezpiecznie - Bardzo stłumione, dalekie wydmy
+    targetFreq = 120; 
+    targetVol = 0.08;
   }
 
-  bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
-  bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
+  // Płynna zmiana parametrów filtra i głośności
+  noiseFilter.frequency.exponentialRampToValueAtTime(targetFreq, now + 0.5);
+  noiseGain.gain.linearRampToValueAtTime(targetVol, now + 0.5);
 }
 
-// --- LOGIKA GRY ---
+// --- LOGIKA GRY (BEZ ZMIAN) ---
 
 function showGame() {
   document.getElementById("game-area").style.display = "flex";
@@ -472,8 +505,6 @@ function handleDeath() {
   gameOver = true;
 }
 
-// === SONAR I EFEKTY ===
-
 function checkProximity(px, py) {
   let minDistance = 999;
   for(let y=0; y<size; y++) {
@@ -509,6 +540,32 @@ function playTone(freq, type, vol) {
   gain.connect(audioCtx.destination);
   osc.start();
   osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function drawBoard() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      cell.className="cell";
+      cell.textContent="";
+      if(board[y][x].visited) cell.classList.add("visited");
+      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) cell.textContent="👣";
+    }
+  }
+}
+
+function revealWorms() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cell.classList.add("worm");
+        cell.textContent="🪱";
+      }
+    }
+  }
 }
 </script>
 </body>

@@ -234,6 +234,9 @@ function startGame() {
   steps = 0;
   score = 0;
   
+  // Reset tekstu statystyk
+  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
+  
   // Reset stylów drżenia
   document.body.className = "";
 
@@ -343,6 +346,11 @@ function moveTo(x,y) {
   steps++;
   board[y][x].visited = true;
 
+  // --- ZMIANA: Obliczanie i aktualizacja punktów na żywo ---
+  score = Math.max(0, 100 - steps * 2);
+  document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+  // ---------------------------------------------------------
+
   // 1. Sprawdź czy zjedzony (Distance = 0)
   if (board[y][x].worm) {
     applyFeedback(0); // Silne wstrząsy
@@ -369,7 +377,7 @@ function moveTo(x,y) {
   checkProximity(x, y);
 
   if (x===size-1 && y===size-1) {
-    score = Math.max(0, 100-steps*2);
+    // Score już obliczony wyżej
     alert(`Dotarłeś do celu! Punkty: ${score}`);
     document.getElementById("helipadB").style.visibility = "visible";
     gameOver = true;

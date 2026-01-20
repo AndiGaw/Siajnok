@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Stabilna Wersja</title>
+<title>Przeprawa przez Arrakis – 5 Poziomów Zagrożenia</title>
 
 <style>
 html, body {
@@ -13,17 +13,66 @@ html, body {
   color: #e6c47a;
   font-family: "Georgia", serif;
   overflow-x: hidden;
-  user-select: none;
 }
 
-/* ===== UI & LAYOUT ===== */
+/* ===== ANIMACJE DRŻENIA (5 POZIOMÓW) ===== */
+
+/* Dystans 3: Mikro-drgania (subtelny niepokój) */
+@keyframes shake-micro {
+  0%, 100% { transform: translate(0,0); }
+  50% { transform: translate(0.5px, 0.5px); }
+}
+.shake-dist-3 { animation: shake-micro 0.1s infinite; }
+
+/* Dystans 2: Lekkie drgania (ostrzeżenie) */
+@keyframes shake-light {
+  0%, 100% { transform: translate(0,0); }
+  25% { transform: translate(1px, 1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+.shake-dist-2 { animation: shake-light 0.5s infinite; }
+
+/* Dystans 1: Silne drgania (zagrożenie) */
+@keyframes shake-strong {
+  0%, 100% { transform: translate(0,0); }
+  20% { transform: translate(-2px, 0); }
+  40% { transform: translate(2px, 0); }
+  60% { transform: translate(-2px, 0); }
+  80% { transform: translate(2px, 0); }
+}
+.shake-dist-1 { animation: shake-strong 0.2s infinite; }
+
+/* Dystans 0: Kolizja (śmierć) */
+@keyframes shake-violent {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-4px, 4px) rotate(-2deg); }
+  50% { transform: translate(4px, -4px) rotate(2deg); }
+  75% { transform: translate(-4px, -4px) rotate(-2deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.shake-dist-0 { animation: shake-violent 0.1s infinite; }
+
+
+.sand {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(230,196,122,0.2),
+    rgba(230,196,122,0.2) 2px,
+    rgba(0,0,0,0) 6px
+  );
+  animation: drift 60s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ===== UI ===== */
 .container {
   position: relative;
-  z-index: 20;
+  z-index: 2;
   text-align: center;
   padding-top: 20px;
-  /* Zapobiega skakaniu szerokości */
-  min-width: 800px; 
 }
 
 #controls {
@@ -31,8 +80,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
-  height: 120px; /* Rezerwuje miejsce na przyciski */
+  margin-bottom: 10px;
 }
 #controls button {
   font-size: 1.2em;
@@ -43,32 +91,26 @@ html, body {
   border: 2px solid #e6c47a;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  box-shadow: 0 0 10px rgba(230,196,122,0.5);
 }
 #controls button:hover {
   background: #222;
-  box-shadow: 0 0 15px rgba(230,196,122,0.6);
-}
-#controls button.active {
-  background: #4a3b1a;
-  border-color: #fff;
+  box-shadow: 0 0 20px rgba(230,196,122,0.8);
 }
 
 #stats {
-  font-size: 1em;
+  margin-top: 10px;
+  font-size: 0.9em;
   font-weight: bold;
-  margin-bottom: 10px;
-  height: 20px; /* Rezerwuje miejsce na tekst */
 }
 
-/* ===== OBSZAR GRY (Layout Sztywny) ===== */
+/* ===== GAME AREA ===== */
 #game-area {
   display: flex;
-  justify-content: center; /* Wyśrodkowanie */
   align-items: flex-start;
   gap: 20px;
-  margin: 0 auto;
-  width: max-content; /* Dopasuj do zawartości */
+  margin: 20px auto;
+  width: max-content; 
 }
 
 #helipadA, #helipadB {
@@ -82,33 +124,23 @@ html, body {
   justify-content: center;
   font-weight: bold;
   flex-shrink: 0;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-#helipadB { 
-  opacity: 0.3; 
-  transition: opacity 1s;
-}
-#helipadB.visible { opacity: 1; box-shadow: 0 0 20px #00f; }
+#helipadB { visibility: hidden; }
 
 #board-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: calc(50px * 10 + 3px * 9);
 }
 
-/* Sztywne wymiary planszy, żeby nie skakała */
 #board {
-  display: grid;
-  grid-template-columns: repeat(10, 50px);
+  display: inline-grid;
   gap: 3px;
-  padding: 5px;
-  background: #000;
-  border: 1px solid #333;
 }
 #worm-map {
   margin-top: 15px;
-  display: grid;
-  grid-template-columns: repeat(10, 20px);
+  display: inline-grid;
   gap: 2px;
 }
 
@@ -116,65 +148,25 @@ html, body {
 .cell {
   width: 50px;
   height: 50px;
-  background: #1a1a1a;
-  border: 2px solid #333; 
+  background: #222;
+  border: 2px solid #e6c47a;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer; 
+  cursor: pointer;
   font-weight: bold;
-  font-size: 1.4em;
-  transition: background 0.2s, border-color 0.2s;
+  font-size: 1.2em;
 }
-/* Kiedy gra nie jest aktywna */
-.cell.inactive {
-  cursor: default;
-  opacity: 0.5;
-}
-
-/* Klasy stanu */
-.visited { background: #554a33 !important; border-color: #776a4a; }
-.start   { background: darkgreen !important; color: #fff; }
-.goal    { background: darkblue !important; color: #fff; }
-.worm    { background: darkred !important; color: white; }
-
-.player {
-  color: #ff3333 !important;
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
-  font-size: 1.6em;
-}
-
 #worm-map .cell {
   width: 20px;
   height: 20px;
-  font-size: 0.9em;
-  border: 1px solid #333;
+  font-size: 0.8em;
 }
 
-/* ===== EFEKTY POGODOWE ===== */
-.sand {
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(230,196,122,0.1),
-    rgba(230,196,122,0.1) 2px,
-    rgba(0,0,0,0) 6px
-  );
-  animation: drift 60s linear infinite;
-  pointer-events: none;
-  z-index: 10;
-}
-@keyframes drift { from { background-position: 0 0; } to { background-position: 1000px 0; } }
-
-/* Drżenie */
-@keyframes shake-violent {
-  0%, 100% { transform: translate(0,0); }
-  25% { transform: translate(-3px, 3px); }
-  75% { transform: translate(3px, -3px); }
-}
-.shake-dist-0 { animation: shake-violent 0.2s infinite; }
-
+.visited { background: #444; }
+.start   { background: darkgreen; }
+.goal    { background: darkblue; }
+.worm    { background: darkred; color: white; }
 </style>
 </head>
 
@@ -183,15 +175,15 @@ html, body {
 
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-  <p>Czerwone stopy to Twoja pozycja.</p>
+  <p>System wczesnego ostrzegania (5 poziomów zagrożenia)</p>
 
   <div id="controls">
-    <button id="narratorBtn" onclick="toggleNarrator()">🎙️ Narrator (Start)</button>
-    <button onclick="startGame()">☢️ RESTART SYSTEMÓW</button>
-    <label style="margin-top: 5px;"><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+    <button onclick="playNarrator()">🎙️ Narrator</button>
+    <button onclick="startGame()">🏜️ Uruchom systemy i ruszaj</button>
+    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
 
-  <div id="stats">Oczekiwanie na start...</div>
+  <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="game-area">
     <div id="helipadA">Lądowisko A</div>
@@ -215,121 +207,127 @@ let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
-let gameOver = true; // Gra zaczyna się jako nieaktywna
-let gameStarted = false;
+let gameOver = false;
 
-// --- AUDIO (Bez zmian logicznych, tylko inicjalizacja) ---
-let narratorAudio = null;
+// --- SYSTEM AUDIO (DRONE) ---
 let audioCtx = null;
-let noiseSource = null; 
-let noiseFilter = null; 
-let noiseGain = null;   
-
-function toggleNarrator() {
-  const btn = document.getElementById("narratorBtn");
-  if (!narratorAudio) {
-    narratorAudio = new Audio("Saper_Diuny.mp3");
-    narratorAudio.addEventListener('ended', () => {
-       narratorAudio.currentTime = 0;
-       btn.innerText = "🎙️ Narrator (Start)";
-       btn.classList.remove("active");
-    });
-  }
-  if (narratorAudio.paused) {
-    narratorAudio.play().then(() => {
-      btn.innerText = "⏸️ Narrator (Pauza)";
-      btn.classList.add("active");
-    }).catch(err => {
-      console.log("Audio err", err);
-      alert("Brak pliku Saper_Diuny.mp3. Gra działa bez niego.");
-    });
-  } else {
-    narratorAudio.pause();
-    btn.innerText = "▶️ Narrator (Wznów)";
-    btn.classList.remove("active");
-  }
-}
+let bgOsc = null;  // Oscylator tła
+let bgGain = null; // Głośność tła
 
 function initAudioContext() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 }
 
 function startBackgroundDrone() {
   initAudioContext();
-  if (noiseSource) { try { noiseSource.stop(); } catch(e){} noiseSource = null; }
+  if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
 
-  const bufferSize = audioCtx.sampleRate * 2; 
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  bgOsc = audioCtx.createOscillator();
+  bgGain = audioCtx.createGain();
 
-  noiseSource = audioCtx.createBufferSource();
-  noiseSource.buffer = buffer;
-  noiseSource.loop = true;
+  bgOsc.type = 'triangle'; // Trójkątna fala jest dobra do technicznych dronów
+  
+  // Domyślnie (bezpiecznie - >3 pól)
+  bgOsc.frequency.value = 50; 
+  bgGain.gain.value = 0.05;   
 
-  noiseFilter = audioCtx.createBiquadFilter();
-  noiseFilter.type = 'lowpass';
-  noiseFilter.frequency.value = 150; 
-  noiseGain = audioCtx.createGain();
-  noiseGain.gain.value = 0.05;
-
-  noiseSource.connect(noiseFilter);
-  noiseFilter.connect(noiseGain);
-  noiseGain.connect(audioCtx.destination);
-  noiseSource.start();
+  bgOsc.connect(bgGain);
+  bgGain.connect(audioCtx.destination);
+  
+  bgOsc.start();
 }
 
 function stopBackgroundDrone() {
-  if (noiseSource) {
+  if (bgOsc) {
     const now = audioCtx.currentTime;
-    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5); 
-    noiseSource.stop(now + 1.5);
-    noiseSource = null;
+    bgGain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+    bgOsc.stop(now + 1);
+    bgOsc = null;
   }
 }
 
+// --- KLUCZOWA ZMIANA: 5 POZIOMÓW DŹWIĘKU ---
 function updateDroneSound(distance) {
-  if (!noiseFilter || !audioCtx) return;
+  if (!bgOsc || !audioCtx) return;
+
   const now = audioCtx.currentTime;
   let targetFreq, targetVol;
-  if (distance === 0) { targetFreq = 3000; targetVol = 0; } 
-  else if (distance === 1) { targetFreq = 1200; targetVol = 0.50; } 
-  else if (distance === 2) { targetFreq = 600; targetVol = 0.25; } 
-  else if (distance === 3) { targetFreq = 300; targetVol = 0.15; } 
-  else { targetFreq = 120; targetVol = 0.08; }
-  noiseFilter.frequency.exponentialRampToValueAtTime(targetFreq, now + 0.5);
-  noiseGain.gain.linearRampToValueAtTime(targetVol, now + 0.5);
+
+  if (distance === 0) {
+    // Kolizja - dźwięk jest obsługiwany przez handleDeath, tu możemy wyciszyć drona
+    targetFreq = 50; targetVol = 0;
+  } 
+  else if (distance === 1) {
+    // POZIOM 1 (Zagrożenie bezpośrednie) - Wysoki, głośny
+    targetFreq = 400; 
+    targetVol = 0.35; 
+  } 
+  else if (distance === 2) {
+    // POZIOM 2 (Blisko) - Średni ton
+    targetFreq = 200; 
+    targetVol = 0.20;
+  } 
+  else if (distance === 3) {
+    // POZIOM 3 (Nasłuch) - Niski, ale podwyższony ton
+    targetFreq = 100; 
+    targetVol = 0.10;
+  } 
+  else {
+    // POZIOM 3+ (Bezpiecznie) - Głęboki bas
+    targetFreq = 50; 
+    targetVol = 0.05;
+  }
+
+  // Płynne przejście (0.3s dla szybszej reakcji)
+  bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
+  bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
 }
 
 // --- LOGIKA GRY ---
 
-// Funkcja wywoływana OD RAZU przy załadowaniu strony
-window.onload = function() {
-  createGridStructure(); // Tworzy planszę wizualnie (pustą)
-};
+function showGame() {
+  document.getElementById("game-area").style.display = "flex";
+}
+  
+function startGame() {
+  initAudioContext();
+  startBackgroundDrone(); 
 
-function createGridStructure() {
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
+
+  board = [];
+  gameOver = false;
+  playerPos = {x:0, y:0};
+  steps = 0;
+  score = 0;
+  
+  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
+  document.body.className = "";
+  document.getElementById("helipadB").style.visibility = "hidden";
+
   boardDiv.innerHTML = "";
   wormDiv.innerHTML = "";
+  boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
+  wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
 
-  // Generujemy siatkę, ale "pustą" logicznie
   for (let y = 0; y < size; y++) {
+    board[y] = [];
     for (let x = 0; x < size; x++) {
-      // Główna plansza
+      board[y][x] = { worm:false, visited:false };
+
       const cell = document.createElement("div");
-      cell.className = "cell inactive"; // Domyślnie nieaktywna
+      cell.className = "cell";
       cell.dataset.x = x;
       cell.dataset.y = y;
-      cell.onclick = () => moveTo(x,y); 
-      // Oznaczenie startu i mety wizualnie
-      if(x===0 && y===0) { cell.classList.add("start"); cell.textContent="A"; }
-      if(x===size-1 && y===size-1) { cell.classList.add("goal"); cell.textContent="B"; }
+      cell.onclick = () => moveTo(x,y);
       boardDiv.appendChild(cell);
 
-      // Minimapa
       const wcell = document.createElement("div");
       wcell.className = "cell";
       wcell.dataset.x = x;
@@ -337,40 +335,12 @@ function createGridStructure() {
       wormDiv.appendChild(wcell);
     }
   }
-}
-
-function startGame() {
-  initAudioContext();
-  startBackgroundDrone(); 
-  
-  // Reset zmiennych
-  board = [];
-  gameOver = false;
-  gameStarted = true;
-  playerPos = {x:0, y:0};
-  steps = 0;
-  score = 100;
-
-  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 100";
-  document.body.className = "";
-  document.getElementById("helipadB").classList.remove("visible");
-
-  // Inicjalizacja tablicy logicznej
-  for (let y = 0; y < size; y++) {
-    board[y] = [];
-    for (let x = 0; x < size; x++) {
-      board[y][x] = { worm:false, visited:false };
-    }
-  }
-  board[0][0].visited = true;
-
-  // Aktywacja komórek wizualnie
-  const cells = document.querySelectorAll("#board .cell");
-  cells.forEach(c => c.classList.remove("inactive", "visited", "player", "worm"));
 
   placeWorms();
-  drawBoard();
   updateWormMap();
+  drawBoard();
+  
+  // Sprawdź na starcie (powinno być bezpiecznie)
   checkProximity(0,0);
 }
 
@@ -379,7 +349,7 @@ function placeWorms() {
   while (placed < wormsCount) {
     let x = Math.floor(Math.random() * size);
     let y = Math.floor(Math.random() * size);
-    if ((x < 2 && y < 2) || (x > size-3 && y > size-3)) continue;
+    if ((x === 0 && y === 0) || (x === size-1 && y === size-1)) continue;
     if (!board[y][x].worm) {
       board[y][x].worm = true;
       placed++;
@@ -387,24 +357,62 @@ function placeWorms() {
   }
 }
 
+function moveWorms() {
+  if (!document.getElementById("hardMode").checked) return;
+
+  let newBoard = board.map(row => row.map(cell => ({...cell, worm:false})));
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (board[y][x].worm) {
+        const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+        const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
+        let nx = x+dx, ny = y+dy;
+
+        if (nx>=0 && nx<size && ny>=0 && ny<size &&
+            !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
+          newBoard[ny][nx].worm = true;
+        } else {
+          newBoard[y][x].worm = true;
+        }
+      }
+    }
+  }
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      board[y][x].worm = newBoard[y][x].worm;
+    }
+  }
+  updateWormMap();
+}
+
+function updateWormMap() {
+  const wormDiv = document.getElementById("worm-map");
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      if (x === playerPos.x && y === playerPos.y) {
+          cell.textContent = "👣";
+      } else {
+          cell.textContent = board[y][x].worm ? "🪱" : "";
+      }
+    }
+  }
+}
+
 function isAdjacent(x,y) {
-  return Math.abs(playerPos.x-x) + Math.abs(playerPos.y-y) === 1;
+  return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1;
 }
 
 function moveTo(x,y) {
-  if(!gameStarted) {
-    alert("Kliknij 'RESTART SYSTEMÓW', aby rozpocząć.");
-    return;
-  }
-  if(gameOver) return;
-  if(!isAdjacent(x,y)) return;
-
+  if(gameOver || !isAdjacent(x,y)) return;
   initAudioContext();
 
   playerPos = {x,y};
   steps++;
   board[y][x].visited = true;
-  score = Math.max(0, 100 - steps);
+
+  score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
   if (board[y][x].worm) {
@@ -419,11 +427,12 @@ function moveTo(x,y) {
     return;
   }
 
+  // Sprawdź bliskość (5 poziomów)
   checkProximity(x, y);
 
   if (x===size-1 && y===size-1) {
     alert(`Dotarłeś do celu! Punkty: ${score}`);
-    document.getElementById("helipadB").classList.add("visible");
+    document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
   }
@@ -432,66 +441,17 @@ function moveTo(x,y) {
   updateWormMap();
 }
 
-function moveWorms() {
-  if (!document.getElementById("hardMode").checked) return;
-  let newBoard = board.map(row => row.map(cell => ({...cell, worm:false})));
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if (board[y][x].worm) {
-        const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
-        const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
-        let nx = x+dx, ny = y+dy;
-        if (nx>=0 && nx<size && ny>=0 && ny<size &&
-            !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
-          newBoard[ny][nx].worm = true;
-        } else {
-          newBoard[y][x].worm = true;
-        }
-      }
-    }
-  }
-  for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-          board[y][x].worm = newBoard[y][x].worm;
-      }
-  }
+function handleDeath() {
+  applyFeedback(0);
+  revealWorms();
+  updateWormMap();
+  stopBackgroundDrone(); 
+  playTone(100, "sawtooth", 0.5); 
+  setTimeout(() => alert("Pożarł Cię Czerw Pustyni!"), 100);
+  gameOver = true;
 }
 
-function drawBoard() {
-  const boardDiv = document.getElementById("board");
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      const cell = boardDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      cell.className = "cell"; 
-      cell.textContent = "";
-
-      if(board[y][x].visited) cell.classList.add("visited");
-      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
-      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
-      
-      if(x===playerPos.x && y===playerPos.y) {
-        cell.textContent = "👣";
-        cell.classList.add("player");
-      }
-    }
-  }
-}
-
-function updateWormMap() {
-  const wormDiv = document.getElementById("worm-map");
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      cell.classList.remove("player");
-      if (x === playerPos.x && y === playerPos.y) {
-          cell.textContent = "👣";
-          cell.classList.add("player");
-      } else {
-          cell.textContent = board[y][x].worm ? "🪱" : "";
-      }
-    }
-  }
-}
+// === SONAR I EFEKTY TŁA ===
 
 function checkProximity(px, py) {
   let minDistance = 999;
@@ -503,28 +463,74 @@ function checkProximity(px, py) {
       }
     }
   }
+
   updateDroneSound(minDistance);
-  if (minDistance === 0) document.body.className = "shake-dist-0";
-  else document.body.className = "";
+  applyFeedback(minDistance);
 }
 
-function handleDeath() {
-  document.body.className = "shake-dist-0";
-  // Odsłaniamy czerwie
-  const boardDiv = document.getElementById("board");
+// --- KLUCZOWA ZMIANA: 5 POZIOMÓW DRGAŃ ---
+function applyFeedback(distance) {
+  document.body.className = "";
+  
+  if (distance === 0) {
+    // 0 pól: Kolizja (Gwałtowne)
+    document.body.classList.add("shake-dist-0");
+  } else if (distance === 1) {
+    // 1 pole: Zagrożenie (Silne)
+    document.body.classList.add("shake-dist-1");
+  } else if (distance === 2) {
+    // 2 pola: Blisko (Średnie)
+    document.body.classList.add("shake-dist-2");
+  } else if (distance === 3) {
+    // 3 pola: Nasłuch (Mikro)
+    document.body.classList.add("shake-dist-3");
+  } 
+  // 3+ pól: Bezpiecznie (Brak drgań)
+}
+
+function playTone(freq, type, vol) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function drawBoard() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      cell.className="cell";
+      cell.textContent="";
+      if(board[y][x].visited) cell.classList.add("visited");
+      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) cell.textContent="👣";
+    }
+  }
+}
+
+function revealWorms() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
-        const cell = boardDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
         cell.classList.add("worm");
         cell.textContent="🪱";
       }
     }
   }
-  updateWormMap();
-  stopBackgroundDrone(); 
-  setTimeout(() => alert("Pożarł Cię Czerw Pustyni!"), 100);
-  gameOver = true;
+}
+
+function playNarrator() {
+  const audio = new Audio("Saper_Diuny.mp3");
+  audio.play().catch(err => console.log("Nie udało się odtworzyć audio:", err));
 }
 </script>
 </body>

@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – Naprawa Widoczności</title>
+<title>Przeprawa przez Arrakis – Stabilna Wersja</title>
 
 <style>
 html, body {
@@ -16,32 +16,14 @@ html, body {
   user-select: none;
 }
 
-/* ===== EFEKTY POGODOWE ===== */
-.sand {
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(230,196,122,0.15),
-    rgba(230,196,122,0.15) 2px,
-    rgba(0,0,0,0) 6px
-  );
-  animation: drift 60s linear infinite;
-  pointer-events: none;
-  z-index: 10;
-}
-
-@keyframes drift {
-  from { background-position: 0 0; }
-  to { background-position: 1000px 0; }
-}
-
-/* ===== UI ===== */
+/* ===== UI & LAYOUT ===== */
 .container {
   position: relative;
   z-index: 20;
   text-align: center;
   padding-top: 20px;
+  /* Zapobiega skakaniu szerokości */
+  min-width: 800px; 
 }
 
 #controls {
@@ -49,7 +31,8 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  height: 120px; /* Rezerwuje miejsce na przyciski */
 }
 #controls button {
   font-size: 1.2em;
@@ -60,12 +43,11 @@ html, body {
   border: 2px solid #e6c47a;
   border-radius: 8px;
   cursor: pointer;
-  box-shadow: 0 0 10px rgba(230,196,122,0.5);
   transition: all 0.2s;
 }
 #controls button:hover {
   background: #222;
-  box-shadow: 0 0 20px rgba(230,196,122,0.8);
+  box-shadow: 0 0 15px rgba(230,196,122,0.6);
 }
 #controls button.active {
   background: #4a3b1a;
@@ -73,18 +55,20 @@ html, body {
 }
 
 #stats {
-  margin-top: 10px;
-  font-size: 0.9em;
+  font-size: 1em;
   font-weight: bold;
+  margin-bottom: 10px;
+  height: 20px; /* Rezerwuje miejsce na tekst */
 }
 
-/* ===== GAME AREA ===== */
+/* ===== OBSZAR GRY (Layout Sztywny) ===== */
 #game-area {
   display: flex;
+  justify-content: center; /* Wyśrodkowanie */
   align-items: flex-start;
   gap: 20px;
-  margin: 20px auto;
-  width: max-content; 
+  margin: 0 auto;
+  width: max-content; /* Dopasuj do zawartości */
 }
 
 #helipadA, #helipadB {
@@ -98,8 +82,13 @@ html, body {
   justify-content: center;
   font-weight: bold;
   flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-#helipadB { visibility: hidden; }
+#helipadB { 
+  opacity: 0.3; 
+  transition: opacity 1s;
+}
+#helipadB.visible { opacity: 1; box-shadow: 0 0 20px #00f; }
 
 #board-wrapper {
   display: flex;
@@ -107,8 +96,10 @@ html, body {
   align-items: center;
 }
 
+/* Sztywne wymiary planszy, żeby nie skakała */
 #board {
-  display: inline-grid;
+  display: grid;
+  grid-template-columns: repeat(10, 50px);
   gap: 3px;
   padding: 5px;
   background: #000;
@@ -116,7 +107,8 @@ html, body {
 }
 #worm-map {
   margin-top: 15px;
-  display: inline-grid;
+  display: grid;
+  grid-template-columns: repeat(10, 20px);
   gap: 2px;
 }
 
@@ -124,31 +116,34 @@ html, body {
 .cell {
   width: 50px;
   height: 50px;
-  background: #222;
-  border: 2px solid #444; 
+  background: #1a1a1a;
+  border: 2px solid #333; 
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer; 
   font-weight: bold;
   font-size: 1.4em;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
+}
+/* Kiedy gra nie jest aktywna */
+.cell.inactive {
+  cursor: default;
+  opacity: 0.5;
 }
 
-/* --- KLASY STANU --- */
+/* Klasy stanu */
 .visited { background: #554a33 !important; border-color: #776a4a; }
-.start   { background: darkgreen !important; }
-.goal    { background: darkblue !important; }
+.start   { background: darkgreen !important; color: #fff; }
+.goal    { background: darkblue !important; color: #fff; }
 .worm    { background: darkred !important; color: white; }
 
-/* --- NOWA KLASA: GRACZ (CZERWONE STOPY) --- */
 .player {
-  color: #ff3333 !important; /* Czerwony kolor */
-  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8); /* Czerwona poświata */
-  font-size: 1.6em; /* Nieco większe */
+  color: #ff3333 !important;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+  font-size: 1.6em;
 }
 
-/* Minimapa - mniejsze komórki */
 #worm-map .cell {
   width: 20px;
   height: 20px;
@@ -156,7 +151,23 @@ html, body {
   border: 1px solid #333;
 }
 
-/* ===== EFEKTY DRŻENIA ===== */
+/* ===== EFEKTY POGODOWE ===== */
+.sand {
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(230,196,122,0.1),
+    rgba(230,196,122,0.1) 2px,
+    rgba(0,0,0,0) 6px
+  );
+  animation: drift 60s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+@keyframes drift { from { background-position: 0 0; } to { background-position: 1000px 0; } }
+
+/* Drżenie */
 @keyframes shake-violent {
   0%, 100% { transform: translate(0,0); }
   25% { transform: translate(-3px, 3px); }
@@ -176,11 +187,11 @@ html, body {
 
   <div id="controls">
     <button id="narratorBtn" onclick="toggleNarrator()">🎙️ Narrator (Start)</button>
-    <button onclick="startGame()">🏜️ Uruchom systemy i ruszaj</button>
-    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+    <button onclick="startGame()">☢️ RESTART SYSTEMÓW</button>
+    <label style="margin-top: 5px;"><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
 
-  <div id="stats">Kroki: 0 | Punktacja: 0</div>
+  <div id="stats">Oczekiwanie na start...</div>
 
   <div id="game-area">
     <div id="helipadA">Lądowisko A</div>
@@ -204,14 +215,18 @@ let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
-let gameOver = false;
+let gameOver = true; // Gra zaczyna się jako nieaktywna
+let gameStarted = false;
 
-// --- NARRATOR ---
+// --- AUDIO (Bez zmian logicznych, tylko inicjalizacja) ---
 let narratorAudio = null;
+let audioCtx = null;
+let noiseSource = null; 
+let noiseFilter = null; 
+let noiseGain = null;   
 
 function toggleNarrator() {
   const btn = document.getElementById("narratorBtn");
-  
   if (!narratorAudio) {
     narratorAudio = new Audio("Saper_Diuny.mp3");
     narratorAudio.addEventListener('ended', () => {
@@ -220,13 +235,12 @@ function toggleNarrator() {
        btn.classList.remove("active");
     });
   }
-
   if (narratorAudio.paused) {
     narratorAudio.play().then(() => {
       btn.innerText = "⏸️ Narrator (Pauza)";
       btn.classList.add("active");
     }).catch(err => {
-      console.log("Błąd audio:", err);
+      console.log("Audio err", err);
       alert("Brak pliku Saper_Diuny.mp3. Gra działa bez niego.");
     });
   } else {
@@ -236,50 +250,33 @@ function toggleNarrator() {
   }
 }
 
-// --- AUDIO SYSTEM ---
-let audioCtx = null;
-let noiseSource = null; 
-let noiseFilter = null; 
-let noiseGain = null;   
-
 function initAudioContext() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
-}
-
-function createNoiseBuffer() {
-  const bufferSize = audioCtx.sampleRate * 2; 
-  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = Math.random() * 2 - 1;
-  }
-  return buffer;
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 function startBackgroundDrone() {
   initAudioContext();
   if (noiseSource) { try { noiseSource.stop(); } catch(e){} noiseSource = null; }
 
+  const bufferSize = audioCtx.sampleRate * 2; 
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
   noiseSource = audioCtx.createBufferSource();
-  noiseSource.buffer = createNoiseBuffer();
+  noiseSource.buffer = buffer;
   noiseSource.loop = true;
 
   noiseFilter = audioCtx.createBiquadFilter();
   noiseFilter.type = 'lowpass';
   noiseFilter.frequency.value = 150; 
-
   noiseGain = audioCtx.createGain();
   noiseGain.gain.value = 0.05;
 
   noiseSource.connect(noiseFilter);
   noiseFilter.connect(noiseGain);
   noiseGain.connect(audioCtx.destination);
-  
   noiseSource.start();
 }
 
@@ -296,55 +293,43 @@ function updateDroneSound(distance) {
   if (!noiseFilter || !audioCtx) return;
   const now = audioCtx.currentTime;
   let targetFreq, targetVol;
-
   if (distance === 0) { targetFreq = 3000; targetVol = 0; } 
   else if (distance === 1) { targetFreq = 1200; targetVol = 0.50; } 
   else if (distance === 2) { targetFreq = 600; targetVol = 0.25; } 
   else if (distance === 3) { targetFreq = 300; targetVol = 0.15; } 
   else { targetFreq = 120; targetVol = 0.08; }
-
   noiseFilter.frequency.exponentialRampToValueAtTime(targetFreq, now + 0.5);
   noiseGain.gain.linearRampToValueAtTime(targetVol, now + 0.5);
 }
 
 // --- LOGIKA GRY ---
 
-function startGame() {
-  initAudioContext();
-  startBackgroundDrone(); 
+// Funkcja wywoływana OD RAZU przy załadowaniu strony
+window.onload = function() {
+  createGridStructure(); // Tworzy planszę wizualnie (pustą)
+};
 
+function createGridStructure() {
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
-
-  board = [];
-  gameOver = false;
-  playerPos = {x:0, y:0};
-  steps = 0;
-  score = 0;
-  
-  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 100";
-  document.body.className = "";
-  document.getElementById("helipadB").style.visibility = "hidden";
-
   boardDiv.innerHTML = "";
   wormDiv.innerHTML = "";
-  boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
-  wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
 
+  // Generujemy siatkę, ale "pustą" logicznie
   for (let y = 0; y < size; y++) {
-    board[y] = [];
     for (let x = 0; x < size; x++) {
-      board[y][x] = { worm:false, visited:false };
-
-      // GŁÓWNA PLANSZA
+      // Główna plansza
       const cell = document.createElement("div");
-      cell.className = "cell";
+      cell.className = "cell inactive"; // Domyślnie nieaktywna
       cell.dataset.x = x;
       cell.dataset.y = y;
       cell.onclick = () => moveTo(x,y); 
+      // Oznaczenie startu i mety wizualnie
+      if(x===0 && y===0) { cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1) { cell.classList.add("goal"); cell.textContent="B"; }
       boardDiv.appendChild(cell);
 
-      // MINIMAPA
+      // Minimapa
       const wcell = document.createElement("div");
       wcell.className = "cell";
       wcell.dataset.x = x;
@@ -352,8 +337,36 @@ function startGame() {
       wormDiv.appendChild(wcell);
     }
   }
+}
 
+function startGame() {
+  initAudioContext();
+  startBackgroundDrone(); 
+  
+  // Reset zmiennych
+  board = [];
+  gameOver = false;
+  gameStarted = true;
+  playerPos = {x:0, y:0};
+  steps = 0;
+  score = 100;
+
+  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 100";
+  document.body.className = "";
+  document.getElementById("helipadB").classList.remove("visible");
+
+  // Inicjalizacja tablicy logicznej
+  for (let y = 0; y < size; y++) {
+    board[y] = [];
+    for (let x = 0; x < size; x++) {
+      board[y][x] = { worm:false, visited:false };
+    }
+  }
   board[0][0].visited = true;
+
+  // Aktywacja komórek wizualnie
+  const cells = document.querySelectorAll("#board .cell");
+  cells.forEach(c => c.classList.remove("inactive", "visited", "player", "worm"));
 
   placeWorms();
   drawBoard();
@@ -379,7 +392,13 @@ function isAdjacent(x,y) {
 }
 
 function moveTo(x,y) {
-  if(gameOver || !isAdjacent(x,y)) return;
+  if(!gameStarted) {
+    alert("Kliknij 'RESTART SYSTEMÓW', aby rozpocząć.");
+    return;
+  }
+  if(gameOver) return;
+  if(!isAdjacent(x,y)) return;
+
   initAudioContext();
 
   playerPos = {x,y};
@@ -404,7 +423,7 @@ function moveTo(x,y) {
 
   if (x===size-1 && y===size-1) {
     alert(`Dotarłeś do celu! Punkty: ${score}`);
-    document.getElementById("helipadB").style.visibility = "visible";
+    document.getElementById("helipadB").classList.add("visible");
     stopBackgroundDrone();
     gameOver = true;
   }
@@ -438,29 +457,21 @@ function moveWorms() {
   }
 }
 
-// --- NAPRAWIONA FUNKCJA RYSOWANIA (Z CZERWONYMI STOPAMI) ---
 function drawBoard() {
-  // Szukamy TYLKO w divie #board, żeby nie mylić z minimapą
   const boardDiv = document.getElementById("board");
-
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      // Używamy selektora ograniczonego do boardDiv
       const cell = boardDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      
-      // Reset klas
-      cell.className = "cell";
+      cell.className = "cell"; 
       cell.textContent = "";
 
-      // Nadawanie stanów
       if(board[y][x].visited) cell.classList.add("visited");
       if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
       if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
       
-      // GRACZ (Nadpisuje wszystko i dodaje klasę .player)
       if(x===playerPos.x && y===playerPos.y) {
         cell.textContent = "👣";
-        cell.classList.add("player"); 
+        cell.classList.add("player");
       }
     }
   }
@@ -471,28 +482,12 @@ function updateWormMap() {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      // Reset klasy player na minimapie
       cell.classList.remove("player");
-
       if (x === playerPos.x && y === playerPos.y) {
           cell.textContent = "👣";
-          cell.classList.add("player"); // Czerwone stopy na minimapie
+          cell.classList.add("player");
       } else {
           cell.textContent = board[y][x].worm ? "🪱" : "";
-      }
-    }
-  }
-}
-
-function revealWorms() {
-  const boardDiv = document.getElementById("board");
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      if(board[y][x].worm){
-        // Szukamy tylko w boardDiv
-        const cell = boardDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-        cell.classList.add("worm");
-        cell.textContent="🪱";
       }
     }
   }
@@ -509,17 +504,23 @@ function checkProximity(px, py) {
     }
   }
   updateDroneSound(minDistance);
-  applyFeedback(minDistance);
-}
-
-function applyFeedback(distance) {
-  document.body.className = "";
-  if (distance === 0) document.body.classList.add("shake-dist-0");
+  if (minDistance === 0) document.body.className = "shake-dist-0";
+  else document.body.className = "";
 }
 
 function handleDeath() {
-  applyFeedback(0);
-  revealWorms();
+  document.body.className = "shake-dist-0";
+  // Odsłaniamy czerwie
+  const boardDiv = document.getElementById("board");
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const cell = boardDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cell.classList.add("worm");
+        cell.textContent="🪱";
+      }
+    }
+  }
   updateWormMap();
   stopBackgroundDrone(); 
   setTimeout(() => alert("Pożarł Cię Czerw Pustyni!"), 100);

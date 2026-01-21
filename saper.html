@@ -385,17 +385,20 @@ function moveTo(x,y) {
 
   checkProximity(x, y);
 
+  // --- ZMIANA KOLEJNOŚCI ---
+  
+  // 1. Najpierw rysujemy czystą planszę z pozycją gracza
+  drawBoard();
+  updateWormMap();
+
+  // 2. Dopiero TERAZ sprawdzamy wygraną i ewentualnie dorysowujemy robaki
   if (x===size-1 && y===size-1) {
-    // ZAMIANA ALERT NA CUSTOM ALERT
+    revealWorms(); // Teraz zadziała, bo drawBoard() już się wykonało wcześniej
     showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
-    revealWorms();
   }
-
-  drawBoard();
-  updateWormMap();
 }
 
 function handleDeath() {

@@ -88,6 +88,34 @@ html, body {
   box-shadow: 0 0 15px rgba(230,196,122,0.5);
 }
 
+/* --- NOWE: STYL TABELI TOP 10 --- */
+#leaderboard-table {
+  display: none; /* Domyślnie ukryta */
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.9em;
+}
+#leaderboard-table th, #leaderboard-table td {
+  border: 1px solid #554422;
+  padding: 8px;
+  text-align: center;
+}
+#leaderboard-table th {
+  background-color: #221a0a;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#leaderboard-table tr:nth-child(even) {
+  background-color: #1a1a1a;
+}
+#leaderboard-table tr.highlight {
+  background-color: #e6c47a;
+  color: #000;
+  font-weight: bold;
+}  
+
 @keyframes modalFadeIn {
   from { opacity: 0; transform: scale(0.8); }
   to { opacity: 1; transform: scale(1); }
@@ -192,28 +220,42 @@ html, body {
     
     <input type="text" id="nickname-input" placeholder="Twoje imię..." maxlength="15">
     
-    <button id="modal-next-btn" class="modal-btn" onclick="closeModal()">Dalej</button>
+    <table id="leaderboard-table">
+        <thead>
+            <tr>
+                <th>Lp.</th>
+                <th>Nick</th>
+                <th>PKT</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            </tbody>
+    </table>
     
+    <button id="modal-next-btn" class="modal-btn" onclick="closeModal()">Dalej</button>
     <button id="modal-save-btn" class="modal-btn" onclick="submitScore()" style="display:none;">Zapisz wynik</button>
   </div>
 </div>
 
 <script>
-// --- NOWY SYSTEM ALERTÓW (JS) ---
+// --- NOWY SYSTEM ALERTÓW I TOP 10 ---
+
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
   
-  // Reset widoku do zwykłego alertu
   text.innerText = message;
+  // Reset widoku
   document.getElementById("nickname-input").style.display = "none";
+  document.getElementById("leaderboard-table").style.display = "none";
   document.getElementById("modal-next-btn").style.display = "inline-block";
+  document.getElementById("modal-next-btn").innerText = "Dalej";
   document.getElementById("modal-save-btn").style.display = "none";
   
   modal.style.display = "flex";
 }
 
-// Funkcja specjalna dla wygranej
+// Funkcja wywoływana po wygranej
 function showVictoryInput(currentScore) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
@@ -224,6 +266,7 @@ function showVictoryInput(currentScore) {
   input.style.display = "inline-block";
   input.value = ""; 
   
+  document.getElementById("leaderboard-table").style.display = "none";
   document.getElementById("modal-next-btn").style.display = "none";
   document.getElementById("modal-save-btn").style.display = "inline-block";
   
@@ -231,20 +274,59 @@ function showVictoryInput(currentScore) {
   input.focus();
 }
 
-function closeModal() {
-  document.getElementById("custom-modal").style.display = "none";
-}
-
-// --- LOGIKA ZAPISU DO TOP 10 ---
 function submitScore() {
   const input = document.getElementById("nickname-input");
   const nick = input.value.trim() || "Nieznajomy";
   
+  // 1. Zapisz wynik
   saveToTop10(nick, score);
-  closeModal();
   
-  // Krótkie potwierdzenie (opcjonalne, ale miłe dla UX)
-  setTimeout(() => showCustomAlert("Wynik zapisany w archiwach Arrakis."), 200);
+  // 2. Przełącz widok na Tabelę Top 10
+  showLeaderboard(nick, score);
+}
+
+function showLeaderboard(lastNick, lastScore) {
+  const text = document.getElementById("modal-text");
+  text.innerText = "🏆 Ranking Arrakis 🏆";
+
+  // Ukryj input i przycisk zapisu
+  document.getElementById("nickname-input").style.display = "none";
+  document.getElementById("modal-save-btn").style.display = "none";
+
+  // Pobierz i wygeneruj tabelę
+  const tbody = document.getElementById("leaderboard-body");
+  tbody.innerHTML = "";
+  
+  const top10 = JSON.parse(localStorage.getItem('arrakis_top10') || '[]');
+  
+  top10.forEach((entry, index) => {
+    const tr = document.createElement("tr");
+    
+    // Podświetl aktualny wynik
+    if (entry.nick === lastNick && entry.points === lastScore) {
+        tr.classList.add("highlight");
+    }
+
+    const tdRank = document.createElement("td");
+    tdRank.innerText = index + 1;
+    
+    const tdNick = document.createElement("td");
+    tdNick.innerText = entry.nick;
+    
+    const tdScore = document.createElement("td");
+    tdScore.innerText = entry.points;
+
+    tr.appendChild(tdRank);
+    tr.appendChild(tdNick);
+    tr.appendChild(tdScore);
+    tbody.appendChild(tr);
+  });
+
+  // Pokaż tabelę i przycisk zamknięcia
+  document.getElementById("leaderboard-table").style.display = "table";
+  const closeBtn = document.getElementById("modal-next-btn");
+  closeBtn.innerText = "Zamknij";
+  closeBtn.style.display = "inline-block";
 }
 
 function saveToTop10(nick, points) {
@@ -252,17 +334,17 @@ function saveToTop10(nick, points) {
   let top10 = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   
   top10.push({ nick: nick, points: points, date: new Date().toISOString() });
-  
-  // Sortuj malejąco wg punktów
   top10.sort((a, b) => b.points - a.points);
   
-  // Zachowaj tylko 10 najlepszych
   if (top10.length > 10) {
     top10 = top10.slice(0, 10);
   }
   
   localStorage.setItem(STORAGE_KEY, JSON.stringify(top10));
-  console.log("Zaktualizowano Top 10 (ukryte):", top10);
+}
+
+function closeModal() {
+  document.getElementById("custom-modal").style.display = "none";
 }
 
 // --- KONFIGURACJA ---

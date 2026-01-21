@@ -122,7 +122,7 @@ html, body {
   /* Specyficzne dla B: */
   visibility: hidden;   /* Ukryte na początku gry */
   align-self: flex-end; /* Przesuwa lądowisko do dolnej krawędzi */
-}
+}  
 
 /* #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); } */
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
@@ -130,6 +130,15 @@ html, body {
 /* #worm-map { margin-top: 15px; display: inline-grid; gap: 2px; } */
 #worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }
 /* #worm-map { visibility: hidden; position: absolute; top: 100%; } */
+
+#Top10 {
+  width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+
+  /* Specyficzne dla B: */
+  visibility: hidden;   /* Ukryte na początku gry */
+  align-self: flex-end - 20px; /* Przesuwa lądowisko do dolnej krawędzi */
+}
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -168,6 +177,9 @@ html, body {
     </div>
 
     <div id="helipadB">Sicz Tabr</div>
+
+    <div id="Top10">Top 10</div>
+    
   </div>
 </div>
 

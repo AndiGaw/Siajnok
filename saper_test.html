@@ -17,14 +17,14 @@ html, body {
 
 /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
-  display: none;
+  display: none; /* Domyślnie ukryty */
   position: fixed;
   z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.85);
+  background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
   backdrop-filter: blur(2px);
   justify-content: center;
   align-items: center;
@@ -42,7 +42,7 @@ html, body {
 }
 
 #modal-text {
-  font-size: 1.5em;
+  font-size: 1.5em; /* Bardzo duża czcionka */
   margin-bottom: 10px;
   color: #e6c47a;
   text-shadow: 0 0 10px rgba(230,196,122,0.3);
@@ -68,11 +68,11 @@ html, body {
   box-shadow: 0 0 20px rgba(230,196,122,0.8);
 }
 
-/* ===== MODAL WYGRANEJ (NICK) ===== */
+/* ===== MODAL ZWYCIĘSTWA (INPUT) - NOWY ===== */
 #win-modal {
   display: none;
   position: fixed;
-  z-index: 101; /* Wyżej niż zwykły modal */
+  z-index: 101;
   left: 0;
   top: 0;
   width: 100%;
@@ -106,41 +106,44 @@ html, body {
   font-family: "Courier New", monospace;
 }
 
-/* ===== SEKCJA WYNIKÓW (TOP 10) ===== */
+/* ===== SEKCJA TOP 10 - NOWA ===== */
 #high-scores-section {
-  margin-top: 30px;
+  display: none; /* Ukryte do momentu wygranej */
+  margin-top: 250px; /* Duży margines, żeby ominąć mapę czerwi (absolute) */
   width: 100%;
+  max-width: 400px;
   text-align: center;
-  border-top: 1px solid #333;
+  border-top: 2px solid #333;
   padding-top: 20px;
+  padding-bottom: 50px;
+  animation: modalFadeIn 1s ease-out;
 }
 
 #high-scores-table {
   width: 100%;
-  max-width: 400px;
-  margin: 10px auto;
   border-collapse: collapse;
   font-family: "Courier New", monospace;
-  font-size: 0.9em;
+  font-size: 1em;
+  margin-top: 10px;
 }
 
 #high-scores-table th {
   border-bottom: 2px solid #e6c47a;
-  padding: 8px;
+  padding: 10px;
   color: #e6c47a;
   text-transform: uppercase;
 }
 
 #high-scores-table td {
   border-bottom: 1px solid #333;
-  padding: 6px;
+  padding: 8px;
   color: #aaa;
 }
 
 #high-scores-table tr:first-child td {
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(255,255,255,0.5);
+  text-shadow: 0 0 5px rgba(230,196,122,0.8);
 }
 
 @keyframes modalFadeIn {
@@ -148,7 +151,7 @@ html, body {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ===== ANIMACJE DRŻENIA ===== */
+/* ===== ANIMACJE DRŻENIA (5 POZIOMÓW) ===== */
 @keyframes shake-micro { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(0.5px, 0.5px); } }
 .shake-dist-3 { animation: shake-micro 0.1s infinite; }
 
@@ -171,7 +174,7 @@ html, body {
 }
 
 /* ===== UI ===== */
-.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; padding-bottom: 40px; }
+.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; }
 
 #controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
 #controls button {
@@ -193,13 +196,18 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden; 
-  align-self: flex-end; 
+
+  /* Specyficzne dla B: */
+  visibility: hidden;   /* Ukryte na początku gry */
+  align-self: flex-end; /* Przesuwa lądowisko do dolnej krawędzi */
 }
 
+/* #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); } */
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-#worm-map { display: inline-grid; gap: 2px; margin-top: 15px; }
+/* #worm-map { margin-top: 15px; display: inline-grid; gap: 2px; } */
+#worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }
+/* #worm-map { visibility: hidden; position: absolute; top: 100%; } */
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -230,13 +238,12 @@ html, body {
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="game-area">
-    <div id="helipadA">Lądowisko A</div>
+    <div id="helipadA">Lądowisko</div>
 
     <div id="board-wrapper">
       <div id="board"></div>
-      
       <div id="worm-map"></div>
-
+      
       <div id="high-scores-section">
         <h3>Kroniki Arrakis (Top 10)</h3>
         <table id="high-scores-table">
@@ -244,11 +251,10 @@ html, body {
                 <tr>
                     <th>Lp.</th>
                     <th>Nick</th>
-                    <th>Wynik</th>
+                    <th>Punkty</th>
                 </tr>
             </thead>
-            <tbody id="high-scores-body">
-                </tbody>
+            <tbody id="high-scores-body"></tbody>
         </table>
       </div>
     </div>
@@ -271,16 +277,11 @@ html, body {
     <p>Podaj swoje imię, aby zapisać się w kronikach:</p>
     <input type="text" id="nickname-input" placeholder="Wpisz nick..." maxlength="12">
     <br>
-    <button id="modal-btn" onclick="submitScore()">Zapisz Wynik</button>
+    <button id="modal-btn" onclick="submitScore()">Zapisz wynik</button>
   </div>
 </div>
 
 <script>
-// --- INICJALIZACJA WYNIKÓW ---
-document.addEventListener("DOMContentLoaded", () => {
-    updateLeaderboardDisplay();
-});
-
 // --- NOWY SYSTEM ALERTÓW (JS) ---
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
@@ -293,14 +294,14 @@ function closeModal() {
   document.getElementById("custom-modal").style.display = "none";
 }
 
-// --- LOGIKA TOP 10 ---
+// --- LOGIKA TOP 10 I MODALU WYGRANEJ ---
 function openWinModal(finalScore) {
     const modal = document.getElementById("win-modal");
     const scoreText = document.getElementById("win-score-display");
     const input = document.getElementById("nickname-input");
     
     scoreText.innerText = `Twój wynik: ${finalScore}`;
-    input.value = ""; // Wyczyść pole
+    input.value = ""; 
     modal.style.display = "flex";
 }
 
@@ -309,26 +310,32 @@ function submitScore() {
     let nick = input.value.trim();
     if(!nick) nick = "Bezimienny";
 
+    // Zapis do localStorage
     saveScoreToLocalStorage(nick, score);
     
+    // Ukryj modal
     document.getElementById("win-modal").style.display = "none";
-    updateLeaderboardDisplay();
+    
+    // Pokaż i odśwież tabelę
+    const section = document.getElementById("high-scores-section");
+    section.style.display = "block";
+    renderLeaderboard();
 }
 
 function saveScoreToLocalStorage(nick, score) {
     let scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
     scores.push({ nick: nick, score: score });
     
-    // Sortuj malejąco
+    // Sortuj (malejąco)
     scores.sort((a, b) => b.score - a.score);
     
-    // Zatrzymaj tylko top 10
+    // Top 10 only
     if(scores.length > 10) scores = scores.slice(0, 10);
     
     localStorage.setItem("arrakisScores", JSON.stringify(scores));
 }
 
-function updateLeaderboardDisplay() {
+function renderLeaderboard() {
     const tbody = document.getElementById("high-scores-body");
     tbody.innerHTML = "";
     
@@ -343,20 +350,11 @@ function updateLeaderboardDisplay() {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${index + 1}.</td>
-            <td>${escapeHtml(entry.nick)}</td>
+            <td>${entry.nick.replace(/</g, "&lt;")}</td>
             <td>${entry.score}</td>
         `;
         tbody.appendChild(tr);
     });
-}
-
-function escapeHtml(text) {
-  return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
 }
 
 // --- KONFIGURACJA ---
@@ -429,6 +427,10 @@ function startGame() {
 
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
+  const hsSection = document.getElementById("high-scores-section");
+
+  // Ukryj Top 10 na starcie
+  hsSection.style.display = "none";
 
   board = [];
   gameOver = false;
@@ -557,15 +559,16 @@ function moveTo(x,y) {
   drawBoard();
   updateWormMap();
 
-  // 2. Dopiero TERAZ sprawdzamy wygraną
+  // 2. Dopiero TERAZ sprawdzamy wygraną i ewentualnie dorysowujemy robaki
   if (x===size-1 && y===size-1) {
     revealWorms(); 
+    
+    // ZMIANA: Zamiast zwykłego alertu, otwieramy modal zapisu wyniku
+    openWinModal(score);
+    
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
-    
-    // ZAMIANA: Zamiast zwykłego alertu, wywołujemy modal zapisu
-    openWinModal(score);
   }
 }
 
@@ -619,9 +622,8 @@ function playTone(freq, type, vol) {
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      // Uściślenie selektora, żeby nie mylić z mapą czerwi
+      // Selektor uściślony aby nie mylić z mapą czerwi
       const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-      if(!cell) continue;
       cell.className="cell";
       cell.textContent="";
       if(board[y][x].visited) cell.classList.add("visited");
@@ -636,12 +638,10 @@ function revealWorms() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
-        // Uściślenie selektora
+        // Selektor uściślony
         const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-        if(cell) {
-            cell.classList.add("worm");
-            cell.textContent="🪱";
-        }
+        cell.classList.add("worm");
+        cell.textContent="🪱";
       }
     }
   }

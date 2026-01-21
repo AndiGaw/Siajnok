@@ -2,14 +2,13 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<title>Przeprawa przez Arrakis - Online</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Siajnoq - Pustynna Przeprawa</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
+  
 <style>
-/* --- STYLE GRAFICZNE (CSS) --- */
 html, body {
   margin: 0;
   padding: 0;
@@ -18,20 +17,19 @@ html, body {
   color: #e6c47a;
   font-family: "Georgia", serif;
   overflow-x: hidden;
-  touch-action: manipulation; /* Zapobiega zoomowaniu na telefonach */
 }
 
-/* OKNO MODALNE (Ranking i komunikaty) */
+/* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
-  display: none;
+  display: none; /* Domyślnie ukryty */
   position: fixed;
   z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.85);
-  backdrop-filter: blur(3px);
+  background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
+  backdrop-filter: blur(2px);
   justify-content: center;
   align-items: center;
 }
@@ -40,52 +38,69 @@ html, body {
   background-color: #111;
   border: 3px solid #e6c47a;
   box-shadow: 0 0 30px rgba(230,196,122,0.4);
-  padding: 30px;
+  padding: 40px;
   text-align: center;
-  width: 90%;
   max-width: 450px;
-  max-height: 85vh;
+  width: 85%;
+  max-height: 90vh;
   overflow-y: auto;
   animation: modalFadeIn 0.3s ease-out;
 }
 
 #modal-text {
-  font-size: 1.4em;
-  margin-bottom: 20px;
+  font-size: 1.5em;
+  margin-bottom: 15px;
   color: #e6c47a;
+  text-shadow: 0 0 10px rgba(230,196,122,0.3);
   line-height: 1.4;
 }
 
+/* Stylizacja przycisków w modalu */
 .modal-btn {
   background: #222;
   color: #e6c47a;
   border: 2px solid #e6c47a;
-  padding: 12px 25px;
-  font-size: 1em;
+  padding: 15px 40px;
+  font-size: 1.1em;
   font-family: "Georgia", serif;
   cursor: pointer;
-  margin-top: 15px;
+  transition: 0.2s;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  margin-top: 10px;
 }
-.modal-btn:hover { background: #e6c47a; color: #000; }
-.modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.modal-btn:hover {
+  background: #e6c47a;
+  color: #000;
+  box-shadow: 0 0 20px rgba(230,196,122,0.8);
+}
+.modal-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* --- NOWE: Styl dla pola wprowadzania nicku --- */
 #nickname-input {
-  display: none; 
-  width: 70%;
+  display: none; /* Domyślnie ukryty */
+  width: 80%;
   padding: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   background: #000;
   border: 1px solid #e6c47a;
   color: #e6c47a;
+  font-family: "Georgia", serif;
   font-size: 1.2em;
   text-align: center;
 }
+#nickname-input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(230,196,122,0.5);
+}
 
-/* TABELA RANKINGU */
+/* --- NOWE: STYL TABELI TOP 10 --- */
 #leaderboard-table {
-  display: none;
+  display: none; /* Domyślnie ukryta */
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
@@ -96,58 +111,102 @@ html, body {
   padding: 8px;
   text-align: center;
 }
-#leaderboard-table th { background-color: #221a0a; color: #fff; }
-#leaderboard-table tr:nth-child(even) { background-color: #1a1a1a; }
-#leaderboard-table tr.highlight { background-color: #e6c47a; color: #000; font-weight: bold; }
-
-@keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-/* ELEMENTY GRY */
-.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; }
-
-#controls { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 10px; }
-#controls button {
-  font-size: 1.1em; padding: 10px; width: 300px; background: #111; color: #e6c47a;
-  border: 1px solid #e6c47a; border-radius: 5px; cursor: pointer;
+#leaderboard-table th {
+  background-color: #221a0a;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
-#stats { margin-top: 5px; font-weight: bold; font-size: 0.9em; }
-
-#game-area { display: flex; flex-direction: column; align-items: center; margin: 15px auto; }
-#board-wrapper { position: relative; display: inline-block; }
-#board { display: grid; gap: 2px; background: #332200; border: 2px solid #e6c47a; padding: 2px; }
-
-.cell {
-  width: 35px; height: 35px; /* Mniejsze kafelki dla lepszego działania na mobile */
-  background: #222; 
-  display: flex; align-items: center; justify-content: center; 
-  cursor: pointer; font-size: 1.2em; user-select: none;
+#leaderboard-table tr:nth-child(even) {
+  background-color: #1a1a1a;
 }
-/* Responsywność dla większych ekranów */
-@media (min-width: 600px) {
-  .cell { width: 45px; height: 45px; }
+#leaderboard-table tr.highlight {
+  background-color: #e6c47a;
+  color: #000;
+  font-weight: bold;
+}  
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.visited { background: #3a3a3a; }
-.start { background: #1b5e20; color: white; font-size: 0.8em; }
-.goal { background: #0d47a1; color: white; font-size: 0.8em; }
-.worm { background: #b71c1c; color: white; }
-.player { background: #e6c47a; color: black; border-radius: 50%; width: 70%; height: 70%; }
+/* ===== ANIMACJE DRŻENIA (5 POZIOMÓW) ===== */
+@keyframes shake-micro { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(0.5px, 0.5px); } }
+.shake-dist-3 { animation: shake-micro 0.1s infinite; }
 
-/* EFEKTY PUSTYNI (Piasek w tle) */
+@keyframes shake-light { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px, 1px); } 75% { transform: translate(-1px, -1px); } }
+.shake-dist-2 { animation: shake-light 0.5s infinite; }
+
+@keyframes shake-strong { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-2px, 0); } 80% { transform: translate(2px, 0); } }
+.shake-dist-1 { animation: shake-strong 0.2s infinite; }
+
+@keyframes shake-violent { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-3px, 3px) rotate(-0.5deg); } 75% { transform: translate(3px, -3px) rotate(0.5deg); } }
+.shake-dist-0 { animation: shake-violent 0.1s infinite; }
+
 .sand {
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(45deg, rgba(230,196,122,0.15), rgba(230,196,122,0.15) 2px, rgba(0,0,0,0) 6px);
-  animation: drift 60s linear infinite; pointer-events: none; z-index: 1;
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
+  animation: drift 60s linear infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 @keyframes drift { from { background-position: 0 0; } to { background-position: 100% 100%; } }
 
-/* TRZĘSIENIE EKRANU */
-@keyframes shake0 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-3px, 3px); } 75% { transform: translate(3px, -3px); } }
-.shake-violent { animation: shake0 0.2s infinite; }
-@keyframes shake1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(2px, 0); } }
-.shake-strong { animation: shake1 0.2s infinite; }
-@keyframes shake2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(1px, 1px); } }
-.shake-light { animation: shake2 0.5s infinite; }
+/* ===== UI ===== */
+.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; }
+
+#controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
+#controls button {
+  font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a;
+  border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5);
+}
+#controls button:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
+
+#stats { margin-top: 10px; font-size: 0.9em; font-weight: bold; }
+
+/* ===== GAME AREA ===== */
+#game-area { display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 20px auto; width: max-content; }
+/* Modyfikacja dla desktopu, żeby było obok siebie */
+@media(min-width: 600px) {
+    #game-area { flex-direction: row; align-items: flex-start; gap: 20px; }
+}
+
+#helipadA {
+  width: 120px; height: 50px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+}
+  
+#helipadB {
+  width: 120px; height: 50px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+  visibility: hidden;   
+  align-self: center; 
+}  
+@media(min-width: 600px) {
+    #helipadA, #helipadB { width: 120px; height: 120px; }
+    #helipadB { align-self: flex-end; }
+}
+
+#board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
+#board { display: inline-grid; gap: 3px; }
+#worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }   
+
+/* ===== KOMÓRKI ===== */
+.cell {
+  width: 35px; height: 35px; /* Mniejsze na mobile */
+  background: #222; border: 2px solid #e6c47a;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; font-size: 1.2em;
+}
+@media(min-width: 600px) { .cell { width: 50px; height: 50px; } }
+
+#worm-map .cell { width: 20px; height: 20px; font-size: 0.8em; }
+
+.visited { background: #444; }
+.start   { background: darkgreen; }
+.goal    { background: darkblue; }
+.worm    { background: darkred; color: white; }
 </style>
 </head>
 
@@ -155,125 +214,178 @@ html, body {
 <div class="sand"></div>
 
 <div class="container">
-  <h2 style="margin: 10px 0;">Siajnoq</h2>
-  
+  <h1>Przeprawa przez Arrakis</h1>
+
   <div id="controls">
-    <button id="narratorBtn" onclick="playNarrator()">🎙️ Narrator</button>
-    <button onclick="startGame()">🏜️ Nowa Wyprawa</button>
-    <button onclick="showLeaderboard(null, null)">🏆 Globalny Ranking</button>
-    <label style="font-size:0.9em"><input type="checkbox" id="hardMode"> Tryb Hard (Czerw się rusza)</label>
+    <button id="narratorBtn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+    <button onclick="startGame()">🏜️ Wyrusz do Siczy Tabr</button>
+    <button onclick="showLeaderboard(null, null)">🏆 Pokaż Ranking</button>
+    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
 
-  <div id="stats">Kroki: 0 | Wynik: 0</div>
+  <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
   <div id="game-area">
+    <div id="helipadA">Lądowisko</div>
+
     <div id="board-wrapper">
       <div id="board"></div>
+      <div id="worm-map"></div>
     </div>
+
+    <div id="helipadB">Sicz Tabr</div>
   </div>
 </div>
 
 <div id="custom-modal">
   <div id="modal-content">
-    <div id="modal-text">Komunikat</div>
+    <div id="modal-text">Komunikat Systemowy</div>
     
-    <input type="text" id="nickname-input" placeholder="Wpisz swój nick" maxlength="12">
+    <input type="text" id="nickname-input" placeholder="Twoje imię..." maxlength="15">
     
     <table id="leaderboard-table">
-        <thead><tr><th>#</th><th>Nick</th><th>PKT</th></tr></thead>
-        <tbody id="leaderboard-body"></tbody>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nick</th>
+                <th>PKT</th>
+            </tr>
+        </thead>
+        <tbody id="leaderboard-body">
+            </tbody>
     </table>
     
-    <div style="display:flex; justify-content:center; gap:10px;">
+    <div style="display: flex; gap: 10px; justify-content: center;">
         <button id="modal-save-btn" class="modal-btn" onclick="submitScore()" style="display:none;">Zapisz wynik</button>
-        <button id="modal-close-btn" class="modal-btn" onclick="closeModal()">Zamknij</button>
+        <button id="modal-next-btn" class="modal-btn" onclick="closeModal()">Zamknij</button>
     </div>
   </div>
 </div>
 
 <script>
 // =============================================================
-// 1. KONFIGURACJA FIREBASE (TUTAJ WKLEJASZ SWOJE DANE!)
+// 1. KONFIGURACJA FIREBASE (WKLEJ DANE TUTAJ!)
 // =============================================================
 
-// ⚠️ UWAGA: Skopiuj zawartość "firebaseConfig" ze strony Firebase i wklej poniżej:
-  const firebaseConfig = {
-    apiKey: "AIzaSyDgdyn19uDwBRztJh6wRvgCjP0eq_ZhVLA",
-    authDomain: "siajnoq.firebaseapp.com",
-    projectId: "siajnoq",
-    storageBucket: "siajnoq.firebasestorage.app",
-    messagingSenderId: "276340521427",
-    appId: "1:276340521427:web:fd7a169822491303829726",
-    measurementId: "G-15HT3559LL"
-  };
-
+// ⚠️ ZASTĄP PONIŻSZY OBIEKT SWOIMI DANYMI Z KONSOLI FIREBASE ⚠️
+const firebaseConfig = {
+  apiKey: "TU_WKLEJ_API_KEY",
+  authDomain: "TU_WKLEJ_AUTH_DOMAIN",
+  projectId: "TU_WKLEJ_PROJECT_ID",
+  storageBucket: "TU_WKLEJ_STORAGE_BUCKET",
+  messagingSenderId: "TU_WKLEJ_SENDER_ID",
+  appId: "TU_WKLEJ_APP_ID"
+};
 
 // Inicjalizacja backendu
 let db;
 try {
-  // Sprawdzamy, czy użytkownik podmienił klucze
   if (firebaseConfig.apiKey.includes("TU_WKLEJ")) {
     console.warn("⚠️ Nie skonfigurowano Firebase! Ranking nie będzie działał.");
   } else {
     firebase.initializeApp(firebaseConfig);
     db = firebase.firestore();
-    console.log("✅ Połączono z Firebase Siajnoq!");
+    console.log("✅ Połączono z Firebase Arrakis!");
   }
 } catch (e) {
   console.error("Błąd Firebase:", e);
 }
 
 // =============================================================
-// 2. LOGIKA RANKINGU (GLOBALNA)
+// 2. NOWY SYSTEM ALERTÓW I LOGIKA RANKINGU (FIREBASE)
 // =============================================================
 
-// Funkcja zapisu wyniku
+function showCustomAlert(message) {
+  const modal = document.getElementById("custom-modal");
+  const text = document.getElementById("modal-text");
+  
+  text.innerText = message;
+  // Reset widoku
+  document.getElementById("nickname-input").style.display = "none";
+  document.getElementById("leaderboard-table").style.display = "none";
+  document.getElementById("modal-next-btn").style.display = "inline-block";
+  document.getElementById("modal-next-btn").innerText = "Dalej";
+  document.getElementById("modal-save-btn").style.display = "none";
+  
+  modal.style.display = "flex";
+}
+
+// Funkcja wywoływana po wygranej
+function showVictoryInput(currentScore) {
+  const modal = document.getElementById("custom-modal");
+  const text = document.getElementById("modal-text");
+  
+  text.innerText = `Dotarłeś do Siczy Tabr!\nPunkty: ${currentScore}\nPodaj swój nick:`;
+  
+  const input = document.getElementById("nickname-input");
+  input.style.display = "inline-block";
+  input.value = ""; 
+  
+  document.getElementById("leaderboard-table").style.display = "none";
+  document.getElementById("modal-next-btn").style.display = "none"; // Ukryj "Dalej", pokaż "Zapisz"
+  document.getElementById("modal-save-btn").style.display = "inline-block";
+  document.getElementById("modal-save-btn").innerText = "Zapisz wynik";
+  document.getElementById("modal-save-btn").disabled = false;
+  
+  modal.style.display = "flex";
+  input.focus();
+}
+
+// Wysyłanie wyniku do Firebase
 async function submitScore() {
   const input = document.getElementById("nickname-input");
-  const nick = input.value.trim();
-  
-  if (!nick) { alert("Musisz podać nick!"); return; }
-  if (!db) { alert("Błąd: Brak połączenia z bazą (źle wklejony config)."); return; }
-
+  const nick = input.value.trim() || "Nieznajomy";
   const btn = document.getElementById("modal-save-btn");
-  btn.disabled = true;
+  
+  if (!db) {
+    alert("Błąd: Nie skonfigurowano Firebase (brak kluczy w kodzie).");
+    return;
+  }
+
   btn.innerText = "Zapisywanie...";
+  btn.disabled = true;
 
   try {
-    await db.collection("scores").add({
-      nick: nick,
-      points: score,
-      date: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    // Po zapisie od razu pokaż ranking z podświetleniem
-    await showLeaderboard(nick, score);
+      // Zapis do bazy
+      await db.collection("scores").add({
+        nick: nick,
+        points: score,
+        date: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // Po sukcesie pokaż ranking
+      await showLeaderboard(nick, score);
   } catch (error) {
-    console.error("Błąd zapisu:", error);
-    alert("Nie udało się połączyć z serwerem.");
-    btn.disabled = false;
-    btn.innerText = "Zapisz wynik";
+      console.error("Błąd zapisu:", error);
+      alert("Nie udało się zapisać wyniku (sprawdź internet).");
+      btn.innerText = "Zapisz wynik";
+      btn.disabled = false;
   }
 }
 
-// Funkcja pobierania rankingu
+// Pobieranie rankingu z Firebase
 async function showLeaderboard(highlightNick, highlightScore) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
   const tbody = document.getElementById("leaderboard-body");
   const table = document.getElementById("leaderboard-table");
 
-  text.innerText = "🏆 Ranking Pustynny";
+  text.innerText = "🏆 Globalny Ranking Diuny";
+
+  // Ukryj input i guzik zapisu
   document.getElementById("nickname-input").style.display = "none";
   document.getElementById("modal-save-btn").style.display = "none";
-  document.getElementById("modal-close-btn").style.display = "none"; // Ukryj guzik na czas ładowania
   
-  tbody.innerHTML = "<tr><td colspan='3'>Ładowanie danych...</td></tr>";
+  // Pokaż tabelę ładowania
+  tbody.innerHTML = "<tr><td colspan='3'>Ładowanie danych z Arrakis...</td></tr>";
   table.style.display = "table";
+  document.getElementById("modal-next-btn").style.display = "inline-block";
+  document.getElementById("modal-next-btn").innerText = "Zamknij";
+  
   modal.style.display = "flex";
 
   if (!db) {
-    tbody.innerHTML = "<tr><td colspan='3'>Brak konfiguracji bazy!</td></tr>";
-    document.getElementById("modal-close-btn").style.display = "inline-block";
+    tbody.innerHTML = "<tr><td colspan='3'>Brak połączenia z bazą.</td></tr>";
     return;
   }
 
@@ -288,25 +400,28 @@ async function showLeaderboard(highlightNick, highlightScore) {
     snapshot.forEach(doc => {
       const data = doc.data();
       const tr = document.createElement("tr");
-      // Podświetl obecny wynik gracza
+      
+      // Podświetlenie gracza
       if (data.points === highlightScore && data.nick === highlightNick) {
         tr.classList.add("highlight");
       }
+      
       tr.innerHTML = `<td>${i}.</td><td>${escapeHtml(data.nick)}</td><td>${data.points}</td>`;
       tbody.appendChild(tr);
       i++;
     });
 
-    if (snapshot.empty) tbody.innerHTML = "<tr><td colspan='3'>Pustynia jest pusta...</td></tr>";
+    if (snapshot.empty) {
+        tbody.innerHTML = "<tr><td colspan='3'>Pustynia jest pusta...</td></tr>";
+    }
 
   } catch (err) {
     console.error(err);
     tbody.innerHTML = "<tr><td colspan='3'>Błąd pobierania danych.</td></tr>";
   }
-  
-  document.getElementById("modal-close-btn").style.display = "inline-block";
 }
 
+// Zabezpieczenie przed XSS
 function escapeHtml(text) {
   if (!text) return "";
   return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -317,265 +432,292 @@ function closeModal() {
 }
 
 // =============================================================
-// 3. LOGIKA GRY (MECHANIKA)
+// 3. LOGIKA GRY (BEZ ZMIAN W MECHANICE)
 // =============================================================
 
 const size = 10;
-const wormsCount = 13;
+const wormsCount = 12;
+
 let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 let gameOver = false;
-let audioCtx = null, droneOsc = null, droneGain = null;
 
-function initAudio() {
+// --- SYSTEM AUDIO (DRONE) ---
+let audioCtx = null;
+let bgOsc = null; 
+let bgGain = null;
+
+function initAudioContext() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
-// Dźwięk tła (Drone)
-function startDrone() {
-  initAudio();
-  if (droneOsc) stopDrone();
-  droneOsc = audioCtx.createOscillator();
-  droneGain = audioCtx.createGain();
-  droneOsc.type = 'triangle';
-  droneOsc.frequency.value = 50; 
-  droneGain.gain.value = 0.05;
-  droneOsc.connect(droneGain);
-  droneGain.connect(audioCtx.destination);
-  droneOsc.start();
+function startBackgroundDrone() {
+  initAudioContext();
+  if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
+
+  bgOsc = audioCtx.createOscillator();
+  bgGain = audioCtx.createGain();
+
+  bgOsc.type = 'triangle';
+  bgOsc.frequency.value = 50; 
+  bgGain.gain.value = 0.05;   
+
+  bgOsc.connect(bgGain);
+  bgGain.connect(audioCtx.destination);
+   
+  bgOsc.start();
 }
 
-function stopDrone() {
-  if (droneOsc) {
-    droneGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
-    droneOsc.stop(audioCtx.currentTime + 1);
-    droneOsc = null;
+function stopBackgroundDrone() {
+  if (bgOsc) {
+    const now = audioCtx.currentTime;
+    bgGain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+    bgOsc.stop(now + 1);
+    bgOsc = null;
   }
 }
 
-function updateDrone(dist) {
-  if (!droneOsc) return;
+function updateDroneSound(distance) {
+  if (!bgOsc || !audioCtx) return;
   const now = audioCtx.currentTime;
-  let freq = 50, vol = 0.05;
-  
-  if (dist === 1) { freq = 200; vol = 0.3; }
-  else if (dist === 2) { freq = 120; vol = 0.15; }
-  else if (dist === 3) { freq = 80; vol = 0.1; }
-  
-  droneOsc.frequency.linearRampToValueAtTime(freq, now + 0.5);
-  droneGain.gain.linearRampToValueAtTime(vol, now + 0.5);
+  let targetFreq, targetVol;
+
+  if (distance === 0) { targetFreq = 50; targetVol = 0; } 
+  else if (distance === 1) { targetFreq = 400; targetVol = 0.35; } 
+  else if (distance === 2) { targetFreq = 200; targetVol = 0.20; } 
+  else if (distance === 3) { targetFreq = 100; targetVol = 0.10; } 
+  else { targetFreq = 50; targetVol = 0.05; }
+
+  bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
+  bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
 }
 
-// Start Gry
+// --- LOGIKA GRY ---
+
 function startGame() {
-  initAudio();
-  startDrone();
-  
+  initAudioContext();
+  startBackgroundDrone(); 
+
+  const boardDiv = document.getElementById("board");
+  const wormDiv  = document.getElementById("worm-map");
+
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
   score = 0;
-  
-  updateUI();
+   
+  document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
-  
-  const boardEl = document.getElementById("board");
-  boardEl.innerHTML = "";
-  boardEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+  document.getElementById("helipadB").style.visibility = "hidden";
 
-  // Generowanie planszy
+  boardDiv.innerHTML = "";
+  wormDiv.innerHTML = "";
+  boardDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`; // Zmienione na 1fr
+  wormDiv.style.gridTemplateColumns  = `repeat(${size}, 20px)`;
+
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
-      board[y][x] = { worm: false, visited: false };
+      board[y][x] = { worm:false, visited:false };
+
       const cell = document.createElement("div");
       cell.className = "cell";
-      cell.dataset.x = x; 
+      cell.dataset.x = x;
       cell.dataset.y = y;
-      cell.onclick = () => movePlayer(x, y);
-      
-      if (x===0 && y===0) { cell.classList.add("start"); cell.innerText = "A"; }
-      if (x===size-1 && y===size-1) { cell.classList.add("goal"); cell.innerText = "B"; }
-      
-      boardEl.appendChild(cell);
+      cell.onclick = () => moveTo(x,y);
+      boardDiv.appendChild(cell);
+
+      const wcell = document.createElement("div");
+      wcell.className = "cell";
+      wcell.dataset.x = x;
+      wcell.dataset.y = y;
+      wormDiv.appendChild(wcell);
     }
   }
 
-  // Rozmieszczenie czerwi
+  placeWorms();
+  updateWormMap();
+  drawBoard();
+  checkProximity(0,0);
+}
+
+function placeWorms() {
   let placed = 0;
   while (placed < wormsCount) {
     let x = Math.floor(Math.random() * size);
     let y = Math.floor(Math.random() * size);
-    // Nie na starcie i nie na mecie
-    if ((x===0 && y===0) || (x===size-1 && y===size-1)) continue;
+    if ((x === 0 && y === 0) || (x === size-1 && y === size-1)) continue;
     if (!board[y][x].worm) {
       board[y][x].worm = true;
       placed++;
     }
   }
-
-  drawPlayer();
-  checkSensors();
-}
-
-function drawPlayer() {
-  document.querySelectorAll(".cell").forEach(c => {
-    c.innerHTML = "";
-    c.classList.remove("visited", "worm");
-    if (c.classList.contains("start")) c.innerText = "A";
-    if (c.classList.contains("goal")) c.innerText = "B";
-    
-    let x = parseInt(c.dataset.x);
-    let y = parseInt(c.dataset.y);
-    
-    if (board[y][x].visited) c.classList.add("visited");
-    if (gameOver && board[y][x].worm) {
-        c.classList.add("worm");
-        c.innerText = "🪱";
-    }
-    if (x === playerPos.x && y === playerPos.y && !gameOver) {
-        c.innerHTML = "<div class='player'></div>";
-    }
-  });
-}
-
-function movePlayer(x, y) {
-  if (gameOver) return;
-  
-  // Sprawdź czy ruch jest o 1 pole (góra/dół/lewo/prawo)
-  const dist = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-  if (dist !== 1) return;
-
-  initAudio();
-  steps++;
-  playerPos = {x, y};
-  board[y][x].visited = true;
-  
-  // Oblicz punkty
-  let basePoints = Math.max(0, 100 - steps);
-  if (document.getElementById("hardMode").checked) {
-      score = basePoints * 5;
-      moveWorms(); // W trybie hard czerwie się ruszają
-  } else {
-      score = basePoints;
-  }
-  
-  updateUI();
-
-  // Sprawdzenie kolizji
-  if (board[y][x].worm) {
-      endGame(false);
-      return;
-  }
-
-  // Sprawdzenie wygranej
-  if (x === size-1 && y === size-1) {
-      endGame(true);
-      return;
-  }
-
-  checkSensors();
-  drawPlayer();
 }
 
 function moveWorms() {
-    // Prosta logika ruchu czerwi (losowo o 1 pole)
-    let newBoardState = board.map(row => row.map(cell => cell.worm));
-    
-    for(let y=0; y<size; y++) {
-        for(let x=0; x<size; x++) {
-            if (board[y][x].worm) {
-                // Szansa 30% na ruch
-                if (Math.random() > 0.3) continue;
-                
-                const dirs = [[0,1], [0,-1], [1,0], [-1,0]];
-                const dir = dirs[Math.floor(Math.random()*dirs.length)];
-                let nx = x + dir[0];
-                let ny = y + dir[1];
-                
-                if (nx>=0 && nx<size && ny>=0 && ny<size && 
-                    !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
-                    // Przesuń
-                    newBoardState[y][x] = false;
-                    newBoardState[ny][nx] = true;
-                }
-            }
-        }
-    }
-    // Aktualizuj planszę
-    for(let y=0; y<size; y++) 
-        for(let x=0; x<size; x++) 
-            board[y][x].worm = newBoardState[y][x];
-}
-
-function checkSensors() {
-  let minDist = 99;
-  for (let y=0; y<size; y++) {
-    for (let x=0; x<size; x++) {
+  if (!document.getElementById("hardMode").checked) return;
+  let newBoard = board.map(row => row.map(cell => ({...cell, worm:false})));
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
       if (board[y][x].worm) {
-        const d = Math.abs(playerPos.x - x) + Math.abs(playerPos.y - y);
-        if (d < minDist) minDist = d;
+        const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
+        const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
+        let nx = x+dx, ny = y+dy;
+        if (nx>=0 && nx<size && ny>=0 && ny<size &&
+            !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
+          newBoard[ny][nx].worm = true;
+        } else {
+          newBoard[y][x].worm = true;
+        }
       }
     }
   }
-  
-  updateDrone(minDist);
-  
-  // Efekty wizualne
-  document.body.className = "";
-  if (minDist === 1) document.body.classList.add("shake-violent");
-  else if (minDist === 2) document.body.classList.add("shake-strong");
-  else if (minDist === 3) document.body.classList.add("shake-light");
-}
-
-function endGame(win) {
-  gameOver = true;
-  stopDrone();
-  drawPlayer(); // Odsłoń czerwie
-  document.body.className = "";
-
-  const modal = document.getElementById("custom-modal");
-  const text = document.getElementById("modal-text");
-  
-  document.getElementById("leaderboard-table").style.display = "none";
-  document.getElementById("modal-close-btn").style.display = "inline-block";
-
-  if (win) {
-    text.innerText = `Udało się! Dotarłeś do Siczy Tabr.\nPunkty: ${score}`;
-    document.getElementById("nickname-input").style.display = "inline-block";
-    document.getElementById("modal-save-btn").style.display = "inline-block";
-    playTone(600, "sine");
-  } else {
-    text.innerText = "Zjadł Cię Czerw Pustyni!\nKoniec gry.";
-    document.getElementById("nickname-input").style.display = "none";
-    document.getElementById("modal-save-btn").style.display = "none";
-    playTone(100, "sawtooth");
+  for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+          board[y][x].worm = newBoard[y][x].worm;
+      }
   }
-  
-  modal.style.display = "flex";
+  updateWormMap();
 }
 
-function updateUI() {
-  document.getElementById("stats").innerText = `Kroki: ${steps} | Wynik: ${score}`;
+function updateWormMap() {
+  const wormDiv = document.getElementById("worm-map");
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      if (x === playerPos.x && y === playerPos.y) {
+          cell.textContent = "👣";
+      } else {
+          cell.textContent = board[y][x].worm ? "🪱" : "";
+      }
+    }
+  }
 }
 
-// Audio pomocnicze
-function playTone(freq, type) {
+function isAdjacent(x,y) {
+  return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1;
+}
+
+function moveTo(x,y) {
+  if(gameOver || !isAdjacent(x,y)) return;
+  initAudioContext();
+
+  playerPos = {x,y};
+  steps++;
+  board[y][x].visited = true;
+
+  // --- MODYFIKACJA PUNKTACJI ---
+  let baseScore = Math.max(0, 100 - steps * 2);
+  let isHardMode = document.getElementById("hardMode").checked;
+  score = isHardMode ? baseScore * 4 : baseScore;
+   
+  document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+
+  if (board[y][x].worm) {
+    handleDeath();
+    return;
+  }
+
+  moveWorms();
+
+  if (board[playerPos.y][playerPos.x].worm) {
+    handleDeath();
+    return;
+  }
+
+  checkProximity(x, y);
+
+  drawBoard();
+  updateWormMap();
+
+  if (x===size-1 && y===size-1) {
+    revealWorms(); 
+    document.getElementById("helipadB").style.visibility = "visible";
+    stopBackgroundDrone();
+
+    document.body.className = "";
+    gameOver = true;
+    
+    // ZMIANA: Pokazujemy okno zapisu online
+    showVictoryInput(score);
+  }
+}
+
+function handleDeath() {
+  applyFeedback(0);
+  revealWorms();
+  updateWormMap();
+  stopBackgroundDrone(); 
+  playTone(100, "sawtooth", 0.5); 
+   
+  setTimeout(() => showCustomAlert("Pożarł Cię Czerw Pustyni!\nKoniec gry."), 100);
+  gameOver = true;
+}
+
+function checkProximity(px, py) {
+  let minDistance = 999;
+  for(let y=0; y<size; y++) {
+    for(let x=0; x<size; x++) {
+      if(board[y][x].worm) {
+        const dist = Math.abs(px - x) + Math.abs(py - y);
+        if(dist < minDistance) minDistance = dist;
+      }
+    }
+  }
+  updateDroneSound(minDistance);
+  applyFeedback(minDistance);
+}
+
+function applyFeedback(distance) {
+  document.body.className = "";
+  if (distance === 0) document.body.classList.add("shake-dist-0");
+  else if (distance === 1) document.body.classList.add("shake-dist-1");
+  else if (distance === 2) document.body.classList.add("shake-dist-2");
+  else if (distance === 3) document.body.classList.add("shake-dist-3");
+}
+
+function playTone(freq, type, vol) {
   if (!audioCtx) return;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
-  o.type = type;
-  o.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  g.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-  o.connect(g);
-  g.connect(audioCtx.destination);
-  o.start();
-  o.stop(audioCtx.currentTime + 0.5);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function drawBoard() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      cell.className="cell";
+      cell.textContent="";
+      if(board[y][x].visited) cell.classList.add("visited");
+      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) cell.textContent="👣";
+    }
+  }
+}
+
+function revealWorms() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cell.classList.add("worm");
+        cell.textContent="🪱";
+      }
+    }
+  }
 }
 
 let narratorAudio = null;
@@ -583,16 +725,20 @@ function playNarrator() {
   const btn = document.getElementById("narratorBtn");
   if (!narratorAudio) {
     narratorAudio = new Audio("Saper_Diuny.mp3");
-    narratorAudio.onended = () => btn.innerText = "🎙️ Narrator";
+    narratorAudio.addEventListener('ended', () => {
+       btn.innerText = "🎙️ Narrator (Start)";
+       narratorAudio.currentTime = 0;
+    });
   }
-  
   if (narratorAudio.paused) {
-    narratorAudio.play().catch(e => alert("Brak pliku Saper_Diuny.mp3 w folderze!"));
-    btn.innerText = "⏸️ Stop";
+    narratorAudio.play().then(() => {
+      btn.innerText = "⏸️ Narrator (Pauza)";
+    }).catch(err => {
+      showCustomAlert("Błąd audio:\nBrak pliku Saper_Diuny.mp3!");
+    });
   } else {
     narratorAudio.pause();
-    narratorAudio.currentTime = 0;
-    btn.innerText = "🎙️ Narrator";
+    btn.innerText = "▶️ Narrator (Wznów)";
   }
 }
 </script>

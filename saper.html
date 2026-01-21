@@ -115,12 +115,14 @@ html, body {
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
 }
   
-##helipadB {
+#helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+
+  /* Specyficzne dla B: */
+  visibility: hidden;   /* Ukryte na początku gry */
+  align-self: flex-end; /* Przesuwa lądowisko do dolnej krawędzi */
 }
-  
-#helipadB { visibility: hidden; }
 
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); }
 #board { display: inline-grid; gap: 3px; }

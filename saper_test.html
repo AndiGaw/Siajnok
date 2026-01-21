@@ -15,58 +15,108 @@ html, body {
   overflow-x: hidden;
 }
 
-/* ===== ALERT SYSTEM & MODAL ===== */
+/* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
-  display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.85); backdrop-filter: blur(2px);
-  justify-content: center; align-items: center;
+  display: none; /* Domyślnie ukryty */
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
+  backdrop-filter: blur(2px);
+  justify-content: center;
+  align-items: center;
 }
+
 #modal-content {
-  background-color: #111; border: 3px solid #e6c47a; box-shadow: 0 0 30px rgba(230,196,122,0.4);
-  padding: 40px; text-align: center; max-width: 400px; width: 80%; animation: modalFadeIn 0.3s ease-out;
+  background-color: #111;
+  border: 3px solid #e6c47a;
+  box-shadow: 0 0 30px rgba(230,196,122,0.4);
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 80%;
+  animation: modalFadeIn 0.3s ease-out;
 }
-#modal-text { font-size: 1.5em; margin-bottom: 20px; color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.3); line-height: 1.4; }
 
-/* Style przycisków w modalu */
-.modal-btn-style {
-  background: #222; color: #e6c47a; border: 2px solid #e6c47a; padding: 15px 40px;
-  font-size: 1.2em; font-family: "Georgia", serif; cursor: pointer; transition: 0.2s;
-  text-transform: uppercase; letter-spacing: 2px; margin-top: 10px;
+#modal-text {
+  font-size: 1.5em;
+  margin-bottom: 15px;
+  color: #e6c47a;
+  text-shadow: 0 0 10px rgba(230,196,122,0.3);
+  line-height: 1.4;
 }
-.modal-btn-style:hover { background: #e6c47a; color: #000; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
 
-/* Nowe style dla inputu nicku */
+/* Stylizacja przycisków w modalu */
+.modal-btn {
+  background: #222;
+  color: #e6c47a;
+  border: 2px solid #e6c47a;
+  padding: 15px 40px;
+  font-size: 1.2em;
+  font-family: "Georgia", serif;
+  cursor: pointer;
+  transition: 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 10px;
+}
+
+.modal-btn:hover {
+  background: #e6c47a;
+  color: #000;
+  box-shadow: 0 0 20px rgba(230,196,122,0.8);
+}
+
+/* --- NOWE: Styl dla pola wprowadzania nicku --- */
 #nickname-input {
   display: none; /* Domyślnie ukryty */
-  width: 80%; padding: 10px; margin-bottom: 20px;
-  background: #000; border: 1px solid #e6c47a; color: #e6c47a;
-  font-family: "Georgia", serif; font-size: 1.2em; text-align: center;
+  width: 80%;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: #000;
+  border: 1px solid #e6c47a;
+  color: #e6c47a;
+  font-family: "Georgia", serif;
+  font-size: 1.2em;
+  text-align: center;
 }
-#nickname-input:focus { outline: none; box-shadow: 0 0 15px rgba(230,196,122,0.5); }
+#nickname-input:focus {
+  outline: none;
+  box-shadow: 0 0 15px rgba(230,196,122,0.5);
+}
 
-/* Ukrywanie/pokazywanie przycisków */
-.hidden { display: none; }
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
 
-@keyframes modalFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
-/* ===== ANIMACJE DRŻENIA ===== */
+/* ===== ANIMACJE DRŻENIA (5 POZIOMÓW) ===== */
 @keyframes shake-micro { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(0.5px, 0.5px); } }
 .shake-dist-3 { animation: shake-micro 0.1s infinite; }
+
 @keyframes shake-light { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px, 1px); } 75% { transform: translate(-1px, -1px); } }
 .shake-dist-2 { animation: shake-light 0.5s infinite; }
+
 @keyframes shake-strong { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-2px, 0); } 80% { transform: translate(2px, 0); } }
 .shake-dist-1 { animation: shake-strong 0.2s infinite; }
+
 @keyframes shake-violent { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-3px, 3px) rotate(-0.5deg); } 75% { transform: translate(3px, -3px) rotate(0.5deg); } }
 .shake-dist-0 { animation: shake-violent 0.1s infinite; }
 
 .sand {
-  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  position: fixed;
+  inset: 0;
   background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
   animation: drift 60s linear infinite;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ===== UI ===== */
-.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; padding-bottom: 50px; }
+.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; }
 
 #controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
 #controls button {
@@ -88,23 +138,13 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden; align-self: flex-end; 
+  visibility: hidden;   
+  align-self: flex-end; 
 }  
 
-#board-wrapper { 
-  display: flex; flex-direction: column; align-items: center; 
-  min-width: calc(50px * 10 + 3px * 9); position: relative; 
-}
-
+#board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-
-#worm-map { display: inline-grid; gap: 2px; margin-top: 15px; }    
-
-#helipadC {
-  width: 120px; height: 120px; background: #221111; border: 2px solid #ff4444; color: #ff4444;
-  border-radius: 10px; display: flex; align-items: center; justify-content: center; 
-  font-weight: bold; margin-top: 20px; visibility: hidden; 
-}
+#worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }   
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -140,7 +180,6 @@ html, body {
     <div id="board-wrapper">
       <div id="board"></div>
       <div id="worm-map"></div>
-      <div id="helipadC">Lądowisko C<br>(Awaryjne)</div>
     </div>
 
     <div id="helipadB">Sicz Tabr</div>
@@ -151,15 +190,16 @@ html, body {
   <div id="modal-content">
     <div id="modal-text">Komunikat Systemowy</div>
     
-    <input type="text" id="nickname-input" placeholder="Wpisz swój nick" maxlength="15">
+    <input type="text" id="nickname-input" placeholder="Twoje imię..." maxlength="15">
     
-    <button id="modal-next-btn" class="modal-btn-style" onclick="closeModal()">Dalej</button>
-    <button id="modal-save-btn" class="modal-btn-style hidden" onclick="submitScore()">Zapisz Wynik</button>
+    <button id="modal-next-btn" class="modal-btn" onclick="closeModal()">Dalej</button>
+    
+    <button id="modal-save-btn" class="modal-btn" onclick="submitScore()" style="display:none;">Zapisz wynik</button>
   </div>
 </div>
 
 <script>
-// --- ALERTY I MODALE ---
+// --- NOWY SYSTEM ALERTÓW (JS) ---
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
@@ -173,118 +213,141 @@ function showCustomAlert(message) {
   modal.style.display = "flex";
 }
 
-// Funkcja specjalna dla zwycięstwa
+// Funkcja specjalna dla wygranej
 function showVictoryInput(currentScore) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
   
   text.innerText = `Dotarłeś do celu!\nPunkty: ${currentScore}\nPodaj swój nick:`;
   
-  // Pokaż input i przycisk zapisu, ukryj zwykły przycisk "Dalej"
   const input = document.getElementById("nickname-input");
   input.style.display = "inline-block";
-  input.value = ""; // Wyczyść poprzedni wpis
-  input.focus();
+  input.value = ""; 
   
   document.getElementById("modal-next-btn").style.display = "none";
   document.getElementById("modal-save-btn").style.display = "inline-block";
   
   modal.style.display = "flex";
+  input.focus();
 }
 
+function closeModal() {
+  document.getElementById("custom-modal").style.display = "none";
+}
+
+// --- LOGIKA ZAPISU DO TOP 10 ---
 function submitScore() {
   const input = document.getElementById("nickname-input");
-  const nick = input.value.trim() || "Anonim"; // Domyślny nick jeśli pusty
+  const nick = input.value.trim() || "Nieznajomy";
   
   saveToTop10(nick, score);
-  
   closeModal();
-  // Opcjonalnie: potwierdzenie zapisu (można wyłączyć jeśli niepotrzebne)
-  setTimeout(() => showCustomAlert(`Zapisano wynik gracza ${nick}!`), 200);
+  
+  // Krótkie potwierdzenie (opcjonalne, ale miłe dla UX)
+  setTimeout(() => showCustomAlert("Wynik zapisany w archiwach Arrakis."), 200);
 }
 
 function saveToTop10(nick, points) {
   const STORAGE_KEY = 'arrakis_top10';
-  // Pobierz obecne wyniki lub utwórz nową tablicę
   let top10 = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   
-  // Dodaj nowy wynik
-  top10.push({ nick: nick, score: points, date: new Date().toISOString() });
+  top10.push({ nick: nick, points: points, date: new Date().toISOString() });
   
-  // Sortuj malejąco (najwięcej punktów na górze)
-  top10.sort((a, b) => b.score - a.score);
+  // Sortuj malejąco wg punktów
+  top10.sort((a, b) => b.points - a.points);
   
   // Zachowaj tylko 10 najlepszych
-  top10 = top10.slice(0, 10);
+  if (top10.length > 10) {
+    top10 = top10.slice(0, 10);
+  }
   
-  // Zapisz z powrotem do localStorage
   localStorage.setItem(STORAGE_KEY, JSON.stringify(top10));
-  
-  console.log("Aktualne Top 10 (Systemowe):", top10);
+  console.log("Zaktualizowano Top 10 (ukryte):", top10);
 }
-
-function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
 
 // --- KONFIGURACJA ---
 const size = 10;
 const wormsCount = 12;
 
-// --- STATE ---
+// --- ZMIENNE STANU ---
 let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 let gameOver = false;
 
-// --- AUDIO ---
-let audioCtx = null, bgOsc = null, bgGain = null;
-function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+// --- SYSTEM AUDIO (DRONE) ---
+let audioCtx = null;
+let bgOsc = null; 
+let bgGain = null;
+
+function initAudioContext() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
 
 function startBackgroundDrone() {
   initAudioContext();
   if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
-  bgOsc = audioCtx.createOscillator(); bgGain = audioCtx.createGain();
-  bgOsc.type = 'triangle'; bgOsc.frequency.value = 50; bgGain.gain.value = 0.05;   
-  bgOsc.connect(bgGain); bgGain.connect(audioCtx.destination); bgOsc.start();
+
+  bgOsc = audioCtx.createOscillator();
+  bgGain = audioCtx.createGain();
+
+  bgOsc.type = 'triangle';
+  bgOsc.frequency.value = 50; 
+  bgGain.gain.value = 0.05;   
+
+  bgOsc.connect(bgGain);
+  bgGain.connect(audioCtx.destination);
+   
+  bgOsc.start();
 }
+
 function stopBackgroundDrone() {
-  if (bgOsc) { bgGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1); bgOsc.stop(audioCtx.currentTime + 1); bgOsc = null; }
+  if (bgOsc) {
+    const now = audioCtx.currentTime;
+    bgGain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+    bgOsc.stop(now + 1);
+    bgOsc = null;
+  }
 }
+
 function updateDroneSound(distance) {
   if (!bgOsc || !audioCtx) return;
   const now = audioCtx.currentTime;
-  let tf, tv;
-  if (distance === 0) { tf = 50; tv = 0; } 
-  else if (distance === 1) { tf = 400; tv = 0.35; } 
-  else if (distance === 2) { tf = 200; tv = 0.20; } 
-  else if (distance === 3) { tf = 100; tv = 0.10; } 
-  else { tf = 50; tv = 0.05; }
-  bgOsc.frequency.linearRampToValueAtTime(tf, now + 0.3);
-  bgGain.gain.linearRampToValueAtTime(tv, now + 0.3);
-}
-function playTone(freq, type, vol) {
-  if (!audioCtx) return;
-  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+  let targetFreq, targetVol;
+
+  if (distance === 0) { targetFreq = 50; targetVol = 0; } 
+  else if (distance === 1) { targetFreq = 400; targetVol = 0.35; } 
+  else if (distance === 2) { targetFreq = 200; targetVol = 0.20; } 
+  else if (distance === 3) { targetFreq = 100; targetVol = 0.10; } 
+  else { targetFreq = 50; targetVol = 0.05; }
+
+  bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
+  bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
 }
 
 // --- LOGIKA GRY ---
+
 function startGame() {
   initAudioContext();
   startBackgroundDrone(); 
+
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
 
-  board = []; gameOver = false; playerPos = {x:0, y:0}; steps = 0; score = 0;
-  
+  board = [];
+  gameOver = false;
+  playerPos = {x:0, y:0};
+  steps = 0;
+  score = 0;
+   
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
   document.getElementById("helipadB").style.visibility = "hidden";
-  document.getElementById("helipadC").style.visibility = "hidden";
 
-  boardDiv.innerHTML = ""; wormDiv.innerHTML = "";
+  boardDiv.innerHTML = "";
+  wormDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
 
@@ -292,25 +355,38 @@ function startGame() {
     board[y] = [];
     for (let x = 0; x < size; x++) {
       board[y][x] = { worm:false, visited:false };
+
       const cell = document.createElement("div");
-      cell.className = "cell"; cell.dataset.x = x; cell.dataset.y = y;
+      cell.className = "cell";
+      cell.dataset.x = x;
+      cell.dataset.y = y;
       cell.onclick = () => moveTo(x,y);
       boardDiv.appendChild(cell);
 
       const wcell = document.createElement("div");
-      wcell.className = "cell"; wcell.dataset.x = x; wcell.dataset.y = y;
+      wcell.className = "cell";
+      wcell.dataset.x = x;
+      wcell.dataset.y = y;
       wormDiv.appendChild(wcell);
     }
   }
-  placeWorms(); updateWormMap(); drawBoard(); checkProximity(0,0);
+
+  placeWorms();
+  updateWormMap();
+  drawBoard();
+  checkProximity(0,0);
 }
 
 function placeWorms() {
   let placed = 0;
   while (placed < wormsCount) {
-    let x = Math.floor(Math.random() * size); let y = Math.floor(Math.random() * size);
+    let x = Math.floor(Math.random() * size);
+    let y = Math.floor(Math.random() * size);
     if ((x === 0 && y === 0) || (x === size-1 && y === size-1)) continue;
-    if (!board[y][x].worm) { board[y][x].worm = true; placed++; }
+    if (!board[y][x].worm) {
+      board[y][x].worm = true;
+      placed++;
+    }
   }
 }
 
@@ -323,13 +399,20 @@ function moveWorms() {
         const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
         const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
         let nx = x+dx, ny = y+dy;
-        if (nx>=0 && nx<size && ny>=0 && ny<size && !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
+        if (nx>=0 && nx<size && ny>=0 && ny<size &&
+            !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
           newBoard[ny][nx].worm = true;
-        } else { newBoard[y][x].worm = true; }
+        } else {
+          newBoard[y][x].worm = true;
+        }
       }
     }
   }
-  for(let y=0;y<size;y++) for(let x=0;x<size;x++) board[y][x].worm = newBoard[y][x].worm;
+  for (let y = 0; y < size; y++) {
+      for (let x = 0; x < size; x++) {
+          board[y][x].worm = newBoard[y][x].worm;
+      }
+  }
   updateWormMap();
 }
 
@@ -338,70 +421,111 @@ function updateWormMap() {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      if (x === playerPos.x && y === playerPos.y) cell.textContent = "👣";
-      else cell.textContent = board[y][x].worm ? "🪱" : "";
+      if (x === playerPos.x && y === playerPos.y) {
+          cell.textContent = "👣";
+      } else {
+          cell.textContent = board[y][x].worm ? "🪱" : "";
+      }
     }
   }
 }
 
-function isAdjacent(x,y) { return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1; }
+function isAdjacent(x,y) {
+  return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y)===1;
+}
 
 function moveTo(x,y) {
   if(gameOver || !isAdjacent(x,y)) return;
   initAudioContext();
-  playerPos = {x,y}; steps++; board[y][x].visited = true;
+
+  playerPos = {x,y};
+  steps++;
+  board[y][x].visited = true;
+
   score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
-  if (board[y][x].worm) { handleDeath(); return; }
+  if (board[y][x].worm) {
+    handleDeath();
+    return;
+  }
+
   moveWorms();
-  if (board[playerPos.y][playerPos.x].worm) { handleDeath(); return; }
+
+  if (board[playerPos.y][playerPos.x].worm) {
+    handleDeath();
+    return;
+  }
 
   checkProximity(x, y);
-  drawBoard(); updateWormMap();
 
-  // --- WARUNEK ZWYCIĘSTWA ---
+  drawBoard();
+  updateWormMap();
+
   if (x===size-1 && y===size-1) {
-    revealWorms();
-    
-    // UI Updates
+    revealWorms(); 
     document.getElementById("helipadB").style.visibility = "visible";
-    document.getElementById("helipadC").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
-
-    // Wywołanie modala z prośbą o nick
+    
+    // ZMIANA: Zamiast zwykłego alertu, poproś o nick
     showVictoryInput(score);
   }
 }
 
 function handleDeath() {
-  applyFeedback(0); revealWorms(); updateWormMap(); stopBackgroundDrone(); playTone(100, "sawtooth", 0.5);  
+  applyFeedback(0);
+  revealWorms();
+  updateWormMap();
+  stopBackgroundDrone(); 
+  playTone(100, "sawtooth", 0.5); 
+   
   setTimeout(() => showCustomAlert("Pożarł Cię Czerw Pustyni!\nKoniec gry."), 100);
   gameOver = true;
 }
 
 function checkProximity(px, py) {
-  let min = 999;
-  for(let y=0; y<size; y++) for(let x=0; x<size; x++) if(board[y][x].worm) {
-    const d = Math.abs(px - x) + Math.abs(py - y); if(d < min) min = d;
+  let minDistance = 999;
+  for(let y=0; y<size; y++) {
+    for(let x=0; x<size; x++) {
+      if(board[y][x].worm) {
+        const dist = Math.abs(px - x) + Math.abs(py - y);
+        if(dist < minDistance) minDistance = dist;
+      }
+    }
   }
-  updateDroneSound(min); applyFeedback(min);
+  updateDroneSound(minDistance);
+  applyFeedback(minDistance);
 }
 
-function applyFeedback(dist) {
+function applyFeedback(distance) {
   document.body.className = "";
-  if (dist === 0) document.body.classList.add("shake-dist-0");
-  else if (dist === 1) document.body.classList.add("shake-dist-1");
-  else if (dist === 2) document.body.classList.add("shake-dist-2");
-  else if (dist === 3) document.body.classList.add("shake-dist-3");
+  if (distance === 0) document.body.classList.add("shake-dist-0");
+  else if (distance === 1) document.body.classList.add("shake-dist-1");
+  else if (distance === 2) document.body.classList.add("shake-dist-2");
+  else if (distance === 3) document.body.classList.add("shake-dist-3");
+}
+
+function playTone(freq, type, vol) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.5);
 }
 
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-      cell.className="cell"; cell.textContent="";
+      const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      cell.className="cell";
+      cell.textContent="";
       if(board[y][x].visited) cell.classList.add("visited");
       if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
       if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
@@ -411,9 +535,14 @@ function drawBoard() {
 }
 
 function revealWorms() {
-  for(let y=0;y<size;y++) for(let x=0;x<size;x++) if(board[y][x].worm){
-    const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-    cell.classList.add("worm"); cell.textContent="🪱";
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cell.classList.add("worm");
+        cell.textContent="🪱";
+      }
+    }
   }
 }
 
@@ -422,11 +551,21 @@ function playNarrator() {
   const btn = document.getElementById("narratorBtn");
   if (!narratorAudio) {
     narratorAudio = new Audio("Saper_Diuny.mp3");
-    narratorAudio.addEventListener('ended', () => { btn.innerText = "🎙️ Narrator (Start)"; narratorAudio.currentTime = 0; });
+    narratorAudio.addEventListener('ended', () => {
+       btn.innerText = "🎙️ Narrator (Start)";
+       narratorAudio.currentTime = 0;
+    });
   }
   if (narratorAudio.paused) {
-    narratorAudio.play().then(() => { btn.innerText = "⏸️ Narrator (Pauza)"; }).catch(err => { showCustomAlert("Błąd audio:\nBrak pliku Saper_Diuny.mp3!"); });
-  } else { narratorAudio.pause(); btn.innerText = "▶️ Narrator (Wznów)"; }
+    narratorAudio.play().then(() => {
+      btn.innerText = "⏸️ Narrator (Pauza)";
+    }).catch(err => {
+      showCustomAlert("Błąd audio:\nBrak pliku Saper_Diuny.mp3!");
+    });
+  } else {
+    narratorAudio.pause();
+    btn.innerText = "▶️ Narrator (Wznów)";
+  }
 }
 </script>
 </body>

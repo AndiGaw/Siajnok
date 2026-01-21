@@ -552,6 +552,10 @@ function moveTo(x,y) {
     revealWorms(); 
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
+
+// --- POPRAWKA: Zatrzymaj wibracje przy wygranej ---
+    document.body.className = "";
+    
     gameOver = true;
     
     // ZMIANA: Zamiast zwykłego alertu, poproś o nick

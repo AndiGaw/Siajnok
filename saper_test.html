@@ -176,10 +176,8 @@ html, body {
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
 
-<audio id="mojDzwiek" src="plik.mp3"></audio>
-
   <div id="controls">
-    <button onclick="playNarrator()">🎙️ Narrator  ▶️ Graj / ⏸️ Pauza</button>
+    <button id="narratorBtn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     <button onclick="startGame()">🏜️ Uruchom systemy i ruszaj</button>
     <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
@@ -534,17 +532,38 @@ function revealWorms() {
 //  audio.play().catch(err => console.log("Nie udało się odtworzyć audio:", err));
 //  }
 
+// Zmienna globalna (poza funkcją), żeby pamiętała stan odtwarzania
+let narratorAudio = null;
+
 function playNarrator() {
-   var audio = document.getElementById("Saper_Diuny.mp3");
+  const btn = document.getElementById("narratorBtn");
+
+  // 1. Jeśli audio jeszcze nie istnieje, tworzymy je
+  if (!narratorAudio) {
+    narratorAudio = new Audio("Saper_Diuny.mp3");
     
-   // Sprawdzamy czy gra, żeby zrobić przełącznik (Play/Pause)
-  if (audio.paused) {
-     audio.play();
+    // Gdy nagranie się skończy, zresetuj przycisk
+    narratorAudio.addEventListener('ended', () => {
+       btn.innerText = "🎙️ Narrator (Start)";
+       narratorAudio.currentTime = 0; // Przewiń do początku
+    });
+  }
+
+  // 2. Logika przełączania (Play / Pauza)
+  if (narratorAudio.paused) {
+    narratorAudio.play()
+      .then(() => {
+        btn.innerText = "⏸️ Narrator (Pauza)"; // Zmieniamy napis na przycisku
+      })
+      .catch(err => {
+        console.log("Błąd audio:", err);
+        alert("Brak pliku Saper_Diuny.mp3 w folderze!");
+      });
   } else {
-     audio.pause();
-    // Opcjonalnie: audio.currentTime = 0; // Odkomentuj, żeby przewinąć do początku
+    narratorAudio.pause();
+    btn.innerText = "▶️ Narrator (Wznów)"; // Zmieniamy napis na przycisku
   }
-  }
+}
 </script>
 
   

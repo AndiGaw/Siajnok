@@ -15,7 +15,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* ===== ALERT SYSTEM ===== */
+/* ===== ALERT SYSTEM & MODAL ===== */
 #custom-modal {
   display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
   background-color: rgba(0,0,0,0.85); backdrop-filter: blur(2px);
@@ -25,13 +25,28 @@ html, body {
   background-color: #111; border: 3px solid #e6c47a; box-shadow: 0 0 30px rgba(230,196,122,0.4);
   padding: 40px; text-align: center; max-width: 400px; width: 80%; animation: modalFadeIn 0.3s ease-out;
 }
-#modal-text { font-size: 1.5em; margin-bottom: 10px; color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.3); line-height: 1.4; }
-#modal-btn {
+#modal-text { font-size: 1.5em; margin-bottom: 20px; color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.3); line-height: 1.4; }
+
+/* Style przycisków w modalu */
+.modal-btn-style {
   background: #222; color: #e6c47a; border: 2px solid #e6c47a; padding: 15px 40px;
   font-size: 1.2em; font-family: "Georgia", serif; cursor: pointer; transition: 0.2s;
-  text-transform: uppercase; letter-spacing: 2px;
+  text-transform: uppercase; letter-spacing: 2px; margin-top: 10px;
 }
-#modal-btn:hover { background: #e6c47a; color: #000; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
+.modal-btn-style:hover { background: #e6c47a; color: #000; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
+
+/* Nowe style dla inputu nicku */
+#nickname-input {
+  display: none; /* Domyślnie ukryty */
+  width: 80%; padding: 10px; margin-bottom: 20px;
+  background: #000; border: 1px solid #e6c47a; color: #e6c47a;
+  font-family: "Georgia", serif; font-size: 1.2em; text-align: center;
+}
+#nickname-input:focus { outline: none; box-shadow: 0 0 15px rgba(230,196,122,0.5); }
+
+/* Ukrywanie/pokazywanie przycisków */
+.hidden { display: none; }
+
 @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
 /* ===== ANIMACJE DRŻENIA ===== */
@@ -73,39 +88,22 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden; /* Ukryte na start */
-  align-self: flex-end; 
+  visibility: hidden; align-self: flex-end; 
 }  
 
 #board-wrapper { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  min-width: calc(50px * 10 + 3px * 9); 
-  position: relative; 
+  display: flex; flex-direction: column; align-items: center; 
+  min-width: calc(50px * 10 + 3px * 9); position: relative; 
 }
 
 #board { display: inline-grid; gap: 3px; }
 
-#worm-map { 
-  display: inline-grid; 
-  gap: 2px; 
-  margin-top: 15px; 
-}    
+#worm-map { display: inline-grid; gap: 2px; margin-top: 15px; }    
 
-/* LĄDOWISKO C */
 #helipadC {
-  width: 120px; height: 120px; 
-  background: #221111; /* Lekko czerwonawy odcień tła dla odróżnienia */
-  border: 2px solid #ff4444; 
-  color: #ff4444;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; 
-  font-weight: bold; 
-  margin-top: 20px;
-  
-  /* ZMIANA: Ukryte domyślnie, rezerwuje miejsce lub znika (tutaj znika całkowicie, żeby nie było dziury) */
-  visibility: hidden; 
+  width: 120px; height: 120px; background: #221111; border: 2px solid #ff4444; color: #ff4444;
+  border-radius: 10px; display: flex; align-items: center; justify-content: center; 
+  font-weight: bold; margin-top: 20px; visibility: hidden; 
 }
 
 /* ===== KOMÓRKI ===== */
@@ -142,7 +140,6 @@ html, body {
     <div id="board-wrapper">
       <div id="board"></div>
       <div id="worm-map"></div>
-      
       <div id="helipadC">Lądowisko C<br>(Awaryjne)</div>
     </div>
 
@@ -153,18 +150,79 @@ html, body {
 <div id="custom-modal">
   <div id="modal-content">
     <div id="modal-text">Komunikat Systemowy</div>
-    <button id="modal-btn" onclick="closeModal()">Dalej</button>
+    
+    <input type="text" id="nickname-input" placeholder="Wpisz swój nick" maxlength="15">
+    
+    <button id="modal-next-btn" class="modal-btn-style" onclick="closeModal()">Dalej</button>
+    <button id="modal-save-btn" class="modal-btn-style hidden" onclick="submitScore()">Zapisz Wynik</button>
   </div>
 </div>
 
 <script>
-// --- ALERTY ---
+// --- ALERTY I MODALE ---
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
+  
+  // Reset widoku do zwykłego alertu
   text.innerText = message;
+  document.getElementById("nickname-input").style.display = "none";
+  document.getElementById("modal-next-btn").style.display = "inline-block";
+  document.getElementById("modal-save-btn").style.display = "none";
+  
   modal.style.display = "flex";
 }
+
+// Funkcja specjalna dla zwycięstwa
+function showVictoryInput(currentScore) {
+  const modal = document.getElementById("custom-modal");
+  const text = document.getElementById("modal-text");
+  
+  text.innerText = `Dotarłeś do celu!\nPunkty: ${currentScore}\nPodaj swój nick:`;
+  
+  // Pokaż input i przycisk zapisu, ukryj zwykły przycisk "Dalej"
+  const input = document.getElementById("nickname-input");
+  input.style.display = "inline-block";
+  input.value = ""; // Wyczyść poprzedni wpis
+  input.focus();
+  
+  document.getElementById("modal-next-btn").style.display = "none";
+  document.getElementById("modal-save-btn").style.display = "inline-block";
+  
+  modal.style.display = "flex";
+}
+
+function submitScore() {
+  const input = document.getElementById("nickname-input");
+  const nick = input.value.trim() || "Anonim"; // Domyślny nick jeśli pusty
+  
+  saveToTop10(nick, score);
+  
+  closeModal();
+  // Opcjonalnie: potwierdzenie zapisu (można wyłączyć jeśli niepotrzebne)
+  setTimeout(() => showCustomAlert(`Zapisano wynik gracza ${nick}!`), 200);
+}
+
+function saveToTop10(nick, points) {
+  const STORAGE_KEY = 'arrakis_top10';
+  // Pobierz obecne wyniki lub utwórz nową tablicę
+  let top10 = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  
+  // Dodaj nowy wynik
+  top10.push({ nick: nick, score: points, date: new Date().toISOString() });
+  
+  // Sortuj malejąco (najwięcej punktów na górze)
+  top10.sort((a, b) => b.score - a.score);
+  
+  // Zachowaj tylko 10 najlepszych
+  top10 = top10.slice(0, 10);
+  
+  // Zapisz z powrotem do localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(top10));
+  
+  console.log("Aktualne Top 10 (Systemowe):", top10);
+}
+
 function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
 
 // --- KONFIGURACJA ---
@@ -223,8 +281,6 @@ function startGame() {
   
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
-  
-  // ZMIANA: Ukrycie obu lądowisk na starcie
   document.getElementById("helipadB").style.visibility = "hidden";
   document.getElementById("helipadC").style.visibility = "hidden";
 
@@ -304,16 +360,18 @@ function moveTo(x,y) {
   checkProximity(x, y);
   drawBoard(); updateWormMap();
 
+  // --- WARUNEK ZWYCIĘSTWA ---
   if (x===size-1 && y===size-1) {
     revealWorms();
-    showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
     
-    // ZMIANA: Pokazanie obu lądowisk po wygranej
+    // UI Updates
     document.getElementById("helipadB").style.visibility = "visible";
     document.getElementById("helipadC").style.visibility = "visible";
-    
     stopBackgroundDrone();
     gameOver = true;
+
+    // Wywołanie modala z prośbą o nick
+    showVictoryInput(score);
   }
 }
 

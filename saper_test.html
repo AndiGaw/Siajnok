@@ -8,14 +8,14 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   background: #000;
   color: #e6c47a;
   font-family: "Georgia", serif;
   overflow-x: hidden;
 }
 
-/* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
+/* ===== MODAL SYSTEMOWY (ZWYKŁY) ===== */
 #custom-modal {
   display: none;
   position: fixed;
@@ -43,7 +43,7 @@ html, body {
 
 #modal-text {
   font-size: 1.5em;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
   color: #e6c47a;
   text-shadow: 0 0 10px rgba(230,196,122,0.3);
   line-height: 1.4;
@@ -66,6 +66,81 @@ html, body {
   background: #e6c47a;
   color: #000;
   box-shadow: 0 0 20px rgba(230,196,122,0.8);
+}
+
+/* ===== MODAL ZWYCIĘSTWA (INPUT) ===== */
+#win-modal {
+  display: none;
+  position: fixed;
+  z-index: 101;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.9);
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
+}
+
+#win-content {
+  background-color: #111;
+  border: 4px double #e6c47a;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 0 50px rgba(230,196,122,0.2);
+  animation: modalFadeIn 0.5s ease-out;
+}
+
+#player-nick {
+  background: #000;
+  border: 1px solid #e6c47a;
+  color: #e6c47a;
+  font-size: 1.5em;
+  padding: 10px;
+  margin: 20px 0;
+  width: 80%;
+  text-align: center;
+  font-family: "Courier New", monospace;
+}
+
+/* ===== TABELA WYNIKÓW (TOP 10) ===== */
+#high-scores-container {
+  margin: 40px auto 60px auto;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  border-top: 2px solid #333;
+  padding-top: 20px;
+}
+
+#high-scores-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  font-family: "Courier New", monospace;
+  font-size: 1.1em;
+}
+
+#high-scores-table th {
+  border-bottom: 2px solid #e6c47a;
+  padding: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+#high-scores-table td {
+  border-bottom: 1px solid #333;
+  padding: 8px;
+  color: #aaa;
+}
+
+#high-scores-table tr:first-child td {
+  color: #e6c47a;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(230,196,122,0.5);
 }
 
 @keyframes modalFadeIn {
@@ -124,22 +199,7 @@ html, body {
 
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-
-/* ===== KONFIGURACJA RADARU (DEBUGOWANIE) ===== */
-
-/* Opcja 1: GRA (Domyślna - ukryj radar) */
 #worm-map { display: none; }
-
-/* Opcja 2: DEBUGOWANIE (Odkomentuj poniższy blok, aby widzieć czerwie pod planszą) */
-/*
-#worm-map { 
-  display: inline-grid; 
-  gap: 2px; 
-  position: absolute; 
-  top: 100%; 
-  margin-top: 15px; 
-} 
-*/
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -179,6 +239,21 @@ html, body {
 
     <div id="helipadB">Sicz Tabr</div>
   </div>
+
+  <div id="high-scores-container">
+    <h2>Kroniki Arrakis (Top 10)</h2>
+    <table id="high-scores-table">
+        <thead>
+            <tr>
+                <th>Lp.</th>
+                <th>Nick</th>
+                <th>Punkty</th>
+            </tr>
+        </thead>
+        <tbody id="high-scores-list">
+            </tbody>
+    </table>
+  </div>
 </div>
 
 <div id="custom-modal">
@@ -188,8 +263,23 @@ html, body {
   </div>
 </div>
 
+<div id="win-modal">
+  <div id="win-content">
+    <h2>Dotarłeś do Siczy Tabr!</h2>
+    <p id="win-score-display">Twój wynik: 0</p>
+    <p>Podaj swoje imię do kronik:</p>
+    <input type="text" id="player-nick" placeholder="Wpisz nick..." maxlength="12">
+    <br>
+    <button id="modal-btn" onclick="submitScore()">Zapisz wynik</button>
+  </div>
+</div>
+
 <script>
 // --- JS ---
+
+// Inicjalizacja wyników przy starcie
+document.addEventListener("DOMContentLoaded", renderHighScores);
+
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
@@ -201,6 +291,69 @@ function closeModal() {
   document.getElementById("custom-modal").style.display = "none";
 }
 
+function showWinModal(finalScore) {
+  const modal = document.getElementById("win-modal");
+  document.getElementById("win-score-display").innerText = `Twój wynik: ${finalScore}`;
+  document.getElementById("player-nick").value = ""; // Wyczyść pole
+  modal.style.display = "flex";
+}
+
+// --- LOGIKA TOP 10 ---
+function getHighScores() {
+  const scores = localStorage.getItem("arrakisHighScores");
+  return scores ? JSON.parse(scores) : [];
+}
+
+function saveHighScore(nick, score) {
+  const scores = getHighScores();
+  const newEntry = { nick, score };
+  scores.push(newEntry);
+  
+  // Sortuj malejąco
+  scores.sort((a, b) => b.score - a.score);
+  
+  // Zostaw tylko top 10
+  const top10 = scores.slice(0, 10);
+  
+  localStorage.setItem("arrakisHighScores", JSON.stringify(top10));
+  renderHighScores();
+}
+
+function renderHighScores() {
+  const list = document.getElementById("high-scores-list");
+  const scores = getHighScores();
+  
+  list.innerHTML = "";
+  
+  if (scores.length === 0) {
+      list.innerHTML = "<tr><td colspan='3'>Brak wpisów w kronikach.</td></tr>";
+      return;
+  }
+
+  scores.forEach((entry, index) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td>${index + 1}.</td>
+          <td>${entry.nick}</td>
+          <td>${entry.score}</td>
+      `;
+      list.appendChild(tr);
+  });
+}
+
+function submitScore() {
+  const nickInput = document.getElementById("player-nick");
+  let nick = nickInput.value.trim();
+  
+  if (nick === "") {
+      nick = "Fremen"; // Domyślny nick
+  }
+  
+  saveHighScore(nick, score);
+  document.getElementById("win-modal").style.display = "none";
+}
+
+// --- KONFIGURACJA GRY ---
 const size = 10;
 const wormsCount = 12;
 
@@ -359,6 +512,7 @@ function moveTo(x,y) {
   board[y][x].visited = true;
   score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+  
   if (board[y][x].worm) {
     handleDeath();
     return;
@@ -370,13 +524,13 @@ function moveTo(x,y) {
   }
   checkProximity(x, y);
 
-  // ZMIANA: Najpierw rysujemy planszę, a potem ewentualnie odkrywamy czerwie (jeśli wygrana)
   drawBoard();
   updateWormMap();
 
   if (x===size-1 && y===size-1) {
-    revealWorms(); // <-- Odsłonięcie czerwii po sukcesie
-    showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
+    revealWorms(); 
+    // ZMIANA: Zamiast zwykłego alertu, otwieramy modal do wpisania nicku
+    showWinModal(score);
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
@@ -432,9 +586,8 @@ function playTone(freq, type, vol) {
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      // Używamy precyzyjnego selektora #board, aby nie mylić z radarem
       const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-      if(!cell) continue;
+      if (!cell) continue;
 
       cell.className="cell";
       cell.textContent="";
@@ -451,7 +604,6 @@ function revealWorms() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
-        // Precyzyjny selektor do głównej planszy
         const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
         if(cell) {
             cell.classList.add("worm");

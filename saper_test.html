@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Przeprawa przez Arrakis – 5 Poziomów Zagrożenia</title>
+<title>Przeprawa przez Arrakis</title>
 
 <style>
 html, body {
@@ -45,9 +45,9 @@ html, body {
 /* Dystans 0: Kolizja (śmierć) */
 @keyframes shake-violent {
   0% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-3px, 3px) rotate(-2deg); }
-  50% { transform: translate(3px, -3px) rotate(2deg); }
-  75% { transform: translate(-3px, -3px) rotate(-2deg); }
+  25% { transform: translate(-3px, 3px) rotate(-0.5deg); }
+  50% { transform: translate(3px, -3px) rotate(0.5deg); }
+  75% { transform: translate(-3px, -3px) rotate(-0.5deg); }
   100% { transform: translate(0, 0) rotate(0deg); }
 }
 .shake-dist-0 { animation: shake-violent 0.1s infinite; }
@@ -175,8 +175,7 @@ html, body {
 
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-  <p>System wczesnego ostrzegania (5 poziomów zagrożenia)</p>
-
+  
   <div id="controls">
     <button onclick="playNarrator()">🎙️ Narrator</button>
     <button onclick="startGame()">🏜️ Uruchom systemy i ruszaj</button>

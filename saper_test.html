@@ -73,7 +73,8 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden; align-self: flex-end; 
+  visibility: hidden; /* Ukryte na start */
+  align-self: flex-end; 
 }  
 
 #board-wrapper { 
@@ -86,22 +87,25 @@ html, body {
 
 #board { display: inline-grid; gap: 3px; }
 
-/* ZMIANA: Usunięto position: absolute, aby Lądowisko C było pod spodem w naturalnym przepływie */
 #worm-map { 
   display: inline-grid; 
   gap: 2px; 
   margin-top: 15px; 
 }    
 
-/* NOWE: Lądowisko C */
+/* LĄDOWISKO C */
 #helipadC {
   width: 120px; height: 120px; 
-  background: #111; 
-  border: 2px solid #e6c47a; 
+  background: #221111; /* Lekko czerwonawy odcień tła dla odróżnienia */
+  border: 2px solid #ff4444; 
+  color: #ff4444;
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center; 
   font-weight: bold; 
-  margin-top: 20px; /* Odstęp od mapy */
+  margin-top: 20px;
+  
+  /* ZMIANA: Ukryte domyślnie, rezerwuje miejsce lub znika (tutaj znika całkowicie, żeby nie było dziury) */
+  visibility: hidden; 
 }
 
 /* ===== KOMÓRKI ===== */
@@ -138,7 +142,8 @@ html, body {
     <div id="board-wrapper">
       <div id="board"></div>
       <div id="worm-map"></div>
-      <div id="helipadC">Lądowisko C</div>
+      
+      <div id="helipadC">Lądowisko C<br>(Awaryjne)</div>
     </div>
 
     <div id="helipadB">Sicz Tabr</div>
@@ -218,7 +223,10 @@ function startGame() {
   
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
+  
+  // ZMIANA: Ukrycie obu lądowisk na starcie
   document.getElementById("helipadB").style.visibility = "hidden";
+  document.getElementById("helipadC").style.visibility = "hidden";
 
   boardDiv.innerHTML = ""; wormDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
@@ -299,7 +307,11 @@ function moveTo(x,y) {
   if (x===size-1 && y===size-1) {
     revealWorms();
     showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
+    
+    // ZMIANA: Pokazanie obu lądowisk po wygranej
     document.getElementById("helipadB").style.visibility = "visible";
+    document.getElementById("helipadC").style.visibility = "visible";
+    
     stopBackgroundDrone();
     gameOver = true;
   }

@@ -17,14 +17,14 @@ html, body {
 
 /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
-  display: none;
+  display: none; /* Domyślnie ukryty */
   position: fixed;
   z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.85);
+  background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
   backdrop-filter: blur(2px);
   justify-content: center;
   align-items: center;
@@ -42,7 +42,7 @@ html, body {
 }
 
 #modal-text {
-  font-size: 1.5em;
+  font-size: 1.5em; /* Bardzo duża czcionka */
   margin-bottom: 10px;
   color: #e6c47a;
   text-shadow: 0 0 10px rgba(230,196,122,0.3);
@@ -73,7 +73,7 @@ html, body {
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ===== ANIMACJE DRŻENIA ===== */
+/* ===== ANIMACJE DRŻENIA (5 POZIOMÓW) ===== */
 @keyframes shake-micro { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(0.5px, 0.5px); } }
 .shake-dist-3 { animation: shake-micro 0.1s infinite; }
 
@@ -118,27 +118,18 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden;
+
+  /* Specyficzne dla B: */
+  visibility: hidden;   /* Ukryte na początku gry */
   align-self: flex-end; /* Przesuwa lądowisko do dolnej krawędzi */
 }
 
+/* #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); } */
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-
-/* ===== KONFIGURACJA RADARU (DEBUGOWANIE) ===== */
-
-/* Opcja 1: GRA (Ukryj radar) */
-#worm-map { display: none; }
-
-/* Opcja 2: DEBUGOWANIE (Pokaż radar pod planszą) */
-/* #worm-map { 
-  display: inline-grid; 
-  gap: 2px; 
-  position: absolute; 
-  top: 100%; 
-  margin-top: 15px; 
-} 
-*/
+/* #worm-map { margin-top: 15px; display: inline-grid; gap: 2px; } */
+#worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }
+#worm-map { visibility: hidden; position: absolute; top: 100%; }
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -188,7 +179,7 @@ html, body {
 </div>
 
 <script>
-// --- JS ---
+// --- NOWY SYSTEM ALERTÓW (JS) ---
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
@@ -200,15 +191,18 @@ function closeModal() {
   document.getElementById("custom-modal").style.display = "none";
 }
 
+// --- KONFIGURACJA ---
 const size = 10;
 const wormsCount = 12;
 
+// --- ZMIENNE STANU ---
 let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 let gameOver = false;
 
+// --- SYSTEM AUDIO (DRONE) ---
 let audioCtx = null;
 let bgOsc = null; 
 let bgGain = null;
@@ -221,13 +215,17 @@ function initAudioContext() {
 function startBackgroundDrone() {
   initAudioContext();
   if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
+
   bgOsc = audioCtx.createOscillator();
   bgGain = audioCtx.createGain();
+
   bgOsc.type = 'triangle';
   bgOsc.frequency.value = 50; 
   bgGain.gain.value = 0.05;   
+
   bgOsc.connect(bgGain);
   bgGain.connect(audioCtx.destination);
+  
   bgOsc.start();
 }
 
@@ -244,42 +242,53 @@ function updateDroneSound(distance) {
   if (!bgOsc || !audioCtx) return;
   const now = audioCtx.currentTime;
   let targetFreq, targetVol;
+
   if (distance === 0) { targetFreq = 50; targetVol = 0; } 
   else if (distance === 1) { targetFreq = 400; targetVol = 0.35; } 
   else if (distance === 2) { targetFreq = 200; targetVol = 0.20; } 
   else if (distance === 3) { targetFreq = 100; targetVol = 0.10; } 
   else { targetFreq = 50; targetVol = 0.05; }
+
   bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
   bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
 }
 
+// --- LOGIKA GRY ---
+
 function startGame() {
   initAudioContext();
   startBackgroundDrone(); 
+
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
+
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
   score = 0;
+  
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
   document.getElementById("helipadB").style.visibility = "hidden";
+
   boardDiv.innerHTML = "";
   wormDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
+
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
       board[y][x] = { worm:false, visited:false };
+
       const cell = document.createElement("div");
       cell.className = "cell";
       cell.dataset.x = x;
       cell.dataset.y = y;
       cell.onclick = () => moveTo(x,y);
       boardDiv.appendChild(cell);
+
       const wcell = document.createElement("div");
       wcell.className = "cell";
       wcell.dataset.x = x;
@@ -287,6 +296,7 @@ function startGame() {
       wormDiv.appendChild(wcell);
     }
   }
+
   placeWorms();
   updateWormMap();
   drawBoard();
@@ -353,27 +363,36 @@ function isAdjacent(x,y) {
 function moveTo(x,y) {
   if(gameOver || !isAdjacent(x,y)) return;
   initAudioContext();
+
   playerPos = {x,y};
   steps++;
   board[y][x].visited = true;
+
   score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
+
   if (board[y][x].worm) {
     handleDeath();
     return;
   }
+
   moveWorms();
+
   if (board[playerPos.y][playerPos.x].worm) {
     handleDeath();
     return;
   }
+
   checkProximity(x, y);
+
   if (x===size-1 && y===size-1) {
+    // ZAMIANA ALERT NA CUSTOM ALERT
     showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
   }
+
   drawBoard();
   updateWormMap();
 }
@@ -384,6 +403,8 @@ function handleDeath() {
   updateWormMap();
   stopBackgroundDrone(); 
   playTone(100, "sawtooth", 0.5); 
+  
+  // ZAMIANA ALERT NA CUSTOM ALERT (z opóźnieniem)
   setTimeout(() => showCustomAlert("Pożarł Cię Czerw Pustyni!\nKoniec gry."), 100);
   gameOver = true;
 }
@@ -422,6 +443,32 @@ function playTone(freq, type, vol) {
   gain.connect(audioCtx.destination);
   osc.start();
   osc.stop(audioCtx.currentTime + 0.5);
+}
+
+function drawBoard() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+      cell.className="cell";
+      cell.textContent="";
+      if(board[y][x].visited) cell.classList.add("visited");
+      if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
+      if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
+      if(x===playerPos.x && y===playerPos.y) cell.textContent="👣";
+    }
+  }
+}
+
+function revealWorms() {
+  for(let y=0;y<size;y++){
+    for(let x=0;x<size;x++){
+      if(board[y][x].worm){
+        const cell = document.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+        cell.classList.add("worm");
+        cell.textContent="🪱";
+      }
+    }
+  }
 }
 
 let narratorAudio = null;

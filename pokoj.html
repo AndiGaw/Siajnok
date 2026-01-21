@@ -5,44 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pokój w klimacie Diuny</title>
     <style>
-        /* Obraz wypełniający całą stronę */
         body {
             margin: 0;
             height: 100vh;
-            background-image: url('Pokoj_goscinny.png'); /* Twój obraz */
+            background-image: url('Pokoj_goscinny.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            cursor: pointer;
             position: relative;
         }
 
-        /* Obszar kliknięcia (tam gdzie koperta) */
+        /* WIDOCZNY OBSZAR KLIKNIĘCIA */
         #clickArea {
-            width: 100px;   /* szerokość obszaru kliknięcia */
-            height: 50px;   /* wysokość obszaru kliknięcia */
+            width: 160px;
+            height: 90px;
             position: absolute;
-            top: 50%;       /* ustaw w przybliżeniu na kopercie */
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0); /* przezroczysty */
+
+            background: rgba(255, 215, 0, 0.25); /* złota poświata */
+            border: 2px dashed #FFD700;
+            border-radius: 6px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <!-- Przezroczysty obszar do kliknięcia -->
-    <div id="clickArea"></div>
 
-    <!-- Element audio -->
-    <audio id="sound" src="Zaproszenie.mp3"></audio>
+    <div id="clickArea" title="Kliknij kopertę"></div>
+
+    <audio id="sound" src="ava.mp3"></audio>
 
     <script>
         const clickArea = document.getElementById('clickArea');
         const sound = document.getElementById('sound');
 
         clickArea.addEventListener('click', () => {
-            sound.play(); // odtwarzanie dźwięku po kliknięciu
+            sound.currentTime = 0;
+            sound.play();
         });
     </script>
+
 </body>
 </html>

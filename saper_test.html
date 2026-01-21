@@ -15,7 +15,7 @@ html, body {
   overflow-x: hidden;
 }
 
-/* ===== MODAL SYSTEMOWY (ZWYKŁY) ===== */
+/* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
   display: none;
   position: fixed;
@@ -36,14 +36,14 @@ html, body {
   box-shadow: 0 0 30px rgba(230,196,122,0.4);
   padding: 40px;
   text-align: center;
-  max-width: 600px;
+  max-width: 400px;
   width: 80%;
   animation: modalFadeIn 0.3s ease-out;
 }
 
 #modal-text {
   font-size: 1.5em;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   color: #e6c47a;
   text-shadow: 0 0 10px rgba(230,196,122,0.3);
   line-height: 1.4;
@@ -68,11 +68,11 @@ html, body {
   box-shadow: 0 0 20px rgba(230,196,122,0.8);
 }
 
-/* ===== MODAL ZWYCIĘSTWA (INPUT) ===== */
+/* ===== MODAL WYGRANEJ (NICK) ===== */
 #win-modal {
   display: none;
   position: fixed;
-  z-index: 101;
+  z-index: 101; /* Wyżej niż zwykły modal */
   left: 0;
   top: 0;
   width: 100%;
@@ -84,63 +84,63 @@ html, body {
 }
 
 #win-content {
-  background-color: #111;
+  background-color: #050505;
   border: 4px double #e6c47a;
   padding: 40px;
   text-align: center;
   max-width: 500px;
   width: 90%;
-  box-shadow: 0 0 50px rgba(230,196,122,0.2);
+  box-shadow: 0 0 50px rgba(230,196,122,0.3);
   animation: modalFadeIn 0.5s ease-out;
 }
 
-#player-nick {
-  background: #000;
+#nickname-input {
+  background: #111;
   border: 1px solid #e6c47a;
   color: #e6c47a;
-  font-size: 1.5em;
   padding: 10px;
-  margin: 20px 0;
-  width: 80%;
+  font-size: 1.2em;
   text-align: center;
+  margin: 20px 0;
+  width: 70%;
   font-family: "Courier New", monospace;
 }
 
-/* ===== TABELA WYNIKÓW (TOP 10) ===== */
-#high-scores-container {
-  margin: 40px auto 60px auto;
-  max-width: 500px;
-  width: 90%;
+/* ===== SEKCJA WYNIKÓW (TOP 10) ===== */
+#high-scores-section {
+  margin-top: 30px;
+  width: 100%;
   text-align: center;
-  border-top: 2px solid #333;
+  border-top: 1px solid #333;
   padding-top: 20px;
 }
 
 #high-scores-table {
   width: 100%;
+  max-width: 400px;
+  margin: 10px auto;
   border-collapse: collapse;
-  margin-top: 15px;
   font-family: "Courier New", monospace;
-  font-size: 1.1em;
+  font-size: 0.9em;
 }
 
 #high-scores-table th {
   border-bottom: 2px solid #e6c47a;
-  padding: 10px;
+  padding: 8px;
+  color: #e6c47a;
   text-transform: uppercase;
-  letter-spacing: 1px;
 }
 
 #high-scores-table td {
   border-bottom: 1px solid #333;
-  padding: 8px;
+  padding: 6px;
   color: #aaa;
 }
 
 #high-scores-table tr:first-child td {
-  color: #e6c47a;
+  color: #fff;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(230,196,122,0.5);
+  text-shadow: 0 0 5px rgba(255,255,255,0.5);
 }
 
 @keyframes modalFadeIn {
@@ -171,7 +171,7 @@ html, body {
 }
 
 /* ===== UI ===== */
-.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; }
+.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; padding-bottom: 40px; }
 
 #controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
 #controls button {
@@ -193,13 +193,13 @@ html, body {
 #helipadB {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
-  visibility: hidden;
-  align-self: flex-end;
+  visibility: hidden; 
+  align-self: flex-end; 
 }
 
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-#worm-map { display: none; }
+#worm-map { display: inline-grid; gap: 2px; margin-top: 15px; }
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -234,25 +234,26 @@ html, body {
 
     <div id="board-wrapper">
       <div id="board"></div>
+      
       <div id="worm-map"></div>
+
+      <div id="high-scores-section">
+        <h3>Kroniki Arrakis (Top 10)</h3>
+        <table id="high-scores-table">
+            <thead>
+                <tr>
+                    <th>Lp.</th>
+                    <th>Nick</th>
+                    <th>Wynik</th>
+                </tr>
+            </thead>
+            <tbody id="high-scores-body">
+                </tbody>
+        </table>
+      </div>
     </div>
 
     <div id="helipadB">Sicz Tabr</div>
-  </div>
-
-  <div id="high-scores-container">
-    <h2>Kroniki Arrakis (Top 10)</h2>
-    <table id="high-scores-table">
-        <thead>
-            <tr>
-                <th>Lp.</th>
-                <th>Nick</th>
-                <th>Punkty</th>
-            </tr>
-        </thead>
-        <tbody id="high-scores-list">
-            </tbody>
-    </table>
   </div>
 </div>
 
@@ -267,19 +268,20 @@ html, body {
   <div id="win-content">
     <h2>Dotarłeś do Siczy Tabr!</h2>
     <p id="win-score-display">Twój wynik: 0</p>
-    <p>Podaj swoje imię do kronik:</p>
-    <input type="text" id="player-nick" placeholder="Wpisz nick..." maxlength="12">
+    <p>Podaj swoje imię, aby zapisać się w kronikach:</p>
+    <input type="text" id="nickname-input" placeholder="Wpisz nick..." maxlength="12">
     <br>
-    <button id="modal-btn" onclick="submitScore()">Zapisz wynik</button>
+    <button id="modal-btn" onclick="submitScore()">Zapisz Wynik</button>
   </div>
 </div>
 
 <script>
-// --- JS ---
+// --- INICJALIZACJA WYNIKÓW ---
+document.addEventListener("DOMContentLoaded", () => {
+    updateLeaderboardDisplay();
+});
 
-// Inicjalizacja wyników przy starcie
-document.addEventListener("DOMContentLoaded", renderHighScores);
-
+// --- NOWY SYSTEM ALERTÓW (JS) ---
 function showCustomAlert(message) {
   const modal = document.getElementById("custom-modal");
   const text = document.getElementById("modal-text");
@@ -291,78 +293,84 @@ function closeModal() {
   document.getElementById("custom-modal").style.display = "none";
 }
 
-function showWinModal(finalScore) {
-  const modal = document.getElementById("win-modal");
-  document.getElementById("win-score-display").innerText = `Twój wynik: ${finalScore}`;
-  document.getElementById("player-nick").value = ""; // Wyczyść pole
-  modal.style.display = "flex";
-}
-
 // --- LOGIKA TOP 10 ---
-function getHighScores() {
-  const scores = localStorage.getItem("arrakisHighScores");
-  return scores ? JSON.parse(scores) : [];
-}
-
-function saveHighScore(nick, score) {
-  const scores = getHighScores();
-  const newEntry = { nick, score };
-  scores.push(newEntry);
-  
-  // Sortuj malejąco
-  scores.sort((a, b) => b.score - a.score);
-  
-  // Zostaw tylko top 10
-  const top10 = scores.slice(0, 10);
-  
-  localStorage.setItem("arrakisHighScores", JSON.stringify(top10));
-  renderHighScores();
-}
-
-function renderHighScores() {
-  const list = document.getElementById("high-scores-list");
-  const scores = getHighScores();
-  
-  list.innerHTML = "";
-  
-  if (scores.length === 0) {
-      list.innerHTML = "<tr><td colspan='3'>Brak wpisów w kronikach.</td></tr>";
-      return;
-  }
-
-  scores.forEach((entry, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-          <td>${index + 1}.</td>
-          <td>${entry.nick}</td>
-          <td>${entry.score}</td>
-      `;
-      list.appendChild(tr);
-  });
+function openWinModal(finalScore) {
+    const modal = document.getElementById("win-modal");
+    const scoreText = document.getElementById("win-score-display");
+    const input = document.getElementById("nickname-input");
+    
+    scoreText.innerText = `Twój wynik: ${finalScore}`;
+    input.value = ""; // Wyczyść pole
+    modal.style.display = "flex";
 }
 
 function submitScore() {
-  const nickInput = document.getElementById("player-nick");
-  let nick = nickInput.value.trim();
-  
-  if (nick === "") {
-      nick = "Fremen"; // Domyślny nick
-  }
-  
-  saveHighScore(nick, score);
-  document.getElementById("win-modal").style.display = "none";
+    const input = document.getElementById("nickname-input");
+    let nick = input.value.trim();
+    if(!nick) nick = "Bezimienny";
+
+    saveScoreToLocalStorage(nick, score);
+    
+    document.getElementById("win-modal").style.display = "none";
+    updateLeaderboardDisplay();
 }
 
-// --- KONFIGURACJA GRY ---
+function saveScoreToLocalStorage(nick, score) {
+    let scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
+    scores.push({ nick: nick, score: score });
+    
+    // Sortuj malejąco
+    scores.sort((a, b) => b.score - a.score);
+    
+    // Zatrzymaj tylko top 10
+    if(scores.length > 10) scores = scores.slice(0, 10);
+    
+    localStorage.setItem("arrakisScores", JSON.stringify(scores));
+}
+
+function updateLeaderboardDisplay() {
+    const tbody = document.getElementById("high-scores-body");
+    tbody.innerHTML = "";
+    
+    const scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
+    
+    if(scores.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='3'>Brak wpisów...</td></tr>";
+        return;
+    }
+
+    scores.forEach((entry, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${index + 1}.</td>
+            <td>${escapeHtml(entry.nick)}</td>
+            <td>${entry.score}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+}
+
+// --- KONFIGURACJA ---
 const size = 10;
 const wormsCount = 12;
 
+// --- ZMIENNE STANU ---
 let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 let gameOver = false;
 
+// --- SYSTEM AUDIO (DRONE) ---
 let audioCtx = null;
 let bgOsc = null; 
 let bgGain = null;
@@ -375,13 +383,17 @@ function initAudioContext() {
 function startBackgroundDrone() {
   initAudioContext();
   if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
+
   bgOsc = audioCtx.createOscillator();
   bgGain = audioCtx.createGain();
+
   bgOsc.type = 'triangle';
   bgOsc.frequency.value = 50; 
   bgGain.gain.value = 0.05;   
+
   bgOsc.connect(bgGain);
   bgGain.connect(audioCtx.destination);
+  
   bgOsc.start();
 }
 
@@ -398,42 +410,53 @@ function updateDroneSound(distance) {
   if (!bgOsc || !audioCtx) return;
   const now = audioCtx.currentTime;
   let targetFreq, targetVol;
+
   if (distance === 0) { targetFreq = 50; targetVol = 0; } 
   else if (distance === 1) { targetFreq = 400; targetVol = 0.35; } 
   else if (distance === 2) { targetFreq = 200; targetVol = 0.20; } 
   else if (distance === 3) { targetFreq = 100; targetVol = 0.10; } 
   else { targetFreq = 50; targetVol = 0.05; }
+
   bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
   bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
 }
 
+// --- LOGIKA GRY ---
+
 function startGame() {
   initAudioContext();
   startBackgroundDrone(); 
+
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
+
   board = [];
   gameOver = false;
   playerPos = {x:0, y:0};
   steps = 0;
   score = 0;
+  
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
   document.body.className = "";
   document.getElementById("helipadB").style.visibility = "hidden";
+
   boardDiv.innerHTML = "";
   wormDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
+
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
       board[y][x] = { worm:false, visited:false };
+
       const cell = document.createElement("div");
       cell.className = "cell";
       cell.dataset.x = x;
       cell.dataset.y = y;
       cell.onclick = () => moveTo(x,y);
       boardDiv.appendChild(cell);
+
       const wcell = document.createElement("div");
       wcell.className = "cell";
       wcell.dataset.x = x;
@@ -441,6 +464,7 @@ function startGame() {
       wormDiv.appendChild(wcell);
     }
   }
+
   placeWorms();
   updateWormMap();
   drawBoard();
@@ -507,33 +531,41 @@ function isAdjacent(x,y) {
 function moveTo(x,y) {
   if(gameOver || !isAdjacent(x,y)) return;
   initAudioContext();
+
   playerPos = {x,y};
   steps++;
   board[y][x].visited = true;
+
   score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
-  
+
   if (board[y][x].worm) {
     handleDeath();
     return;
   }
+
   moveWorms();
+
   if (board[playerPos.y][playerPos.x].worm) {
     handleDeath();
     return;
   }
+
   checkProximity(x, y);
 
+  // 1. Najpierw rysujemy czystą planszę z pozycją gracza
   drawBoard();
   updateWormMap();
 
+  // 2. Dopiero TERAZ sprawdzamy wygraną
   if (x===size-1 && y===size-1) {
     revealWorms(); 
-    // ZMIANA: Zamiast zwykłego alertu, otwieramy modal do wpisania nicku
-    showWinModal(score);
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
+    
+    // ZAMIANA: Zamiast zwykłego alertu, wywołujemy modal zapisu
+    openWinModal(score);
   }
 }
 
@@ -543,6 +575,7 @@ function handleDeath() {
   updateWormMap();
   stopBackgroundDrone(); 
   playTone(100, "sawtooth", 0.5); 
+  
   setTimeout(() => showCustomAlert("Pożarł Cię Czerw Pustyni!\nKoniec gry."), 100);
   gameOver = true;
 }
@@ -586,12 +619,11 @@ function playTone(freq, type, vol) {
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
+      // Uściślenie selektora, żeby nie mylić z mapą czerwi
       const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-      if (!cell) continue;
-
+      if(!cell) continue;
       cell.className="cell";
       cell.textContent="";
-      
       if(board[y][x].visited) cell.classList.add("visited");
       if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
       if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
@@ -604,6 +636,7 @@ function revealWorms() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
+        // Uściślenie selektora
         const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
         if(cell) {
             cell.classList.add("worm");

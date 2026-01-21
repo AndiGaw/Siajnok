@@ -3,179 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <title>Przeprawa przez Arrakis</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* ===== FUNDAMENTY ===== */
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100vh; /* Ważne: tło rozciąga się na całą wysokość przewijania */
+  height: 100%;
   background: #000;
   color: #e6c47a;
   font-family: "Georgia", serif;
+  overflow-x: hidden;
 }
 
-/* Tło pustyni (animacja) */
+/* ===== ALERT SYSTEM ===== */
+#custom-modal {
+  display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+  background-color: rgba(0,0,0,0.85); backdrop-filter: blur(2px);
+  justify-content: center; align-items: center;
+}
+#modal-content {
+  background-color: #111; border: 3px solid #e6c47a; box-shadow: 0 0 30px rgba(230,196,122,0.4);
+  padding: 40px; text-align: center; max-width: 400px; width: 80%; animation: modalFadeIn 0.3s ease-out;
+}
+#modal-text { font-size: 1.5em; margin-bottom: 10px; color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.3); line-height: 1.4; }
+#modal-btn {
+  background: #222; color: #e6c47a; border: 2px solid #e6c47a; padding: 15px 40px;
+  font-size: 1.2em; font-family: "Georgia", serif; cursor: pointer; transition: 0.2s;
+  text-transform: uppercase; letter-spacing: 2px;
+}
+#modal-btn:hover { background: #e6c47a; color: #000; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
+@keyframes modalFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+/* ===== ANIMACJE DRŻENIA ===== */
+@keyframes shake-micro { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(0.5px, 0.5px); } }
+.shake-dist-3 { animation: shake-micro 0.1s infinite; }
+@keyframes shake-light { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px, 1px); } 75% { transform: translate(-1px, -1px); } }
+.shake-dist-2 { animation: shake-light 0.5s infinite; }
+@keyframes shake-strong { 0%, 100% { transform: translate(0,0); } 20% { transform: translate(-2px, 0); } 80% { transform: translate(2px, 0); } }
+.shake-dist-1 { animation: shake-strong 0.2s infinite; }
+@keyframes shake-violent { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(-3px, 3px) rotate(-0.5deg); } 75% { transform: translate(3px, -3px) rotate(0.5deg); } }
+.shake-dist-0 { animation: shake-violent 0.1s infinite; }
+
 .sand {
-  position: fixed;
-  inset: 0;
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
   animation: drift 60s linear infinite;
-  pointer-events: none;
-  z-index: 1;
 }
 
-/* Główny kontener */
-.container {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
+/* ===== UI ===== */
+.container { position: relative; z-index: 2; text-align: center; padding-top: 20px; padding-bottom: 50px; }
 
-/* UI Sterowania */
-#controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 20px; }
+#controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
 #controls button {
-  font-size: 1.2em; padding: 10px 20px; width: 300px; background: #111; color: #e6c47a;
+  font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a;
   border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5);
 }
 #controls button:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
 
-#stats { margin-bottom: 20px; font-size: 1.1em; font-weight: bold; }
+#stats { margin-top: 10px; font-size: 0.9em; font-weight: bold; }
 
-/* ===== UKŁAD GRY (Nowa Struktura) ===== */
-/* Górna sekcja: Lądowisko A - Plansza - Lądowisko B */
-.game-row {
-  display: flex;
-  align-items: flex-start; /* Wyrównanie do góry */
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 20px;
-  flex-wrap: wrap; /* Responsywność na małych ekranach */
+/* ===== GAME AREA ===== */
+#game-area { display: flex; align-items: flex-start; gap: 20px; margin: 20px auto; width: max-content; }
+
+#helipadA {
+  width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
 }
-
-/* Lądowiska */
-.helipad {
-  width: 100px; height: 100px;
-  background: #111; border: 2px solid #e6c47a; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: bold; font-size: 0.9em; text-align: center;
-  box-shadow: 0 0 15px rgba(230,196,122,0.2);
-}
-
+  
 #helipadB {
-  visibility: hidden; /* Ukryte na start */
-  border-color: #4a90e2;
-  color: #4a90e2;
+  width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+  visibility: hidden; align-self: flex-end; 
+}  
+
+#board-wrapper { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  min-width: calc(50px * 10 + 3px * 9); 
+  position: relative; 
 }
 
-/* Główna plansza */
-#board {
-  display: grid;
-  gap: 3px;
-  border: 4px solid #333;
-  padding: 5px;
-  background: #000;
+#board { display: inline-grid; gap: 3px; }
+
+/* ZMIANA: Usunięto position: absolute, aby Lądowisko C było pod spodem w naturalnym przepływie */
+#worm-map { 
+  display: inline-grid; 
+  gap: 2px; 
+  margin-top: 15px; 
+}    
+
+/* NOWE: Lądowisko C */
+#helipadC {
+  width: 120px; height: 120px; 
+  background: #111; 
+  border: 2px solid #e6c47a; 
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; 
+  font-weight: bold; 
+  margin-top: 20px; /* Odstęp od mapy */
 }
 
+/* ===== KOMÓRKI ===== */
 .cell {
-  width: 50px; height: 50px;
-  background: #222; border: 1px solid #554d33;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-weight: bold; font-size: 1.4em;
-  user-select: none;
+  width: 50px; height: 50px; background: #222; border: 2px solid #e6c47a;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; font-size: 1.2em;
 }
-.cell:hover { background: #333; }
-.visited { background: #444; border-color: #666; }
-.start { background: darkgreen; color: #fff; }
-.goal { background: darkblue; color: #fff; }
-.worm { background: darkred; color: white; animation: shake-violent 0.2s infinite; }
+#worm-map .cell { width: 20px; height: 20px; font-size: 0.8em; }
 
-/* ===== DOLNA SEKCJA: MAPA CZERWI + TOP 10 ===== */
-.info-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 30px; /* Odstęp między mapą czerwi a wynikami */
-  width: 100%;
-}
-
-/* Mapa Czerwi (Mini-mapa) */
-#worm-map-container {
-  text-align: center;
-}
-#worm-map-label { font-size: 0.9em; margin-bottom: 5px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-#worm-map {
-  display: grid;
-  gap: 2px;
-  border: 2px solid #444;
-  padding: 3px;
-  background: #000;
-}
-#worm-map .cell { width: 20px; height: 20px; font-size: 0.8em; border: 1px solid #333; }
-
-/* Sekcja TOP 10 */
-#high-scores-section {
-  display: none; /* Ukryte domyślnie */
-  width: 100%;
-  max-width: 500px;
-  background: rgba(17, 17, 17, 0.9);
-  border: 1px solid #e6c47a;
-  padding: 20px;
-  box-shadow: 0 0 30px rgba(0,0,0,0.8);
-  animation: fadeIn 1s;
-}
-
-#high-scores-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: "Courier New", monospace;
-  margin-top: 15px;
-}
-#high-scores-table th { border-bottom: 2px solid #e6c47a; padding: 10px; text-align: left; color: #e6c47a; }
-#high-scores-table td { border-bottom: 1px solid #333; padding: 8px; color: #ccc; }
-#high-scores-table tr:nth-child(1) td { color: #fff; font-weight: bold; text-shadow: 0 0 5px #e6c47a; }
-
-/* ===== MODALE (ALERTY) ===== */
-.modal {
-  display: none; position: fixed; z-index: 100; left: 0; top: 0;
-  width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
-  justify-content: center; align-items: center; backdrop-filter: blur(3px);
-}
-.modal-content {
-  background: #111; border: 2px solid #e6c47a; padding: 30px;
-  text-align: center; max-width: 400px; width: 90%;
-  box-shadow: 0 0 40px rgba(230,196,122,0.3);
-  animation: fadeIn 0.3s;
-}
-.modal input {
-  background: #000; border: 1px solid #e6c47a; color: #fff;
-  padding: 10px; width: 70%; margin: 15px 0; text-align: center; font-size: 1.1em;
-}
-.modal button {
-  background: #222; color: #e6c47a; border: 1px solid #e6c47a;
-  padding: 10px 30px; font-size: 1em; cursor: pointer; text-transform: uppercase;
-}
-.modal button:hover { background: #e6c47a; color: #000; }
-
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes drift { from { background-position: 0 0; } to { background-position: 100px 100px; } }
-
-/* Animacje wstrząsów */
-@keyframes shake-micro { 50% { transform: translate(0.5px, 0.5px); } }
-.shake-dist-3 { animation: shake-micro 0.1s infinite; }
-@keyframes shake-light { 25% { transform: translate(1px, 1px); } 75% { transform: translate(-1px, -1px); } }
-.shake-dist-2 { animation: shake-light 0.5s infinite; }
-@keyframes shake-strong { 20% { transform: translate(-2px, 0); } 80% { transform: translate(2px, 0); } }
-.shake-dist-1 { animation: shake-strong 0.2s infinite; }
-@keyframes shake-violent { 25% { transform: translate(-3px, 3px) rotate(-1deg); } 75% { transform: translate(3px, -3px) rotate(1deg); } }
-.shake-dist-0 { animation: shake-violent 0.1s infinite; }
-
+.visited { background: #444; }
+.start   { background: darkgreen; }
+.goal    { background: darkblue; }
+.worm    { background: darkred; color: white; }
 </style>
 </head>
 
@@ -193,240 +132,140 @@ html, body {
 
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
 
-  <div class="game-row">
-    <div id="helipadA" class="helipad">Lądowisko<br>(Start)</div>
-    <div id="board"></div>
-    <div id="helipadB" class="helipad">Sicz Tabr<br>(Cel)</div>
-  </div>
+  <div id="game-area">
+    <div id="helipadA">Lądowisko</div>
 
-  <div class="info-column">
-    
-    <div id="worm-map-container">
-      <div id="worm-map-label">Skan sejsmiczny</div>
+    <div id="board-wrapper">
+      <div id="board"></div>
       <div id="worm-map"></div>
+      <div id="helipadC">Lądowisko C</div>
     </div>
 
-    <div id="high-scores-section">
-      <h3 style="text-align: center; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Kroniki Arrakis</h3>
-      <table id="high-scores-table">
-          <thead><tr><th>Poz.</th><th>Nick</th><th>Pkt</th></tr></thead>
-          <tbody id="high-scores-body"></tbody>
-      </table>
-    </div>
-
+    <div id="helipadB">Sicz Tabr</div>
   </div>
 </div>
 
-<div id="custom-modal" class="modal">
-  <div class="modal-content">
-    <div id="modal-text">Komunikat</div>
-    <button onclick="closeModal()">Dalej</button>
-  </div>
-</div>
-
-<div id="win-modal" class="modal">
-  <div class="modal-content">
-    <h2 style="color:#e6c47a">Dotarłeś do celu!</h2>
-    <p id="win-score-display">Twój wynik: 0</p>
-    <p>Podaj imię do kronik:</p>
-    <input type="text" id="nickname-input" placeholder="Fremen" maxlength="12">
-    <br><br>
-    <button onclick="submitScore()">Zapisz wynik</button>
+<div id="custom-modal">
+  <div id="modal-content">
+    <div id="modal-text">Komunikat Systemowy</div>
+    <button id="modal-btn" onclick="closeModal()">Dalej</button>
   </div>
 </div>
 
 <script>
+// --- ALERTY ---
+function showCustomAlert(message) {
+  const modal = document.getElementById("custom-modal");
+  const text = document.getElementById("modal-text");
+  text.innerText = message;
+  modal.style.display = "flex";
+}
+function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
+
 // --- KONFIGURACJA ---
 const size = 10;
 const wormsCount = 12;
 
-// --- ZMIENNE STANU ---
+// --- STATE ---
 let board = [];
 let playerPos = {x:0, y:0};
 let steps = 0;
 let score = 0;
 let gameOver = false;
 
-// --- AUDIO (Tone Generator) ---
-let audioCtx = null;
-let bgOsc = null; 
-let bgGain = null;
-
-function initAudioContext() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
+// --- AUDIO ---
+let audioCtx = null, bgOsc = null, bgGain = null;
+function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
 
 function startBackgroundDrone() {
   initAudioContext();
   if (bgOsc) { try { bgOsc.stop(); } catch(e){} bgOsc = null; }
-  bgOsc = audioCtx.createOscillator();
-  bgGain = audioCtx.createGain();
-  bgOsc.type = 'triangle';
-  bgOsc.frequency.value = 50; 
-  bgGain.gain.value = 0.05;   
-  bgOsc.connect(bgGain);
-  bgGain.connect(audioCtx.destination);
-  bgOsc.start();
+  bgOsc = audioCtx.createOscillator(); bgGain = audioCtx.createGain();
+  bgOsc.type = 'triangle'; bgOsc.frequency.value = 50; bgGain.gain.value = 0.05;   
+  bgOsc.connect(bgGain); bgGain.connect(audioCtx.destination); bgOsc.start();
 }
-
 function stopBackgroundDrone() {
-  if (bgOsc) {
-    const now = audioCtx.currentTime;
-    bgGain.gain.exponentialRampToValueAtTime(0.001, now + 1);
-    bgOsc.stop(now + 1);
-    bgOsc = null;
-  }
+  if (bgOsc) { bgGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1); bgOsc.stop(audioCtx.currentTime + 1); bgOsc = null; }
 }
-
 function updateDroneSound(distance) {
   if (!bgOsc || !audioCtx) return;
   const now = audioCtx.currentTime;
-  let targetFreq = 50, targetVol = 0.05;
-  if (distance === 0) { targetFreq = 50; targetVol = 0; } 
-  else if (distance === 1) { targetFreq = 400; targetVol = 0.35; } 
-  else if (distance === 2) { targetFreq = 200; targetVol = 0.20; } 
-  else if (distance === 3) { targetFreq = 100; targetVol = 0.10; } 
-  
-  bgOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.3);
-  bgGain.gain.linearRampToValueAtTime(targetVol, now + 0.3);
+  let tf, tv;
+  if (distance === 0) { tf = 50; tv = 0; } 
+  else if (distance === 1) { tf = 400; tv = 0.35; } 
+  else if (distance === 2) { tf = 200; tv = 0.20; } 
+  else if (distance === 3) { tf = 100; tv = 0.10; } 
+  else { tf = 50; tv = 0.05; }
+  bgOsc.frequency.linearRampToValueAtTime(tf, now + 0.3);
+  bgGain.gain.linearRampToValueAtTime(tv, now + 0.3);
 }
-
 function playTone(freq, type, vol) {
   if (!audioCtx) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.5);
-}
-
-// --- LOGIKA UI (MODALE) ---
-function showCustomAlert(message) {
-  const modal = document.getElementById("custom-modal");
-  document.getElementById("modal-text").innerText = message;
-  modal.style.display = "flex";
-}
-function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
-
-function openWinModal(finalScore) {
-    const modal = document.getElementById("win-modal");
-    document.getElementById("win-score-display").innerText = `Twój wynik: ${finalScore}`;
-    document.getElementById("nickname-input").value = ""; 
-    modal.style.display = "flex";
-    document.getElementById("nickname-input").focus();
-}
-
-function submitScore() {
-    let nick = document.getElementById("nickname-input").value.trim() || "Fremen";
-    saveScoreToLocalStorage(nick, score);
-    document.getElementById("win-modal").style.display = "none";
-    
-    // Pokaż sekcję Top 10
-    document.getElementById("high-scores-section").style.display = "block";
-    renderLeaderboard();
-    
-    // Scroll do wyników (opcjonalnie, żeby gracz zobaczył tabelę)
-    document.getElementById("high-scores-section").scrollIntoView({behavior: "smooth"});
+  const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5);
 }
 
 // --- LOGIKA GRY ---
 function startGame() {
   initAudioContext();
   startBackgroundDrone(); 
-
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
-  
-  // Ukryj Top 10 przy nowej grze
-  document.getElementById("high-scores-section").style.display = "none";
-  document.getElementById("helipadB").style.visibility = "hidden";
-  document.body.className = "";
 
-  board = [];
-  gameOver = false;
-  playerPos = {x:0, y:0};
-  steps = 0;
-  score = 0;
+  board = []; gameOver = false; playerPos = {x:0, y:0}; steps = 0; score = 0;
   
   document.getElementById("stats").innerText = "Kroki: 0 | Punktacja: 0";
-  
-  // Generowanie gridów (CSS grid-template)
+  document.body.className = "";
+  document.getElementById("helipadB").style.visibility = "hidden";
+
+  boardDiv.innerHTML = ""; wormDiv.innerHTML = "";
   boardDiv.style.gridTemplateColumns = `repeat(${size},50px)`;
   wormDiv.style.gridTemplateColumns  = `repeat(${size},20px)`;
-  boardDiv.innerHTML = "";
-  wormDiv.innerHTML = "";
 
   for (let y = 0; y < size; y++) {
     board[y] = [];
     for (let x = 0; x < size; x++) {
       board[y][x] = { worm:false, visited:false };
-
-      // Plansza główna
       const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.dataset.x = x; cell.dataset.y = y;
+      cell.className = "cell"; cell.dataset.x = x; cell.dataset.y = y;
       cell.onclick = () => moveTo(x,y);
       boardDiv.appendChild(cell);
 
-      // Mapa robaków
       const wcell = document.createElement("div");
-      wcell.className = "cell";
-      wcell.dataset.x = x; wcell.dataset.y = y;
+      wcell.className = "cell"; wcell.dataset.x = x; wcell.dataset.y = y;
       wormDiv.appendChild(wcell);
     }
   }
-
-  placeWorms();
-  updateWormMap();
-  drawBoard();
-  checkProximity(0,0);
+  placeWorms(); updateWormMap(); drawBoard(); checkProximity(0,0);
 }
 
 function placeWorms() {
   let placed = 0;
   while (placed < wormsCount) {
-    let x = Math.floor(Math.random() * size);
-    let y = Math.floor(Math.random() * size);
+    let x = Math.floor(Math.random() * size); let y = Math.floor(Math.random() * size);
     if ((x === 0 && y === 0) || (x === size-1 && y === size-1)) continue;
-    if (!board[y][x].worm) {
-      board[y][x].worm = true;
-      placed++;
-    }
+    if (!board[y][x].worm) { board[y][x].worm = true; placed++; }
   }
 }
 
 function moveWorms() {
   if (!document.getElementById("hardMode").checked) return;
-  // Kopia planszy dla jednoczesnego ruchu
-  let newBoardState = board.map(row => row.map(cell => ({...cell, worm:false})));
-  
+  let newBoard = board.map(row => row.map(cell => ({...cell, worm:false})));
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       if (board[y][x].worm) {
-        const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]]; // Zostań lub idź
+        const dirs = [[0,0],[0,-1],[0,1],[-1,0],[1,0]];
         const [dx,dy] = dirs[Math.floor(Math.random()*dirs.length)];
         let nx = x+dx, ny = y+dy;
-        // Sprawdź granice i pola start/meta
         if (nx>=0 && nx<size && ny>=0 && ny<size && !(nx===0 && ny===0) && !(nx===size-1 && ny===size-1)) {
-           newBoardState[ny][nx].worm = true;
-        } else {
-           newBoardState[y][x].worm = true; // Zderzenie ze ścianą = zostań
-        }
+          newBoard[ny][nx].worm = true;
+        } else { newBoard[y][x].worm = true; }
       }
     }
   }
-  // Przepisz stan robaków
-  for (let y = 0; y < size; y++) {
-      for (let x = 0; x < size; x++) {
-          board[y][x].worm = newBoardState[y][x].worm;
-      }
-  }
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++) board[y][x].worm = newBoard[y][x].worm;
   updateWormMap();
 }
 
@@ -435,9 +274,8 @@ function updateWormMap() {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-      cell.textContent = ""; 
       if (x === playerPos.x && y === playerPos.y) cell.textContent = "👣";
-      else if (board[y][x].worm) cell.textContent = "🪱";
+      else cell.textContent = board[y][x].worm ? "🪱" : "";
     }
   }
 }
@@ -447,71 +285,53 @@ function isAdjacent(x,y) { return Math.abs(playerPos.x-x)+Math.abs(playerPos.y-y
 function moveTo(x,y) {
   if(gameOver || !isAdjacent(x,y)) return;
   initAudioContext();
-
-  playerPos = {x,y};
-  steps++;
-  board[y][x].visited = true;
+  playerPos = {x,y}; steps++; board[y][x].visited = true;
   score = Math.max(0, 100 - steps * 2);
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
   if (board[y][x].worm) { handleDeath(); return; }
-  
   moveWorms();
-  
   if (board[playerPos.y][playerPos.x].worm) { handleDeath(); return; }
 
   checkProximity(x, y);
-  drawBoard();
-  updateWormMap();
+  drawBoard(); updateWormMap();
 
-  // Sprawdzenie wygranej
   if (x===size-1 && y===size-1) {
     revealWorms();
+    showCustomAlert(`Dotarłeś do celu!\nPunkty: ${score}`);
     document.getElementById("helipadB").style.visibility = "visible";
     stopBackgroundDrone();
     gameOver = true;
-    openWinModal(score);
   }
 }
 
 function handleDeath() {
-  applyFeedback(0);
-  revealWorms();
-  updateWormMap();
-  stopBackgroundDrone(); 
-  playTone(100, "sawtooth", 0.5); 
+  applyFeedback(0); revealWorms(); updateWormMap(); stopBackgroundDrone(); playTone(100, "sawtooth", 0.5);  
   setTimeout(() => showCustomAlert("Pożarł Cię Czerw Pustyni!\nKoniec gry."), 100);
   gameOver = true;
 }
 
 function checkProximity(px, py) {
-  let minDistance = 999;
-  for(let y=0; y<size; y++) {
-    for(let x=0; x<size; x++) {
-      if(board[y][x].worm) {
-        const dist = Math.abs(px - x) + Math.abs(py - y);
-        if(dist < minDistance) minDistance = dist;
-      }
-    }
+  let min = 999;
+  for(let y=0; y<size; y++) for(let x=0; x<size; x++) if(board[y][x].worm) {
+    const d = Math.abs(px - x) + Math.abs(py - y); if(d < min) min = d;
   }
-  updateDroneSound(minDistance);
-  applyFeedback(minDistance);
+  updateDroneSound(min); applyFeedback(min);
 }
 
-function applyFeedback(distance) {
+function applyFeedback(dist) {
   document.body.className = "";
-  if (distance === 0) document.body.classList.add("shake-dist-0");
-  else if (distance === 1) document.body.classList.add("shake-dist-1");
-  else if (distance === 2) document.body.classList.add("shake-dist-2");
-  else if (distance === 3) document.body.classList.add("shake-dist-3");
+  if (dist === 0) document.body.classList.add("shake-dist-0");
+  else if (dist === 1) document.body.classList.add("shake-dist-1");
+  else if (dist === 2) document.body.classList.add("shake-dist-2");
+  else if (dist === 3) document.body.classList.add("shake-dist-3");
 }
 
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-      cell.className="cell";
-      cell.textContent="";
+      cell.className="cell"; cell.textContent="";
       if(board[y][x].visited) cell.classList.add("visited");
       if(x===0 && y===0){ cell.classList.add("start"); cell.textContent="A"; }
       if(x===size-1 && y===size-1){ cell.classList.add("goal"); cell.textContent="B"; }
@@ -521,63 +341,22 @@ function drawBoard() {
 }
 
 function revealWorms() {
-  for(let y=0;y<size;y++){
-    for(let x=0;x<size;x++){
-      if(board[y][x].worm){
-        const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
-        cell.classList.add("worm");
-        cell.textContent="🪱";
-      }
-    }
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++) if(board[y][x].worm){
+    const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
+    cell.classList.add("worm"); cell.textContent="🪱";
   }
 }
 
-// --- LEADERBOARD (LocalStorage) ---
-function saveScoreToLocalStorage(nick, score) {
-    let scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
-    scores.push({ nick: nick, score: score });
-    scores.sort((a, b) => b.score - a.score);
-    if(scores.length > 10) scores = scores.slice(0, 10);
-    localStorage.setItem("arrakisScores", JSON.stringify(scores));
-}
-
-function renderLeaderboard() {
-    const tbody = document.getElementById("high-scores-body");
-    tbody.innerHTML = "";
-    const scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
-    if(scores.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='3' style='text-align:center'>Pustynia jest pusta...</td></tr>";
-        return;
-    }
-    scores.forEach((entry, index) => {
-        const tr = document.createElement("tr");
-        const safeNick = entry.nick.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        tr.innerHTML = `<td>${index + 1}.</td><td>${safeNick}</td><td>${entry.score}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-// --- NARRATOR ---
 let narratorAudio = null;
 function playNarrator() {
   const btn = document.getElementById("narratorBtn");
   if (!narratorAudio) {
     narratorAudio = new Audio("Saper_Diuny.mp3");
-    narratorAudio.addEventListener('ended', () => {
-       btn.innerText = "🎙️ Narrator (Start)";
-       narratorAudio.currentTime = 0;
-    });
+    narratorAudio.addEventListener('ended', () => { btn.innerText = "🎙️ Narrator (Start)"; narratorAudio.currentTime = 0; });
   }
   if (narratorAudio.paused) {
-    narratorAudio.play().then(() => {
-      btn.innerText = "⏸️ Narrator (Pauza)";
-    }).catch(err => {
-      showCustomAlert("Błąd audio:\nBrak pliku Saper_Diuny.mp3!");
-    });
-  } else {
-    narratorAudio.pause();
-    btn.innerText = "▶️ Narrator (Wznów)";
-  }
+    narratorAudio.play().then(() => { btn.innerText = "⏸️ Narrator (Pauza)"; }).catch(err => { showCustomAlert("Błąd audio:\nBrak pliku Saper_Diuny.mp3!"); });
+  } else { narratorAudio.pause(); btn.innerText = "▶️ Narrator (Wznów)"; }
 }
 </script>
 </body>

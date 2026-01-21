@@ -175,9 +175,11 @@ html, body {
 
 <div class="container">
   <h1>Przeprawa przez Arrakis</h1>
-  
+
+<audio id="mojDzwiek" src="plik.mp3"></audio>
+
   <div id="controls">
-    <button onclick="playNarrator()">🎙️ Narrator</button>
+    <button onclick="playNarrator()">🎙️ Narrator  ▶️ Graj / ⏸️ Pauza</button>
     <button onclick="startGame()">🏜️ Uruchom systemy i ruszaj</button>
     <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
   </div>
@@ -527,10 +529,25 @@ function revealWorms() {
   }
 }
 
+//function playNarrator() {
+//  const audio = new Audio("Saper_Diuny.mp3");
+//  audio.play().catch(err => console.log("Nie udało się odtworzyć audio:", err));
+//  }
+
 function playNarrator() {
-  const audio = new Audio("Saper_Diuny.mp3");
-  audio.play().catch(err => console.log("Nie udało się odtworzyć audio:", err));
-}
+   var audio = document.getElementById("Saper_Diuny.mp3");
+    
+   // Sprawdzamy czy gra, żeby zrobić przełącznik (Play/Pause)
+  if (audio.paused) {
+     audio.play();
+  } else {
+     audio.pause();
+    // Opcjonalnie: audio.currentTime = 0; // Odkomentuj, żeby przewinąć do początku
+  }
+  }
+</script>
+
+  
 </script>
 </body>
 </html>

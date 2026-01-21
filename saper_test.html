@@ -8,7 +8,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  min-height: 100%;
+  min-height: 100%; /* Zmiana na min-height dla przewijania */
   background: #000;
   color: #e6c47a;
   font-family: "Georgia", serif;
@@ -17,14 +17,14 @@ html, body {
 
 /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
 #custom-modal {
-  display: none; /* Domyślnie ukryty */
+  display: none;
   position: fixed;
   z-index: 100;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
+  background-color: rgba(0,0,0,0.85);
   backdrop-filter: blur(2px);
   justify-content: center;
   align-items: center;
@@ -42,7 +42,7 @@ html, body {
 }
 
 #modal-text {
-  font-size: 1.5em; /* Bardzo duża czcionka */
+  font-size: 1.5em;
   margin-bottom: 10px;
   color: #e6c47a;
   text-shadow: 0 0 10px rgba(230,196,122,0.3);
@@ -108,12 +108,15 @@ html, body {
 
 /* ===== SEKCJA TOP 10 - NOWA ===== */
 #high-scores-section {
-  display: none; /* Ukryte do momentu wygranej */
-  margin-top: 250px; /* Duży margines, żeby ominąć mapę czerwi (absolute) */
+  display: none; /* Domyślnie ukryte, pokazuje się po wygranej */
+  
+  /* Kluczowe: margines górny, aby wylądować pod mapą czerwi (która ma position:absolute) */
+  margin-top: 240px; 
+  
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   text-align: center;
-  border-top: 2px solid #333;
+  border-top: 1px solid #333;
   padding-top: 20px;
   padding-bottom: 50px;
   animation: modalFadeIn 1s ease-out;
@@ -124,26 +127,32 @@ html, body {
   border-collapse: collapse;
   font-family: "Courier New", monospace;
   font-size: 1em;
-  margin-top: 10px;
+  margin-top: 15px;
+  background: rgba(17, 17, 17, 0.8);
+  border: 1px solid #e6c47a;
 }
 
 #high-scores-table th {
+  background: #222;
   border-bottom: 2px solid #e6c47a;
-  padding: 10px;
+  padding: 12px;
   color: #e6c47a;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 #high-scores-table td {
   border-bottom: 1px solid #333;
-  padding: 8px;
-  color: #aaa;
+  padding: 10px;
+  color: #ccc;
 }
 
-#high-scores-table tr:first-child td {
+/* Podświetlenie pierwszego miejsca */
+#high-scores-table tr:nth-child(1) td {
   color: #fff;
   font-weight: bold;
-  text-shadow: 0 0 5px rgba(230,196,122,0.8);
+  text-shadow: 0 0 8px rgba(230,196,122,0.6);
+  background: rgba(230,196,122,0.1);
 }
 
 @keyframes modalFadeIn {
@@ -202,12 +211,11 @@ html, body {
   align-self: flex-end; /* Przesuwa lądowisko do dolnej krawędzi */
 }
 
-/* #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); } */
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
 #board { display: inline-grid; gap: 3px; }
-/* #worm-map { margin-top: 15px; display: inline-grid; gap: 2px; } */
+
+/* Pozycjonowanie mapy czerwi */
 #worm-map { display: inline-grid; gap: 2px; position: absolute; top: 100%; margin-top: 15px; }
-/* #worm-map { visibility: hidden; position: absolute; top: 100%; } */
 
 /* ===== KOMÓRKI ===== */
 .cell {
@@ -243,13 +251,13 @@ html, body {
     <div id="board-wrapper">
       <div id="board"></div>
       <div id="worm-map"></div>
-      
+
       <div id="high-scores-section">
         <h3>Kroniki Arrakis (Top 10)</h3>
         <table id="high-scores-table">
             <thead>
                 <tr>
-                    <th>Lp.</th>
+                    <th>Poz.</th>
                     <th>Nick</th>
                     <th>Punkty</th>
                 </tr>
@@ -274,7 +282,7 @@ html, body {
   <div id="win-content">
     <h2>Dotarłeś do Siczy Tabr!</h2>
     <p id="win-score-display">Twój wynik: 0</p>
-    <p>Podaj swoje imię, aby zapisać się w kronikach:</p>
+    <p>Podaj imię, aby zapisać się w historii:</p>
     <input type="text" id="nickname-input" placeholder="Wpisz nick..." maxlength="12">
     <br>
     <button id="modal-btn" onclick="submitScore()">Zapisz wynik</button>
@@ -294,7 +302,8 @@ function closeModal() {
   document.getElementById("custom-modal").style.display = "none";
 }
 
-// --- LOGIKA TOP 10 I MODALU WYGRANEJ ---
+// --- LOGIKA TOP 10 (NOWA) ---
+
 function openWinModal(finalScore) {
     const modal = document.getElementById("win-modal");
     const scoreText = document.getElementById("win-score-display");
@@ -303,35 +312,40 @@ function openWinModal(finalScore) {
     scoreText.innerText = `Twój wynik: ${finalScore}`;
     input.value = ""; 
     modal.style.display = "flex";
+    input.focus();
 }
 
 function submitScore() {
     const input = document.getElementById("nickname-input");
     let nick = input.value.trim();
-    if(!nick) nick = "Bezimienny";
+    if(!nick) nick = "Fremen";
 
-    // Zapis do localStorage
+    // 1. Zapisz wynik
     saveScoreToLocalStorage(nick, score);
     
-    // Ukryj modal
+    // 2. Zamknij modal
     document.getElementById("win-modal").style.display = "none";
     
-    // Pokaż i odśwież tabelę
+    // 3. Pokaż sekcję Top 10 i odśwież tabelę
     const section = document.getElementById("high-scores-section");
     section.style.display = "block";
     renderLeaderboard();
 }
 
 function saveScoreToLocalStorage(nick, score) {
+    // Pobierz istniejące wyniki lub stwórz pustą tablicę
     let scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
+    
+    // Dodaj nowy wynik
     scores.push({ nick: nick, score: score });
     
-    // Sortuj (malejąco)
+    // Sortuj malejąco
     scores.sort((a, b) => b.score - a.score);
     
-    // Top 10 only
+    // Zostaw tylko top 10
     if(scores.length > 10) scores = scores.slice(0, 10);
     
+    // Zapisz z powrotem
     localStorage.setItem("arrakisScores", JSON.stringify(scores));
 }
 
@@ -342,15 +356,17 @@ function renderLeaderboard() {
     const scores = JSON.parse(localStorage.getItem("arrakisScores") || "[]");
     
     if(scores.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='3'>Brak wpisów...</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='3'>Pustynia jest pusta...</td></tr>";
         return;
     }
 
     scores.forEach((entry, index) => {
         const tr = document.createElement("tr");
+        // Zabezpieczenie XSS przy wyświetlaniu nicku
+        const safeNick = entry.nick.replace(/</g, "&lt;").replace(/>/g, "&gt;");
         tr.innerHTML = `
             <td>${index + 1}.</td>
-            <td>${entry.nick.replace(/</g, "&lt;")}</td>
+            <td>${safeNick}</td>
             <td>${entry.score}</td>
         `;
         tbody.appendChild(tr);
@@ -427,10 +443,9 @@ function startGame() {
 
   const boardDiv = document.getElementById("board");
   const wormDiv  = document.getElementById("worm-map");
-  const hsSection = document.getElementById("high-scores-section");
-
-  // Ukryj Top 10 na starcie
-  hsSection.style.display = "none";
+  
+  // Ukrywamy Top 10 przy starcie nowej gry
+  document.getElementById("high-scores-section").style.display = "none";
 
   board = [];
   gameOver = false;
@@ -516,6 +531,7 @@ function updateWormMap() {
   const wormDiv = document.getElementById("worm-map");
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
+      // Uściślenie selektora
       const cell = wormDiv.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
       if (x === playerPos.x && y === playerPos.y) {
           cell.textContent = "👣";
@@ -559,11 +575,11 @@ function moveTo(x,y) {
   drawBoard();
   updateWormMap();
 
-  // 2. Dopiero TERAZ sprawdzamy wygraną i ewentualnie dorysowujemy robaki
+  // 2. Dopiero TERAZ sprawdzamy wygraną
   if (x===size-1 && y===size-1) {
-    revealWorms(); 
+    revealWorms();
     
-    // ZMIANA: Zamiast zwykłego alertu, otwieramy modal zapisu wyniku
+    // --- ZMIANA: Zamiast alertu, otwieramy modal zapisu ---
     openWinModal(score);
     
     document.getElementById("helipadB").style.visibility = "visible";
@@ -622,7 +638,7 @@ function playTone(freq, type, vol) {
 function drawBoard() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      // Selektor uściślony aby nie mylić z mapą czerwi
+      // Uściślenie selektora dla głównej planszy
       const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
       cell.className="cell";
       cell.textContent="";
@@ -638,7 +654,7 @@ function revealWorms() {
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
       if(board[y][x].worm){
-        // Selektor uściślony
+        // Uściślenie selektora dla głównej planszy
         const cell = document.querySelector(`#board .cell[data-x='${x}'][data-y='${y}']`);
         cell.classList.add("worm");
         cell.textContent="🪱";

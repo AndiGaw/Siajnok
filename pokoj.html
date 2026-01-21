@@ -1,1 +1,37 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diuna - Pokój z kopertą</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4e7d0; /* pustynny odcień */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        img {
+            max-width: 90%;
+            max-height: 90%;
+            cursor: pointer;
+            border: 5px solid #c19a6b; /* złoto-piaskowa ramka */
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <img src="/mnt/data/A_digital_photograph_showcases_a_spacious_study_se.png" alt="Pokój w klimacie Diuny" id="duneImage">
 
+    <script>
+        const image = document.getElementById('duneImage');
+        image.addEventListener('click', () => {
+            alert('To jest koperta w klimacie Diuny!');
+        });
+    </script>
+</body>
+</html>

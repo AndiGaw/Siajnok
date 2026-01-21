@@ -567,6 +567,12 @@ function playNarrator() {
     btn.innerText = "▶️ Narrator (Wznów)";
   }
 }
+
+  function resetTop10() {
+  localStorage.removeItem('arrakis_top10');
+  console.log("Ranking wyczyszczony.");
+  showCustomAlert("Baza danych Top 10\nzostała wyzerowana.");
+}
 </script>
 </body>
 </html>

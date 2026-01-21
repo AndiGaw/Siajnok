@@ -524,7 +524,11 @@ function moveTo(x,y) {
   steps++;
   board[y][x].visited = true;
 
-  score = Math.max(0, 100 - steps * 2);
+  // --- MODYFIKACJA PUNKTACJI ---
+  let baseScore = Math.max(0, 100 - steps * 2);
+  let isHardMode = document.getElementById("hardMode").checked;
+  score = isHardMode ? baseScore * 4 : baseScore;
+  
   document.getElementById("stats").innerText = `Kroki: ${steps} | Punktacja: ${score}`;
 
   if (board[y][x].worm) {

@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diuna - Pokój z kopertą</title>
+    <title>Pokój w klimacie Diuny</title>
     <style>
+        /* Obraz wypełniający całą stronę */
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4e7d0; /* pustynny odcień */
-            display: flex;
-            justify-content: center;
-            align-items: center;
             height: 100vh;
-        }
-        img {
-            max-width: 90%;
-            max-height: 90%;
+            background-image: url('Pokoj_goscinny.png'); /* Twój obraz */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             cursor: pointer;
-            border: 5px solid #c19a6b; /* złoto-piaskowa ramka */
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        /* Obszar kliknięcia (tam gdzie koperta) */
+        #clickArea {
+            width: 100px;   /* szerokość obszaru kliknięcia */
+            height: 50px;   /* wysokość obszaru kliknięcia */
+            position: absolute;
+            top: 50%;       /* ustaw w przybliżeniu na kopercie */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0); /* przezroczysty */
         }
     </style>
 </head>
 <body>
-    <img src="/mnt/data/A_digital_photograph_showcases_a_spacious_study_se.png" alt="Pokój w klimacie Diuny" id="duneImage">
+    <!-- Przezroczysty obszar do kliknięcia -->
+    <div id="clickArea"></div>
+
+    <!-- Element audio -->
+    <audio id="sound" src="Zaproszenie.mp3"></audio>
 
     <script>
-        const image = document.getElementById('duneImage');
-        image.addEventListener('click', () => {
-            alert('To jest koperta w klimacie Diuny!');
+        const clickArea = document.getElementById('clickArea');
+        const sound = document.getElementById('sound');
+
+        clickArea.addEventListener('click', () => {
+            sound.play(); // odtwarzanie dźwięku po kliknięciu
         });
     </script>
 </body>

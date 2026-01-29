@@ -1,1 +1,241 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Wrota Siczy Tabr - Próba</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    /* ===== STYL BAZOWY (DIUNA STYLE) ===== */
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #000;
+        color: #e6c47a;
+        font-family: "Georgia", serif;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
 
+    /* Nakładka ruchomego piasku */
+    .sand {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(230,196,122,0.1),
+            rgba(230,196,122,0.1) 2px,
+            transparent 6px
+        );
+        animation: drift 60s linear infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @keyframes drift {
+        from { background-position: 0 0; }
+        to { background-position: 1000px 1000px; }
+    }
+
+    /* ===== WIELKIE WROTA ===== */
+    .gate-frame {
+        position: relative;
+        z-index: 2;
+        width: 320px;
+        height: 480px;
+        border: 10px solid #2a1f0d;
+        border-bottom: none;
+        border-radius: 160px 160px 5px 5px;
+        background: linear-gradient(180deg, #111 0%, #000 100%);
+        box-shadow: 0 0 40px rgba(230, 196, 122, 0.15), inset 0 0 60px #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 60px;
+        transition: all 0.5s ease-in-out;
+    }
+
+    /* Obraz tła wrót (opcjonalny, zastąpiony gradientem skalnym) */
+    .gate-image {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        opacity: 0.2;
+        background: radial-gradient(circle, #332211 0%, transparent 70%);
+        border-radius: 150px 150px 0 0;
+        z-index: -1;
+    }
+
+    h1 {
+        font-size: 1.3em;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        margin-bottom: 50px;
+        text-shadow: 0 0 15px rgba(230, 196, 122, 0.6);
+        padding: 0 20px;
+    }
+
+    /* ===== POLA SZYFRU ===== */
+    .inputs-container {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 40px;
+    }
+
+    .code-input {
+        width: 45px;
+        height: 65px;
+        background: #000;
+        border: 2px solid #5a4422;
+        color: #e6c47a;
+        font-size: 2.2em;
+        text-align: center;
+        border-radius: 4px;
+        transition: 0.3s;
+        font-family: "Georgia", serif;
+    }
+
+    .code-input:focus {
+        outline: none;
+        border-color: #e6c47a;
+        box-shadow: 0 0 20px rgba(230, 196, 122, 0.4);
+        background: #0a0a0a;
+    }
+
+    /* ===== PRZYCISK ===== */
+    #revealBtn {
+        display: none; /* Ukryty, dopóki szyfr jest błędny */
+        background: transparent;
+        color: #e6c47a;
+        border: 2px solid #e6c47a;
+        padding: 15px 35px;
+        font-size: 1em;
+        font-family: "Georgia", serif;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: 0.3s;
+        animation: pulse-gold 1.5s infinite;
+    }
+
+    #revealBtn:hover {
+        background: #e6c47a;
+        color: #000;
+    }
+
+    /* ===== ANIMACJE ===== */
+    @keyframes pulse-gold {
+        0% { box-shadow: 0 0 5px rgba(230, 196, 122, 0.5); }
+        50% { box-shadow: 0 0 25px rgba(230, 196, 122, 1); }
+        100% { box-shadow: 0 0 5px rgba(230, 196, 122, 0.5); }
+    }
+
+    @keyframes gate-shake {
+        0% { transform: translate(0, 0); }
+        25% { transform: translate(-3px, 1px); }
+        50% { transform: translate(3px, -1px); }
+        75% { transform: translate(-2px, -2px); }
+        100% { transform: translate(0, 0); }
+    }
+
+    .opening {
+        animation: gate-shake 0.15s infinite !important;
+        border-color: #fff !important;
+        box-shadow: 0 0 80px rgba(230, 196, 122, 0.5) !important;
+    }
+
+    /* Efekt oślepiającego światła na końcu */
+    #flash {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+        transition: opacity 2s ease-in;
+    }
+</style>
+</head>
+<body>
+
+<div class="sand"></div>
+<div id="flash"></div>
+
+<div class="gate-frame" id="mainGate">
+    <div class="gate-image"></div>
+    <h1>Wypowiedz Szyfr,<br>by wejść do Siczy</h1>
+    
+    <div class="inputs-container">
+        <input type="number" class="code-input" maxlength="1" id="c1" oninput="limit(this)">
+        <input type="number" class="code-input" maxlength="1" id="c2" oninput="limit(this)">
+        <input type="number" class="code-input" maxlength="1" id="c3" oninput="limit(this)">
+        <input type="number" class="code-input" maxlength="1" id="c4" oninput="limit(this)">
+    </div>
+
+    <button id="revealBtn" onclick="finalAction()">Wstąp do Siczy</button>
+</div>
+
+<audio id="stoneSound">
+    <source src="stone_gate.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+    const inputs = document.querySelectorAll('.code-input');
+    const button = document.getElementById('revealBtn');
+    const gate = document.getElementById('mainGate');
+    const sound = document.getElementById('stoneSound');
+
+    // Ograniczenie do 1 cyfry i auto-tabbing
+    function limit(element) {
+        if (element.value.length > 1) element.value = element.value.slice(0, 1);
+    }
+
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && index < inputs.length - 1) {
+                inputs[index + 1].focus();
+            }
+            checkCode();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && input.value === "" && index > 0) {
+                inputs[index - 1].focus();
+            }
+        });
+    });
+
+    function checkCode() {
+        const code = Array.from(inputs).map(i => i.value).join('');
+        if (code === "1234") {
+            button.style.display = "block";
+        } else {
+            button.style.display = "none";
+        }
+    }
+
+    function finalAction() {
+        // 1. Dźwięk
+        sound.play().catch(e => console.log("Brak pliku stone_gate.mp3"));
+
+        // 2. Drżenie wrót
+        gate.classList.add('opening');
+        button.style.display = "none";
+        inputs.forEach(i => i.disabled = true);
+
+        // 3. Finał: Błysk i komunikat
+        setTimeout(() => {
+            document.getElementById('flash').style.opacity = "1";
+            setTimeout(() => {
+                alert("Wrota się otwarły. Witaj w Siczy Tabr, Kwisatz Haderach.");
+                // Opcjonalnie: window.location.href = "final.html";
+            }, 2100);
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>

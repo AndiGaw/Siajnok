@@ -5,7 +5,7 @@
 <title>Wrota Siczy Tabr - Próba</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    /* ===== STYL BAZOWY (DIUNA STYLE) ===== */
+    /* ===== STYL BAZOWY ===== */
     html, body {
         margin: 0;
         padding: 0;
@@ -13,150 +13,133 @@
         background: #000;
         color: #e6c47a;
         font-family: "Georgia", serif;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
     }
 
-    /* Nakładka ruchomego piasku */
+    /* Piasek w tle */
     .sand {
         position: fixed;
-        width: 100%;
-        height: 100%;
-        background: repeating-linear-gradient(
-            45deg,
-            rgba(230,196,122,0.1),
-            rgba(230,196,122,0.1) 2px,
-            transparent 6px
-        );
+        width: 100%; height: 100%;
+        background: repeating-linear-gradient(45deg, rgba(230,196,122,0.1), rgba(230,196,122,0.1) 2px, transparent 6px);
         animation: drift 60s linear infinite;
         pointer-events: none;
         z-index: 1;
     }
+    @keyframes drift { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
 
-    @keyframes drift {
-        from { background-position: 0 0; }
-        to { background-position: 1000px 1000px; }
+    /* UI - GÓRNE PRZYCISKI */
+    #top-controls {
+        position: relative;
+        z-index: 10;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+    .ui-btn {
+        font-size: 1.1em;
+        padding: 12px 25px;
+        background: #111;
+        color: #e6c47a;
+        border: 2px solid #e6c47a;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(230,196,122,0.3);
+        font-family: "Georgia", serif;
+        text-transform: uppercase;
+        transition: 0.3s;
+    }
+    .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.6); }
+
+    /* UKŁAD ŚRODKOWY (DUDNIK - WROTA - LICZNIK) */
+    .main-layout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 40px;
+        z-index: 5;
+        width: 100%;
+        max-width: 1000px;
+        flex-wrap: wrap;
     }
 
-    /* ===== WIELKIE WROTA ===== */
+    /* Dudnik Przycisk */
+    #dudnik-btn {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px double #e6c47a;
+        background: #1a1a1a;
+        color: #e6c47a;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(230,196,122,0.2);
+    }
+    #dudnik-btn:active { transform: scale(0.95); }
+
+    /* Licznik */
+    #timer-display {
+        width: 120px;
+        font-size: 3em;
+        text-align: center;
+        color: #ff4400;
+        text-shadow: 0 0 15px #ff4400;
+        visibility: hidden; /* Pojawi się po dudniku */
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* WROTA */
     .gate-frame {
-        position: relative;
-        z-index: 2;
-        width: 320px;
-        height: 480px;
-        border: 10px solid #2a1f0d;
+        width: 300px;
+        height: 450px;
+        border: 8px solid #2a1f0d;
         border-bottom: none;
-        border-radius: 160px 160px 5px 5px;
+        border-radius: 150px 150px 5px 5px;
         background: linear-gradient(180deg, #111 0%, #000 100%);
-        box-shadow: 0 0 40px rgba(230, 196, 122, 0.15), inset 0 0 60px #000;
+        box-shadow: 0 0 30px rgba(230, 196, 122, 0.2);
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 60px;
-        transition: all 0.5s ease-in-out;
+        padding-top: 50px;
+        position: relative;
     }
 
-    /* Obraz tła wrót (opcjonalny, zastąpiony gradientem skalnym) */
-    .gate-image {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        opacity: 0.2;
-        background: radial-gradient(circle, #332211 0%, transparent 70%);
-        border-radius: 150px 150px 0 0;
-        z-index: -1;
-    }
-
-    h1 {
-        font-size: 1.3em;
-        text-transform: uppercase;
-        letter-spacing: 4px;
-        margin-bottom: 50px;
-        text-shadow: 0 0 15px rgba(230, 196, 122, 0.6);
-        padding: 0 20px;
-    }
-
-    /* ===== POLA SZYFRU ===== */
-    .inputs-container {
-        display: flex;
-        gap: 12px;
-        margin-bottom: 40px;
-    }
-
+    /* POLA SZYFRU - USUNIĘCIE STRZAŁEK */
+    .inputs-container { display: flex; gap: 10px; margin-top: 30px; }
     .code-input {
-        width: 45px;
-        height: 65px;
-        background: #000;
-        border: 2px solid #5a4422;
-        color: #e6c47a;
-        font-size: 2.2em;
-        text-align: center;
+        width: 40px; height: 60px;
+        background: #000; border: 2px solid #5a4422;
+        color: #e6c47a; font-size: 2em; text-align: center;
         border-radius: 4px;
-        transition: 0.3s;
-        font-family: "Georgia", serif;
     }
+    /* Ukrywanie strzałek w Chrome, Safari, Edge, Opera */
+    .code-input::-webkit-outer-spin-button,
+    .code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    /* Ukrywanie strzałek w Firefox */
+    .code-input[type=number] { -moz-appearance: textfield; }
 
-    .code-input:focus {
-        outline: none;
-        border-color: #e6c47a;
-        box-shadow: 0 0 20px rgba(230, 196, 122, 0.4);
-        background: #0a0a0a;
-    }
-
-    /* ===== PRZYCISK ===== */
+    /* PRZYCISK WEJŚCIA */
     #revealBtn {
-        display: none; /* Ukryty, dopóki szyfr jest błędny */
+        display: none;
+        margin-top: 30px;
         background: transparent;
         color: #e6c47a;
         border: 2px solid #e6c47a;
-        padding: 15px 35px;
-        font-size: 1em;
-        font-family: "Georgia", serif;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        padding: 12px 25px;
         cursor: pointer;
-        transition: 0.3s;
         animation: pulse-gold 1.5s infinite;
     }
+    @keyframes pulse-gold { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; box-shadow: 0 0 15px #e6c47a; } }
 
-    #revealBtn:hover {
-        background: #e6c47a;
-        color: #000;
-    }
+    .opening { animation: shake 0.1s infinite; border-color: #fff; }
+    @keyframes shake { 0% { transform: translate(0,0); } 50% { transform: translate(2px, 2px); } 100% { transform: translate(-2px, -2px); } }
 
-    /* ===== ANIMACJE ===== */
-    @keyframes pulse-gold {
-        0% { box-shadow: 0 0 5px rgba(230, 196, 122, 0.5); }
-        50% { box-shadow: 0 0 25px rgba(230, 196, 122, 1); }
-        100% { box-shadow: 0 0 5px rgba(230, 196, 122, 0.5); }
-    }
-
-    @keyframes gate-shake {
-        0% { transform: translate(0, 0); }
-        25% { transform: translate(-3px, 1px); }
-        50% { transform: translate(3px, -1px); }
-        75% { transform: translate(-2px, -2px); }
-        100% { transform: translate(0, 0); }
-    }
-
-    .opening {
-        animation: gate-shake 0.15s infinite !important;
-        border-color: #fff !important;
-        box-shadow: 0 0 80px rgba(230, 196, 122, 0.5) !important;
-    }
-
-    /* Efekt oślepiającego światła na końcu */
-    #flash {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: #fff;
-        opacity: 0;
-        pointer-events: none;
-        z-index: 10;
-        transition: opacity 2s ease-in;
-    }
+    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
 </style>
 </head>
 <body>
@@ -164,74 +147,108 @@
 <div class="sand"></div>
 <div id="flash"></div>
 
-<div class="gate-frame" id="mainGate">
-    <div class="gate-image"></div>
-    <h1>Wypowiedz Szyfr,<br>by wejść do Siczy</h1>
-    
-    <div class="inputs-container">
-        <input type="number" class="code-input" maxlength="1" id="c1" oninput="limit(this)">
-        <input type="number" class="code-input" maxlength="1" id="c2" oninput="limit(this)">
-        <input type="number" class="code-input" maxlength="1" id="c3" oninput="limit(this)">
-        <input type="number" class="code-input" maxlength="1" id="c4" oninput="limit(this)">
-    </div>
-
-    <button id="revealBtn" onclick="finalAction()">Wstąp do Siczy</button>
+<div id="top-controls">
+    <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
 </div>
 
-<audio id="stoneSound">
-    <source src="stone_gate.mp3" type="audio/mpeg">
-</audio>
+<div class="main-layout">
+    <button id="dudnik-btn" onclick="activateDudnik()">DUDNIK</button>
+
+    <div class="gate-frame" id="mainGate">
+        <h1>Szyfr Siczy</h1>
+        <div class="inputs-container">
+            <input type="number" class="code-input" id="c1" oninput="limit(this)">
+            <input type="number" class="code-input" id="c2" oninput="limit(this)">
+            <input type="number" class="code-input" id="c3" oninput="limit(this)">
+            <input type="number" class="code-input" id="c4" oninput="limit(this)">
+        </div>
+        <button id="revealBtn" onclick="finalAction()">Wstąp do Siczy</button>
+    </div>
+
+    <div id="timer-display">60</div>
+</div>
+
+<audio id="stoneSound"><source src="stone_gate.mp3" type="audio/mpeg"></audio>
+<audio id="dudnikSound"><source src="dudnik.mp3" type="audio/mpeg"></audio>
 
 <script>
-    const inputs = document.querySelectorAll('.code-input');
-    const button = document.getElementById('revealBtn');
-    const gate = document.getElementById('mainGate');
-    const sound = document.getElementById('stoneSound');
+    // NARRATOR LOGIC
+    let narratorAudio = null;
+    function playNarrator() {
+        const btn = document.getElementById("narratorBtn");
+        if (!narratorAudio) {
+            narratorAudio = new Audio("Saper_Diuny.mp3");
+            narratorAudio.addEventListener('ended', () => {
+                btn.innerText = "🎙️ Narrator (Start)";
+            });
+        }
+        if (narratorAudio.paused) {
+            narratorAudio.play().then(() => { btn.innerText = "⏸️ Narrator (Pauza)"; })
+            .catch(() => alert("Brak pliku Saper_Diuny.mp3"));
+        } else {
+            narratorAudio.pause();
+            btn.innerText = "▶️ Narrator (Wznów)";
+        }
+    }
 
-    // Ograniczenie do 1 cyfry i auto-tabbing
-    function limit(element) {
-        if (element.value.length > 1) element.value = element.value.slice(0, 1);
+    // DUDNIK & LICZNIK LOGIC
+    let timeLeft = 60;
+    let timerId = null;
+    function activateDudnik() {
+        // Dźwięk
+        const dSound = document.getElementById('dudnikSound');
+        dSound.play().catch(() => console.log("Brak dudnik.mp3"));
+
+        // Licznik
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.style.visibility = "visible";
+        
+        if (timerId) clearInterval(timerId);
+        timeLeft = 60;
+        timerDisplay.innerText = timeLeft;
+
+        timerId = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                alert("Czas minął! Czerw Cię usłyszał...");
+                location.reload(); // Reset gry
+            }
+        }, 1000);
+    }
+
+    // SZYFR LOGIC
+    const inputs = document.querySelectorAll('.code-input');
+    function limit(el) {
+        if (el.value.length > 1) el.value = el.value.slice(0, 1);
     }
 
     inputs.forEach((input, index) => {
         input.addEventListener('input', () => {
-            if (input.value.length === 1 && index < inputs.length - 1) {
-                inputs[index + 1].focus();
-            }
+            if (input.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
             checkCode();
         });
-
         input.addEventListener('keydown', (e) => {
-            if (e.key === "Backspace" && input.value === "" && index > 0) {
-                inputs[index - 1].focus();
-            }
+            if (e.key === "Backspace" && input.value === "" && index > 0) inputs[index - 1].focus();
         });
     });
 
     function checkCode() {
         const code = Array.from(inputs).map(i => i.value).join('');
-        if (code === "1234") {
-            button.style.display = "block";
-        } else {
-            button.style.display = "none";
-        }
+        document.getElementById('revealBtn').style.display = (code === "1234") ? "block" : "none";
     }
 
     function finalAction() {
-        // 1. Dźwięk
-        sound.play().catch(e => console.log("Brak pliku stone_gate.mp3"));
-
-        // 2. Drżenie wrót
-        gate.classList.add('opening');
-        button.style.display = "none";
-        inputs.forEach(i => i.disabled = true);
-
-        // 3. Finał: Błysk i komunikat
+        if(timerId) clearInterval(timerId);
+        document.getElementById('stoneSound').play().catch(() => {});
+        document.getElementById('mainGate').classList.add('opening');
+        document.getElementById('revealBtn').style.display = "none";
+        
         setTimeout(() => {
             document.getElementById('flash').style.opacity = "1";
             setTimeout(() => {
-                alert("Wrota się otwarły. Witaj w Siczy Tabr, Kwisatz Haderach.");
-                // Opcjonalnie: window.location.href = "final.html";
+                alert("Witaj w Siczy Tabr.");
             }, 2100);
         }, 2000);
     }

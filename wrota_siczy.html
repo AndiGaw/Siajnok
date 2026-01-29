@@ -20,135 +20,157 @@
         align-items: center;
     }
 
- /* Nakładka ruchomego piasku */
-.sand {
-  position:fixed;
-  width:100%;
-  height:100%;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(230,196,122,0.2),  /* złote ziarenka widoczne */
-      rgba(230,196,122,0.2) 2px,
-      rgba(0,0,0,0) 6px        /* przerwy między ziarenkami */
-    );
-  animation: drift 60s linear infinite;
-  pointer-events:none;
-  z-index:1;
-}
-
-@keyframes drift {
-  from { background-position:0 0; }
-  to { background-position:1000px 1000px; }
-}
+    /* POPRAWIONY RUCHOMY PIASEK */
+    .sand {
+        position: fixed;
+        width: 100%; height: 100%;
+        background-image: 
+            radial-gradient(circle, rgba(230,196,122,0.4) 1px, transparent 1px),
+            radial-gradient(circle, rgba(230,196,122,0.2) 1.5px, transparent 1.5px);
+        background-size: 60px 60px, 100px 100px;
+        z-index: 1;
+        pointer-events: none;
+        animation: drift 80s linear infinite;
+    }
+    @keyframes drift {
+        from { background-position: 0 0, 0 0; }
+        to { background-position: 1000px 2000px, -500px 1000px; }
+    }
 
     /* UI - GÓRNE PRZYCISKI */
     #top-controls {
         position: relative;
         z-index: 10;
-        margin-top: 20px;
-        margin-bottom: 30px;
+        margin-top: 30px;
+        margin-bottom: 20px;
     }
     .ui-btn {
-        font-size: 1.1em;
-        padding: 12px 25px;
+        font-size: 1.3em;
+        padding: 15px 40px;
         background: #111;
         color: #e6c47a;
         border: 2px solid #e6c47a;
         border-radius: 8px;
         cursor: pointer;
-        box-shadow: 0 0 10px rgba(230,196,122,0.3);
-        font-family: "Georgia", serif;
         text-transform: uppercase;
         transition: 0.3s;
     }
-    .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.6); }
+    .ui-btn:hover { background: #e6c47a; color: #000; box-shadow: 0 0 30px #e6c47a; }
 
-    /* UKŁAD ŚRODKOWY (DUDNIK - WROTA - LICZNIK) */
+    /* UKŁAD GŁÓWNY */
     .main-layout {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 40px;
+        gap: 60px;
         z-index: 5;
         width: 100%;
-        max-width: 1000px;
-        flex-wrap: wrap;
+        max-width: 1200px;
+        padding: 20px;
     }
 
-    /* Dudnik Przycisk */
+    /* POWIĘKSZONY DUDNIK */
     #dudnik-btn {
-        width: 120px;
-        height: 120px;
+        width: 150px;
+        height: 150px;
         border-radius: 50%;
-        border: 4px double #e6c47a;
+        border: 6px double #e6c47a;
         background: #1a1a1a;
         color: #e6c47a;
+        font-size: 1.2em;
         font-weight: bold;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 15px rgba(230,196,122,0.2);
+        transition: 0.2s;
+        box-shadow: 0 0 20px rgba(230,196,122,0.3);
     }
-    #dudnik-btn:active { transform: scale(0.95); }
+    #dudnik-btn:hover { background: #222; transform: scale(1.05); }
 
-    /* Licznik */
+    /* POWIĘKSZONY LICZNIK */
     #timer-display {
-        width: 120px;
-        font-size: 3em;
+        width: 150px;
+        font-size: 4.5em;
         text-align: center;
         color: #ff4400;
-        text-shadow: 0 0 15px #ff4400;
-        visibility: hidden; /* Pojawi się po dudniku */
+        text-shadow: 0 0 25px #ff4400;
+        visibility: hidden;
         font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
     }
 
-    /* WROTA */
+    /* ===== POWIĘKSZONE WROTA ===== */
     .gate-frame {
-        width: 300px;
-        height: 450px;
-        border: 8px solid #2a1f0d;
+        width: 450px; /* Zwiększone z 300px */
+        height: 650px; /* Zwiększone z 450px */
+        border: 12px solid #2a1f0d;
         border-bottom: none;
-        border-radius: 150px 150px 5px 5px;
-        background: linear-gradient(180deg, #111 0%, #000 100%);
-        box-shadow: 0 0 30px rgba(230, 196, 122, 0.2);
+        border-radius: 225px 225px 10px 10px;
+        background: linear-gradient(180deg, #151515 0%, #000 100%);
+        box-shadow: 0 0 60px rgba(230, 196, 122, 0.25);
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 50px;
+        padding-top: 80px;
         position: relative;
     }
 
-    /* POLA SZYFRU - USUNIĘCIE STRZAŁEK */
-    .inputs-container { display: flex; gap: 10px; margin-top: 30px; }
-    .code-input {
-        width: 40px; height: 60px;
-        background: #000; border: 2px solid #5a4422;
-        color: #e6c47a; font-size: 2em; text-align: center;
-        border-radius: 4px;
+    .gate-frame h1 {
+        font-size: 2em;
+        letter-spacing: 5px;
+        margin-bottom: 60px;
+        text-transform: uppercase;
+        text-shadow: 0 0 10px #e6c47a;
     }
-    /* Ukrywanie strzałek w Chrome, Safari, Edge, Opera */
+
+    /* ===== POWIĘKSZONE POLA WPISU ===== */
+    .inputs-container { display: flex; gap: 20px; }
+    .code-input {
+        width: 70px;  /* Zwiększone z 40px */
+        height: 100px; /* Zwiększone z 60px */
+        background: #000; 
+        border: 3px solid #5a4422;
+        color: #e6c47a; 
+        font-size: 3.5em; /* Gigantyczne cyfry */
+        text-align: center;
+        border-radius: 8px;
+        font-family: "Georgia", serif;
+        transition: 0.3s;
+    }
+    .code-input:focus {
+        border-color: #e6c47a;
+        box-shadow: 0 0 25px #e6c47a;
+        outline: none;
+    }
+
+    /* Ukrywanie strzałek */
     .code-input::-webkit-outer-spin-button,
     .code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    /* Ukrywanie strzałek w Firefox */
     .code-input[type=number] { -moz-appearance: textfield; }
 
     /* PRZYCISK WEJŚCIA */
     #revealBtn {
         display: none;
-        margin-top: 30px;
-        background: transparent;
-        color: #e6c47a;
-        border: 2px solid #e6c47a;
-        padding: 12px 25px;
+        margin-top: 50px;
+        background: #e6c47a;
+        color: #000;
+        border: none;
+        padding: 20px 50px;
+        font-size: 1.5em;
+        font-weight: bold;
+        text-transform: uppercase;
         cursor: pointer;
+        border-radius: 5px;
         animation: pulse-gold 1.5s infinite;
     }
-    @keyframes pulse-gold { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; box-shadow: 0 0 15px #e6c47a; } }
 
-    .opening { animation: shake 0.1s infinite; border-color: #fff; }
-    @keyframes shake { 0% { transform: translate(0,0); } 50% { transform: translate(2px, 2px); } 100% { transform: translate(-2px, -2px); } }
+    @keyframes pulse-gold { 
+        0% { transform: scale(1); box-shadow: 0 0 10px #e6c47a; } 
+        50% { transform: scale(1.05); box-shadow: 0 0 30px #e6c47a; } 
+        100% { transform: scale(1); box-shadow: 0 0 10px #e6c47a; } 
+    }
+
+    /* Efekt drżenia */
+    .opening { animation: shake 0.1s infinite !important; border-color: #fff !important; }
+    @keyframes shake { 0% { transform: translate(0,0); } 50% { transform: translate(3px, 3px); } 100% { transform: translate(-3px, -3px); } }
 
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
 </style>
@@ -183,34 +205,26 @@
 <audio id="dudnikSound"><source src="dudnik.mp3" type="audio/mpeg"></audio>
 
 <script>
-    // NARRATOR LOGIC
     let narratorAudio = null;
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
         if (!narratorAudio) {
             narratorAudio = new Audio("Saper_Diuny.mp3");
-            narratorAudio.addEventListener('ended', () => {
-                btn.innerText = "🎙️ Narrator (Start)";
-            });
+            narratorAudio.onended = () => btn.innerText = "🎙️ Narrator (Start)";
         }
         if (narratorAudio.paused) {
-            narratorAudio.play().then(() => { btn.innerText = "⏸️ Narrator (Pauza)"; })
+            narratorAudio.play().then(() => btn.innerText = "⏸️ Pauza")
             .catch(() => alert("Brak pliku Saper_Diuny.mp3"));
         } else {
             narratorAudio.pause();
-            btn.innerText = "▶️ Narrator (Wznów)";
+            btn.innerText = "▶️ Wznów";
         }
     }
 
-    // DUDNIK & LICZNIK LOGIC
     let timeLeft = 60;
     let timerId = null;
     function activateDudnik() {
-        // Dźwięk
-        const dSound = document.getElementById('dudnikSound');
-        dSound.play().catch(() => console.log("Brak dudnik.mp3"));
-
-        // Licznik
+        document.getElementById('dudnikSound').play().catch(() => {});
         const timerDisplay = document.getElementById('timer-display');
         timerDisplay.style.visibility = "visible";
         
@@ -223,13 +237,12 @@
             timerDisplay.innerText = timeLeft;
             if (timeLeft <= 0) {
                 clearInterval(timerId);
-                alert("Czas minął! Czerw Cię usłyszał...");
-                location.reload(); // Reset gry
+                alert("Czerw nadciągnął! Zostałeś odnaleziony...");
+                location.reload();
             }
         }, 1000);
     }
 
-    // SZYFR LOGIC
     const inputs = document.querySelectorAll('.code-input');
     function limit(el) {
         if (el.value.length > 1) el.value = el.value.slice(0, 1);
@@ -258,9 +271,7 @@
         
         setTimeout(() => {
             document.getElementById('flash').style.opacity = "1";
-            setTimeout(() => {
-                alert("Witaj w Siczy Tabr.");
-            }, 2100);
+            setTimeout(() => { alert("Witaj w Siczy Tabr, Proroku."); }, 2100);
         }, 2000);
     }
 </script>

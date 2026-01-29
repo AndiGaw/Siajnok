@@ -191,7 +191,8 @@ html, body {
   width: 120px; height: 120px; background: #111; border: 2px solid #e6c47a; border-radius: 10px;
   display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
   visibility: hidden;   
-  align-self: flex-end; 
+  align-self: flex-end;
+  cursor: pointer; 
 }  
 
 #board-wrapper { display: flex; flex-direction: column; align-items: center; min-width: calc(50px * 10 + 3px * 9); position: relative; }
@@ -250,6 +251,7 @@ html, body {
     </div>
 
     <div id="helipadB">Sicz Tabr</div>
+    <div id="helipadB" onclick="goToSich()">Sicz Tabr</div>
   </div>
 </div>
 
@@ -757,6 +759,10 @@ function playNarrator() {
     narratorAudio.pause();
     btn.innerText = "▶️ Narrator (Wznów)";
   }
+}
+
+function goToSich() {
+  window.location.href = "https://andigaw.github.io/Siajnok/index.html";
 }
 
  function resetTop10() {

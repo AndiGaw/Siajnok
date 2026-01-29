@@ -20,21 +20,26 @@
         align-items: center;
     }
 
-    /* POPRAWIONY RUCHOMY PIASEK */
+    /* Nakładka ruchomego piasku */
     .sand {
-        position: fixed;
-        width: 100%; height: 100%;
-        background-image: 
-            radial-gradient(circle, rgba(230,196,122,0.4) 1px, transparent 1px),
-            radial-gradient(circle, rgba(230,196,122,0.2) 1.5px, transparent 1.5px);
-        background-size: 60px 60px, 100px 100px;
-        z-index: 1;
-        pointer-events: none;
-        animation: drift 80s linear infinite;
+      position:fixed;
+      width:100%;
+      height:100%;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          rgba(230,196,122,0.2),  /* złote ziarenka widoczne */
+          rgba(230,196,122,0.2) 2px,
+          rgba(0,0,0,0) 6px        /* przerwy między ziarenkami */
+        );
+      animation: drift 60s linear infinite;
+      pointer-events:none;
+      z-index:1;
     }
+    
     @keyframes drift {
-        from { background-position: 0 0, 0 0; }
-        to { background-position: 1000px 2000px, -500px 1000px; }
+      from { background-position:0 0; }
+      to { background-position:1000px 1000px; }
     }
 
     /* UI - GÓRNE PRZYCISKI */

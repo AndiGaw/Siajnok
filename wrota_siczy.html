@@ -49,18 +49,27 @@
         margin-top: 30px;
         margin-bottom: 20px;
     }
+    /* ZMIENIONY STYL PRZYCISKU (identyczny jak w grze) */
     .ui-btn {
-        font-size: 1.3em;
-        padding: 15px 40px;
-        background: #111;
+        font-size: 1.2em; 
+        padding: 10px 20px; 
+        width: 320px; 
+        background: #111; 
         color: #e6c47a;
-        border: 2px solid #e6c47a;
-        border-radius: 8px;
-        cursor: pointer;
-        text-transform: uppercase;
+        border: 2px solid #e6c47a; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        box-shadow: 0 0 10px rgba(230,196,122,0.5);
+        text-transform: none; /* Usunięto wymuszenie wielkich liter, by pasowało do drugiego kodu */
         transition: 0.3s;
+        font-family: inherit; /* Żeby dziedziczył czcionkę Georgia */
     }
-    .ui-btn:hover { background: #e6c47a; color: #000; box-shadow: 0 0 30px #e6c47a; }
+
+    .ui-btn:hover { 
+        background: #222; 
+        box-shadow: 0 0 20px rgba(230,196,122,0.8); 
+        color: #e6c47a; /* W drugim kodzie kolor tekstu nie zmienia się na czarny przy hover */
+    }
 
     /* UKŁAD GŁÓWNY */
     .main-layout {
@@ -210,19 +219,32 @@
 <audio id="dudnikSound"><source src="dudnik.mp3" type="audio/mpeg"></audio>
 
 <script>
-    let narratorAudio = null;
+let narratorAudio = null;
+    
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
+        
+        // Inicjalizacja przy pierwszym kliknięciu
         if (!narratorAudio) {
             narratorAudio = new Audio("Saper_Diuny.mp3");
-            narratorAudio.onended = () => btn.innerText = "🎙️ Narrator (Start)";
+            
+            // Obsługa zakończenia nagrania (reset tekstu i czasu)
+            narratorAudio.addEventListener('ended', () => {
+                btn.innerText = "🎙️ Narrator (Start)";
+                narratorAudio.currentTime = 0;
+            });
         }
+
+        // Logika odtwarzania/pauzowania
         if (narratorAudio.paused) {
-            narratorAudio.play().then(() => btn.innerText = "⏸️ Pauza")
-            .catch(() => alert("Brak pliku Saper_Diuny.mp3"));
+            narratorAudio.play().then(() => {
+                btn.innerText = "⏸️ Narrator (Pauza)";
+            }).catch(() => {
+                alert("Błąd: Brak pliku Saper_Diuny.mp3");
+            });
         } else {
             narratorAudio.pause();
-            btn.innerText = "▶️ Wznów";
+            btn.innerText = "▶️ Narrator (Wznów)";
         }
     }
 

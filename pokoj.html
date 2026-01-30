@@ -94,41 +94,48 @@
             animation: zoomIn 0.4s ease-out;
         }
 
-        /* Styl przycisku drzwi */
-        #door-btn {
-            display: none; /* Ukryte na starcie */
-            position: absolute;
-            right: 30px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 120px;
-            height: 250px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 3px solid #e6c47a;
-            color: #e6c47a;
-            font-family: "Georgia", serif;
-            font-size: 1.5em;
-            cursor: pointer;
-            z-index: 8;
-            transition: all 0.5s ease;
-            writing-mode: vertical-rl; /* Pionowy napis */
-            text-orientation: mixed;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(230, 196, 122, 0.3);
-            opacity: 0;
-        }
+    /* 2. Styl przycisku - bez zmian w pozycji, dodajemy tylko obsługę animacji */
+    #door-btn {
+        display: none;
+        position: absolute;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%); /* To musi być spójne z animacją */
+        width: 120px;
+        height: 250px;
+        background: rgba(0, 0, 0, 0.4);
+        border: 3px solid #e6c47a;
+        color: #e6c47a;
+        font-family: "Georgia", serif;
+        font-size: 1.5em;
+        cursor: pointer;
+        z-index: 8;
+        transition: background 0.5s ease, box-shadow 0.5s ease;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(230, 196, 122, 0.3);
+        opacity: 0;
+    }    
 
         #door-btn:hover {
             background: rgba(230, 196, 122, 0.2);
             box-shadow: 0 0 30px rgba(230, 196, 122, 0.6);
             color: #fff;
         }
-        
-        @keyframes zoomIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+
+            /* 1. Poprawione klatki animacji - uwzględniają wyśrodkowanie pionowe */
+    @keyframes zoomIn {
+        from { 
+            transform: translateY(-50%) scale(0.5); 
+            opacity: 0; 
         }
+        to { 
+            transform: translateY(-50%) scale(1); 
+            opacity: 1; 
+        }
+    }
     </style>
 </head>
 <body>
@@ -184,19 +191,16 @@
         }
 
     function closeLetter() {
-            // 1. Ukryj okno modalne
-            document.getElementById("letterModal").style.display = "none";
-            
-            // 2. Pokaż przycisk drzwi
-            const door = document.getElementById("door-btn");
-            door.style.display = "flex"; 
-            
-            // Wymuszamy widoczność po animacji
-            setTimeout(() => {
-                door.style.opacity = "1";
-                door.style.animation = "zoomIn 0.8s ease-out";
-            }, 10);
-        }
+        // 1. Ukryj okno modalne
+        document.getElementById("letterModal").style.display = "none";
+        
+        // 2. Pokaż przycisk drzwi i od razu nadaj mu parametry widoczności
+        const door = document.getElementById("door-btn");
+        door.style.display = "flex";
+        door.style.opacity = "1";
+        door.style.animation = "zoomIn 0.8s ease-out forwards"; 
+        // "forwards" sprawia, że przycisk zostanie w stanie z ostatniej klatki animacji
+    }
 
     function goToNextLoc() {
         window.location.href = "https://www.www.www"; // Twój adres docelowy

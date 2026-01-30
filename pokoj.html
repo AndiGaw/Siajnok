@@ -90,7 +90,7 @@
                 
                 // Obsługa zakończenia nagrania
                 narratorAudio.addEventListener('ended', () => {
-                    btn.innerText = "🎙️ Odtwórz zaproszenie";
+                    btn.innerText = "🎙️ Narrator (Start)";
                     narratorAudio.currentTime = 0;
                 });
             }
@@ -98,14 +98,14 @@
             // Logika odtwarzania/pauzowania
             if (narratorAudio.paused) {
                 narratorAudio.play().then(() => {
-                    btn.innerText = "⏸️ Pauza (Zaproszenie)";
+                    btn.innerText = "⏸️ Narrator (Pauza)";
                 }).catch((e) => {
                     console.error(e);
                     alert("Błąd: Upewnij się, że plik 'Zaproszenie.mp3' jest w folderze.");
                 });
             } else {
                 narratorAudio.pause();
-                btn.innerText = "▶️ Wznów zaproszenie";
+                btn.innerText = "▶️ Narrator (Wznów)";
             }
         }
     </script>

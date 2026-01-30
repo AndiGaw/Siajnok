@@ -226,7 +226,7 @@ let narratorAudio = null;
         
         // Inicjalizacja przy pierwszym kliknięciu
         if (!narratorAudio) {
-            narratorAudio = new Audio("Saper_Diuny.mp3");
+            narratorAudio = new Audio("Wrota.mp3");
             
             // Obsługa zakończenia nagrania (reset tekstu i czasu)
             narratorAudio.addEventListener('ended', () => {
@@ -240,7 +240,7 @@ let narratorAudio = null;
             narratorAudio.play().then(() => {
                 btn.innerText = "⏸️ Narrator (Pauza)";
             }).catch(() => {
-                alert("Błąd: Brak pliku Saper_Diuny.mp3");
+                alert("Błąd: Brak pliku Wrota.mp3");
             });
         } else {
             narratorAudio.pause();

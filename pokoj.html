@@ -93,6 +93,37 @@
             box-shadow: 0 0 30px rgba(230, 196, 122, 0.5);
             animation: zoomIn 0.4s ease-out;
         }
+
+        /* Styl przycisku drzwi */
+        #door-btn {
+            display: none; /* Ukryte na starcie */
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 120px;
+            height: 250px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #e6c47a;
+            color: #e6c47a;
+            font-family: "Georgia", serif;
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 8;
+            transition: all 0.5s ease;
+            writing-mode: vertical-rl; /* Pionowy napis */
+            text-orientation: mixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(230, 196, 122, 0.3);
+        }
+
+        #door-btn:hover {
+            background: rgba(230, 196, 122, 0.2);
+            box-shadow: 0 0 30px rgba(230, 196, 122, 0.6);
+            color: #fff;
+        }
         
         @keyframes zoomIn {
             from { transform: scale(0.5); opacity: 0; }
@@ -107,6 +138,8 @@
     </div>
 
     <div id="clickArea" title="Kliknij kopertę" onclick="openLetter()"></div>
+
+    <button id="door-btn" onclick="goToNextLoc()">WYJŚCIE</button>
 
     <div id="letterModal" onclick="closeLetter()">
         <img src="Zaproszenie.png" id="letterImage" alt="Zaproszenie">
@@ -151,11 +184,19 @@
         }
 
     function closeLetter() {
-        // Ukryj okno
+        // 1. Ukryj okno modalne
         document.getElementById("letterModal").style.display = "none";
         
-        // Opcjonalnie: jeśli chcesz, aby dźwięk przestawał grać po zamknięciu listu:
-        // if (narratorAudio && !narratorAudio.paused) { playNarrator(); }
+        // 2. Pokaż przycisk drzwi
+        const door = document.getElementById("door-btn");
+        door.style.display = "flex"; // Zmieniamy z none na flex
+        
+        // Opcjonalny efekt: płynne pojawienie się (jeśli dodasz opacity do CSS)
+        door.style.animation = "zoomIn 0.8s ease-out";
+    }
+
+    function goToNextLoc() {
+        window.location.href = "https://www.www.www"; // Twój adres docelowy
     }
     </script>
 </body>

@@ -113,10 +113,10 @@
             transition: all 0.5s ease;
             writing-mode: vertical-rl; /* Pionowy napis */
             text-orientation: mixed;
-            display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 0 15px rgba(230, 196, 122, 0.3);
+            opacity: 0;
         }
 
         #door-btn:hover {
@@ -184,16 +184,19 @@
         }
 
     function closeLetter() {
-        // 1. Ukryj okno modalne
-        document.getElementById("letterModal").style.display = "none";
-        
-        // 2. Pokaż przycisk drzwi
-        const door = document.getElementById("door-btn");
-        door.style.display = "flex"; // Zmieniamy z none na flex
-        
-        // Opcjonalny efekt: płynne pojawienie się (jeśli dodasz opacity do CSS)
-        door.style.animation = "zoomIn 0.8s ease-out";
-    }
+            // 1. Ukryj okno modalne
+            document.getElementById("letterModal").style.display = "none";
+            
+            // 2. Pokaż przycisk drzwi
+            const door = document.getElementById("door-btn");
+            door.style.display = "flex"; 
+            
+            // Wymuszamy widoczność po animacji
+            setTimeout(() => {
+                door.style.opacity = "1";
+                door.style.animation = "zoomIn 0.8s ease-out";
+            }, 10);
+        }
 
     function goToNextLoc() {
         window.location.href = "https://www.www.www"; // Twój adres docelowy

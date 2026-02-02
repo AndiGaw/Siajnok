@@ -20,7 +20,6 @@
             overflow-y: auto;
         }
 
-        /* Główny kontener - stos pionowy */
         .container {
             display: flex;
             flex-direction: column;
@@ -28,7 +27,7 @@
             width: 100%;
             max-width: 1200px;
             padding: 40px 20px;
-            gap: 20px; /* Stały odstęp między sekcjami */
+            gap: 20px;
         }
 
         .ui-btn {
@@ -43,25 +42,15 @@
             z-index: 10;
         }
 
-        /* KLUCZOWA ZMIANA: Kontener mapy z wymuszonym rozmiarem */
+        /* Sekcja mapy jako punkt odniesienia dla pozycjonowania */
         .map-section {
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Rezerwujemy stałą wysokość, aby rogi mapy miały "pusty plac" wokół siebie */
-            height: 60vh; 
+            height: 50vh; 
             width: 100%;
-            position: relative;
+            position: relative; /* Kluczowe dla ukrytego tekstu */
             margin: 20px 0;
-        }
-
-        /* Na komputerach tekst ląduje obok mapy */
-        @media (min-width: 1024px) {
-            .map-section {
-                flex-direction: row;
-                gap: 80px;
-            }
         }
 
         .map-wrapper {
@@ -78,23 +67,42 @@
             height: auto;
             transform: rotate(45deg);
             transition: transform 1.5s ease-in-out;
-            /* Drop-shadow zamiast border, żeby nie ucinało rogów */
             filter: drop-shadow(0 0 10px rgba(230,196,122,0.3));
         }
 
+        /* TEKST NA PRAWO - Nie przesuwa mapy */
         .ukryty-tekst {
+            position: absolute;
+            /* Ustawiamy tekst na prawo od środka sekcji */
+            left: calc(50% + 180px); 
             width: 280px;
-            text-align: center;
+            text-align: left;
             font-size: 1rem;
             letter-spacing: 2px;
             line-height: 1.6;
-            color: rgba(0,0,0,0); /* Całkowicie ukryty */
-            transition: color 1s ease;
+            color: rgba(0,0,0,0);
+            transition: color 1s ease, transform 1s ease;
+            pointer-events: none; /* Żeby nie przeszkadzał w klikaniu dopóki go nie ma */
+        }
+
+        /* Responsywność dla telefonów */
+        @media (max-width: 1024px) {
+            .map-section {
+                height: auto;
+                flex-direction: column;
+            }
+            .ukryty-tekst {
+                position: static;
+                margin-top: 20px;
+                text-align: center;
+                width: 90%;
+            }
         }
 
         .revealed {
             color: #e6c47a;
             text-shadow: 0 0 10px rgba(230,196,122,0.5);
+            pointer-events: auto;
         }
 
         .answer-input {

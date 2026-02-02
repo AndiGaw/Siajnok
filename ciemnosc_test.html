@@ -9,10 +9,10 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #000000;
+            background-color: #000;
             display: flex;
-            flex-direction: column; /* Narrator na górze, reszta pod nim */
-            align-items: center;
+            flex-direction: column;
+            align-items: center; /* Centrowanie głównej osi (Narrator, Mapa, Hasło) */
             justify-content: center;
             min-height: 100vh;
             color: #e6c47a;
@@ -20,8 +20,10 @@
             overflow: hidden;
         }
 
+        /* 1. NARRATOR W OSI CENTRALNEJ */
         #controls-container {
-            margin-bottom: 50px;
+            margin-bottom: 20px;
+            z-index: 10;
         }
 
         .ui-btn {
@@ -32,74 +34,81 @@
             color: #e6c47a;
             border: 2px solid #e6c47a; 
             border-radius: 8px; 
-            cursor: pointer; 
-            transition: 0.3s;
+            cursor: pointer;
             font-family: inherit;
+            transition: 0.3s;
         }
 
-        /* GŁÓWNY KONTENER POZIOMY */
-        .content-layout {
-            display: flex;
-            flex-direction: row; /* Mapa po lewej, tekst po prawej */
-            align-items: center;
-            justify-content: center;
-            gap: 100px; /* Przestrzeń między mapą a tekstem */
-        }
-
-        /* BLOK LEWY (MAPA + INPUT) */
-        .map-box {
+        /* KONTENER DLA MAPY I TEKSTU ORAZ HASŁA */
+        .middle-section {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 30px;
-            width: 450px; /* Rezerwacja miejsca na obrót */
+            align-items: center; /* Pilnuje, by Mapa i Hasło były pod Narratorem */
+            position: relative;
         }
 
+        /* UKŁAD POZIOMY TYLKO DLA LINII MAPY */
+        .map-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            /* To szerokość gwarantująca, że mapa jest w centrum, a tekst obok */
+            width: 1000px; 
+        }
+
+        /* 2. MAPA W OSI CENTRALNEJ */
         .map-wrapper {
-            width: 300px;
-            height: 300px;
+            width: 400px;
+            height: 400px;
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Dzięki temu mapa jest "pępkiem" tego rzędu */
         }
 
         .mapa-arrakis {
-            width: 250px;
+            width: 280px;
             height: auto;
             transform: rotate(45deg); 
             transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* 3. TEKST NA PRAWO OD MAPY */
+        .ukryty-tekst {
+            user-select: text; 
+            width: 300px;
+            color: #000; /* Ukryty */
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            text-align: left; /* Tekst na prawo, wyrównany do lewej */
+            position: absolute;
+            left: 700px; /* Przesunięcie na prawo od osi centralnej */
+        }
+
+        .ukryty-tekst::selection {
+            background: #ff8c00;
+            color: #fff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00;
+        }
+
+        /* 4. HASŁO POD MAPĄ W OSI CENTRALNEJ */
         .answer-input {
             background: #111;
             border: 2px solid #5a4422;
             color: #e6c47a;
             padding: 12px;
             font-family: 'Forum', serif;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             text-align: center;
             border-radius: 4px;
-            width: 200px;
+            width: 250px;
             outline: none;
-        }
-
-        /* BLOK PRAWY (TEKST) */
-        .ukryty-tekst {
-            user-select: text; 
-            width: 350px;
-            color: #000000; /* Ukryty */
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            line-height: 1.8;
-            font-size: 1.2rem;
-            text-align: center; /* Tekst wycentrowany wewnątrz swojej kolumny */
-        }
-
-        .ukryty-tekst::selection {
-            background: #ff8c00;
-            color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00;
+            margin-top: -20px; /* Przyciągnięcie do mapy */
         }
     </style>
 </head>
@@ -109,32 +118,37 @@
         <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
 
-    <div class="content-layout">
-        <div class="map-box">
+    <div class="middle-section">
+        <div class="map-row">
             <div class="map-wrapper">
                 <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
             </div>
-            <input type="text" id="questInput" class="answer-input" placeholder="WPISZ HASŁO..." oninput="checkAnswer(this)">
+
+            <div class="ukryty-tekst">
+                Przyprawa musi płynąć. <br>
+                Kto kontroluje przyprawę, <br>
+                ten kontroluje wszechświat. <br>
+                Strach to zabójca umysłu.
+            </div>
         </div>
-        
-        <div class="ukryty-tekst">
-            Przyprawa musi płynąć. <br>
-            Kto kontroluje przyprawę, <br>
-            ten kontroluje wszechświat.
-        </div>
+
+        <input type="text" id="questInput" class="answer-input" placeholder="WPISZ HASŁO..." oninput="checkAnswer(this)">
     </div>
 
     <script>
-        // ... (skrypt pozostaje bez zmian) ...
         let narratorAudio = null;
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
             if (!narratorAudio) {
                 narratorAudio = new Audio("Zaproszenie.mp3");
-                narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; narratorAudio.currentTime = 0; };
+                narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; };
             }
-            if (narratorAudio.paused) { narratorAudio.play().then(() => btn.innerText = "⏸️ Pauza"); }
-            else { narratorAudio.pause(); btn.innerText = "▶️ Wznów"; }
+            if (narratorAudio.paused) {
+                narratorAudio.play().then(() => btn.innerText = "⏸️ Pauza");
+            } else {
+                narratorAudio.pause();
+                btn.innerText = "▶️ Wznów";
+            }
         }
 
         function checkAnswer(input) {

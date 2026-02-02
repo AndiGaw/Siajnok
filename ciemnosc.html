@@ -16,7 +16,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
+            overflow-x: hidden; 
             overflow-y: auto;
         }
 
@@ -25,32 +25,27 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 1200px;
             padding: 40px 20px;
-            gap: 20px;
+            gap: 30px;
+            box-sizing: border-box;
         }
 
         .ui-btn {
-            font-size: 1.1em; 
-            padding: 12px; 
-            width: 300px; 
-            background: #111; 
-            color: #e6c47a;
-            border: 2px solid #e6c47a; 
-            border-radius: 8px; 
-            cursor: pointer;
-            z-index: 10;
+            font-size: 1.1em; padding: 12px; width: 280px; 
+            background: #111; color: #e6c47a; border: 2px solid #e6c47a; 
+            border-radius: 8px; cursor: pointer; transition: 0.3s;
         }
 
-        /* Sekcja mapy jako punkt odniesienia dla pozycjonowania */
-        .map-section {
+        /* GRUPOWANIE MAPY I TEKSTU */
+        .content-cluster {
             display: flex;
+            flex-direction: row; /* Zawsze obok siebie na dużych ekranach */
             align-items: center;
             justify-content: center;
-            height: 50vh; 
-            width: 100%;
-            position: relative; /* Kluczowe dla ukrytego tekstu */
-            margin: 20px 0;
+            position: relative;
+            width: auto; /* Dopasuj do zawartości, nie do ekranu */
+            min-height: 450px;
+            gap: 50px; /* Sztywny odstęp między mapą a napisem */
         }
 
         .map-wrapper {
@@ -60,60 +55,51 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0; /* Mapa nie może się ściisnąć */
         }
 
         .mapa-arrakis {
-            width: 100%;
-            height: auto;
+            width: 220px; /* Rozmiar bazowy bezpieczny dla obrotu */
+            height: 220px;
+            object-fit: contain;
             transform: rotate(45deg);
             transition: transform 1.5s ease-in-out;
-            filter: drop-shadow(0 0 10px rgba(230,196,122,0.3));
+            filter: drop-shadow(0 0 15px rgba(230,196,122,0.4));
         }
 
-        /* TEKST NA PRAWO - Nie przesuwa mapy */
         .ukryty-tekst {
-            position: absolute;
-            /* Ustawiamy tekst na prawo od środka sekcji */
-            left: calc(50% + 180px); 
-            width: 280px;
+            width: 300px;
             text-align: left;
-            font-size: 1rem;
+            font-size: 1.1rem;
             letter-spacing: 2px;
             line-height: 1.6;
-            color: rgba(0,0,0,0);
-            transition: color 1s ease, transform 1s ease;
-            pointer-events: none; /* Żeby nie przeszkadzał w klikaniu dopóki go nie ma */
+            color: transparent; /* Ukryty */
+            transition: color 1s ease;
+            user-select: none;
         }
 
-        /* Responsywność dla telefonów */
-        @media (max-width: 1024px) {
-            .map-section {
-                height: auto;
+        .revealed {
+            color: #e6c47a;
+            text-shadow: 0 0 10px rgba(230,196,122,0.6);
+            user-select: text;
+        }
+
+        /* Responsywność dla mniejszych ekranów */
+        @media (max-width: 800px) {
+            .content-cluster {
                 flex-direction: column;
+                gap: 20px;
             }
             .ukryty-tekst {
-                position: static;
-                margin-top: 20px;
                 text-align: center;
                 width: 90%;
             }
         }
 
-        .revealed {
-            color: #e6c47a;
-            text-shadow: 0 0 10px rgba(230,196,122,0.5);
-            pointer-events: auto;
-        }
-
         .answer-input {
-            background: #111;
-            border: 2px solid #5a4422;
-            color: #e6c47a;
-            padding: 12px;
-            width: 290px;
-            text-align: center;
-            border-radius: 8px;
-            font-family: inherit;
+            background: #111; border: 2px solid #5a4422;
+            color: #e6c47a; padding: 12px; width: 280px;
+            text-align: center; border-radius: 8px; font-family: inherit;
         }
     </style>
 </head>
@@ -122,7 +108,7 @@
     <div class="container">
         <button id="narratorBtn" class="ui-btn" onclick="playAudio()">🎙️ Narrator (Start)</button>
 
-        <div class="map-section">
+        <div class="content-cluster">
             <div class="map-wrapper">
                 <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
             </div>
@@ -139,16 +125,10 @@
 
     <script>
         let audio = new Audio('Zaproszenie.mp3');
-        
         function playAudio() {
             const btn = document.getElementById("narratorBtn");
-            if (audio.paused) {
-                audio.play();
-                btn.innerText = "⏸️ Pauza";
-            } else {
-                audio.pause();
-                btn.innerText = "▶️ Wznów";
-            }
+            if (audio.paused) { audio.play(); btn.innerText = "⏸️ Pauza"; }
+            else { audio.pause(); btn.innerText = "▶️ Wznów"; }
         }
 
         function check(el) {

@@ -19,7 +19,6 @@
             overflow: hidden;
         }
 
-                /* Kontener na przycisk (żeby ładnie wisiał na górze) */
         #controls-container {
             position: absolute;
             top: 20px;
@@ -51,10 +50,23 @@
             color: #e6c47a; 
         }
 
+        /* Główny kontener */
         .container {
             display: flex;
+            flex-direction: row;
             align-items: center;
-            gap: 20px; /* Odstęp między mapą a tekstem */
+            justify-content: center;
+            gap: 100px; /* Zwiększony odstęp, by rogi mapy nie dotykały tekstu */
+            padding: 20px;
+        }
+
+        /* Kontener na mapę - klucz do uniknięcia nachodzenia */
+        .map-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Zapewniamy dodatkowe miejsce na wystające rogi obróconej mapy */
+            padding: 60px; 
         }
 
         .mapa-arrakis {
@@ -84,7 +96,6 @@
                 background: #ff8c00; /* Kolor przyprawy (pomarańczowy) */
                 color: #000000;
             }
-        }
     </style>
 </head>
 <body>
@@ -94,6 +105,7 @@
     </div>
 
     <div class="container">
+        <div class="map-wrapper">
         <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
         
         <div class="ukryty-tekst">

@@ -6,25 +6,80 @@
     <title>Arrakis - Tajna Mapa</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; background-color: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; color: #e6c47a; font-family: 'Cinzel', serif; overflow: hidden; }
-        #controls-container { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; z-index: 10; }
-        .ui-btn { font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; transition: 0.3s; font-family: inherit; }
-        
-        /* Kontener trzymający mapę i tekst obok niej */
-        .map-section { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; margin-bottom: 40px; }
-        
-        .map-wrapper { display: flex; justify-content: center; align-items: center; width: 60vh; height: 60vh; position: relative; flex-shrink: 0; }
-        .mapa-arrakis { max-width: 100%; max-height: 100%; object-fit: contain; display: block; transform: rotate(45deg); transition: transform 0.8s ease-in-out; }
-        
-        /* Tekst zawsze na prawo od środka mapy */
-        .ukryty-tekst { position: absolute; left: calc(50% + 32vh); width: 300px; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; line-height: 1.6; font-size: 1.1rem; text-align: center; color: transparent; transition: color 0.5s ease; }
-        .revealed { color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.5); }
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Rozkłada elementy równomiernie w pionie */
+            justify-content: space-between; 
+            padding: 40px 0;
+            box-sizing: border-box;
+            color: #e6c47a;
+            font-family: 'Cinzel', serif;
+            overflow: hidden;
+        }
 
-        .input-field { background-color: #111; border: 2px solid #5a4422; color: #e6c47a; padding: 12px; font-family: 'Cinzel', serif; font-size: 1rem; border-radius: 8px; width: 300px; text-align: center; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: #e6c47a; box-shadow: 0 0 15px rgba(230,196,122,0.3); }
+        #controls-container { width: 100%; display: flex; justify-content: center; }
+
+        .map-section {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            /* Mapa zajmuje środek, ale ma elastyczność */
+            flex-grow: 0; 
+        }
+
+        .map-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60vh;
+            height: 60vh;
+            position: relative;
+        }
+
+        .mapa-arrakis {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transform: rotate(45deg);
+            transition: transform 0.8s ease-in-out;
+        }
+
+        .ukryty-tekst {
+            position: absolute;
+            left: calc(50% + 32vh);
+            width: 300px;
+            text-align: center;
+            color: transparent;
+            transition: color 0.5s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .input-field {
+            background: #111;
+            border: 2px solid #5a4422;
+            color: #e6c47a;
+            padding: 12px;
+            width: 300px;
+            text-align: center;
+            border-radius: 8px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .revealed { color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.5); }
     </style>
 </head>
 <body>
+
     <div id="controls-container">
         <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
@@ -41,6 +96,7 @@
     <input type="text" class="input-field" placeholder="WPISZ HASŁO..." oninput="checkPass(this)">
 
     <script>
+        // Funkcje JavaScript pozostają bez zmian
         let audio = null;
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
@@ -56,11 +112,9 @@
             if (val === "tukan") {
                 map.style.transform = "rotate(405deg)";
                 txt.classList.add('revealed');
-                el.style.borderColor = "#e6c47a";
             } else {
                 map.style.transform = "rotate(45deg)";
                 txt.classList.remove('revealed');
-                el.style.borderColor = "#5a4422";
             }
         }
     </script>

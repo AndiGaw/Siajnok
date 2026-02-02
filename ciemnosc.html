@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrakis - Tajna Mapa</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #000000; /* Tekst domyślnie czarny */
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Odstęp między mapą a tekstem */
+        }
+
+        .mapa-arrakis {
+            max-width: 80vw;
+            max-height: 80vh;
+            display: block;
+        }
+
+        .ukryty-tekst {
+            /* Tekst jest czarny na czarnym tle, 
+               więc będzie widoczny tylko po zaznaczeniu myszką */
+            user-select: text; 
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="Arrakis_mapa.png" alt="Mapa Arrakis" class="mapa-arrakis">
+        
+        <div class="ukryty-tekst">
+            Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat.
+        </div>
+    </div>
+
+</body>
+</html>

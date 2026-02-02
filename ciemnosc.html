@@ -11,8 +11,17 @@
         .ui-btn { font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5); transition: 0.3s; font-family: inherit; }
         .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); color: #e6c47a; }
         .container { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 120px; z-index: 5; }
-        .map-wrapper { display: flex; justify-content: center; align-items: center; width: 50vh;height: 50vh; position: relative; flex-shrink: 0;}
-        .mapa-arrakis { max-width: 35vw; max-height: 50vh; display: block; transform: rotate(0deg); transition: transform 0.5s ease-in-out; }
+
+        .map-wrapper { 
+                    display: flex; justify-content: center; align-items: center; 
+                    width: 500px; height: 500px; position: relative; flex-shrink: 0; 
+                    }
+        
+        .mapa-arrakis { 
+            max-width: 70%; max-height: 70%; position: absolute; 
+            transform: rotate(45deg); transition: transform 0.8s ease-in-out; 
+                }    
+
         .ukryty-tekst { user-select: text; width: 300px; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; line-height: 1.6; font-size: 1.2rem; text-align: center; transition: color 0.3s ease; }
         .ukryty-tekst::selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
         .ukryty-tekst::-moz-selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }

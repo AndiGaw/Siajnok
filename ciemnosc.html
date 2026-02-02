@@ -6,144 +6,51 @@
     <title>Arrakis - Tajna Mapa</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            background-color: #000;
-            color: #e6c47a;
-            font-family: 'Cinzel', serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden; 
-            overflow-y: auto;
-        }
-
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            padding: 40px 20px;
-            gap: 30px;
-            box-sizing: border-box;
-        }
-
-        .ui-btn {
-            font-size: 1.1em; padding: 12px; width: 280px; 
-            background: #111; color: #e6c47a; border: 2px solid #e6c47a; 
-            border-radius: 8px; cursor: pointer; transition: 0.3s;
-        }
-
-        /* GRUPOWANIE MAPY I TEKSTU */
-        .content-cluster {
-            display: flex;
-            flex-direction: row; /* Zawsze obok siebie na dużych ekranach */
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            width: auto; /* Dopasuj do zawartości, nie do ekranu */
-            min-height: 450px;
-            gap: 50px; /* Sztywny odstęp między mapą a napisem */
-        }
-
-        .map-wrapper {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0; /* Mapa nie może się ściisnąć */
-        }
-
-        .mapa-arrakis {
-            width: 220px; /* Rozmiar bazowy bezpieczny dla obrotu */
-            height: 220px;
-            object-fit: contain;
-            transform: rotate(45deg);
-            transition: transform 1.5s ease-in-out;
-            filter: drop-shadow(0 0 15px rgba(230,196,122,0.4));
-        }
-
-        .ukryty-tekst {
-            width: 300px;
-            text-align: left;
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            line-height: 1.6;
-            color: transparent; /* Ukryty */
-            transition: color 1s ease;
-            user-select: none;
-        }
-
-        .revealed {
-            color: #e6c47a;
-            text-shadow: 0 0 10px rgba(230,196,122,0.6);
-            user-select: text;
-        }
-
-        /* Responsywność dla mniejszych ekranów */
-        @media (max-width: 800px) {
-            .content-cluster {
-                flex-direction: column;
-                gap: 20px;
-            }
-            .ukryty-tekst {
-                text-align: center;
-                width: 90%;
-            }
-        }
-
-        .answer-input {
-            background: #111; border: 2px solid #5a4422;
-            color: #e6c47a; padding: 12px; width: 280px;
-            text-align: center; border-radius: 8px; font-family: inherit;
-        }
+        body { margin: 0; padding: 0; background-color: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #000; font-family: 'Cinzel', serif; overflow: hidden; }
+        #controls-container { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; z-index: 10; }
+        .ui-btn { font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5); transition: 0.3s; font-family: inherit; }
+        .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); color: #e6c47a; }
+        .container { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 120px; z-index: 5; }
+        .map-wrapper { display: flex; justify-content: center; align-items: center; padding: 50px; }
+        .mapa-arrakis { max-width: 35vw; max-height: 50vh; display: block; transform: rotate(45deg); transition: transform 0.5s ease-in-out; }
+        .ukryty-tekst { user-select: text; width: 300px; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; line-height: 1.6; font-size: 1.2rem; text-align: center; transition: color 0.3s ease; }
+        .ukryty-tekst::selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
+        .ukryty-tekst::-moz-selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <button id="narratorBtn" class="ui-btn" onclick="playAudio()">🎙️ Narrator (Start)</button>
-
-        <div class="content-cluster">
-            <div class="map-wrapper">
-                <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
-            </div>
-
-            <div id="secretText" class="ukryty-tekst">
-                PRZYPRAWA MUSI PŁYNĄĆ. <br>
-                KTO KONTROLUJE PRZYPRAWĘ, <br>
-                TEN KONTROLUJE WSZECHŚWIAT.
-            </div>
-        </div>
-
-        <input type="text" id="pass" class="answer-input" placeholder="WPISZ HASŁO..." oninput="check(this)">
+    <div id="controls-container">
+        <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
-
+    <div class="container">
+        <div class="map-wrapper">
+            <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
+        </div>
+        <div class="ukryty-tekst">
+            Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat. Strach to zabójca umysłu.
+        </div>
+    </div>
     <script>
-        let audio = new Audio('Zaproszenie.mp3');
-        function playAudio() {
+        let narratorAudio = null;
+        function playNarrator() {
             const btn = document.getElementById("narratorBtn");
-            if (audio.paused) { audio.play(); btn.innerText = "⏸️ Pauza"; }
-            else { audio.pause(); btn.innerText = "▶️ Wznów"; }
-        }
-
-        function check(el) {
-            const val = el.value.toLowerCase().trim();
-            const mapa = document.getElementById('mapa');
-            const txt = document.getElementById('secretText');
-
-            if (val === "tukan") {
-                mapa.style.transform = "rotate(405deg)";
-                txt.classList.add('revealed');
-                el.style.borderColor = "#00ff00";
+            if (!narratorAudio) {
+                narratorAudio = new Audio("Zaproszenie.mp3");
+                narratorAudio.addEventListener('ended', () => {
+                    btn.innerText = "🎙️ Narrator (Start)";
+                    narratorAudio.currentTime = 0;
+                });
+            }
+            if (narratorAudio.paused) {
+                narratorAudio.play().then(() => {
+                    btn.innerText = "⏸️ Narrator (Pauza)";
+                }).catch((e) => {
+                    console.error(e);
+                    alert("Upewnij się, że plik 'Zaproszenie.mp3' istnieje.");
+                });
             } else {
-                mapa.style.transform = "rotate(45deg)";
-                txt.classList.remove('revealed');
-                el.style.borderColor = "#5a4422";
+                narratorAudio.pause();
+                btn.innerText = "▶️ Narrator (Wznów)";
             }
         }
     </script>

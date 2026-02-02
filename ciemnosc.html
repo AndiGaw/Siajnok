@@ -14,8 +14,8 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #000000; /* Tekst domyślnie czarny */
-            font-family: 'Cinzel', serif; /* Ustawienie epickiego fontu dla całości */
+            color: #000000;
+            font-family: 'Cinzel', serif;
             overflow: hidden;
         }
 
@@ -28,7 +28,6 @@
             z-index: 10;
         }
 
-        /* STYL PRZYCISKU (identyczny jak w grze) */
         .ui-btn {
             font-size: 1.2em; 
             padding: 10px 20px; 
@@ -39,7 +38,6 @@
             border-radius: 8px; 
             cursor: pointer; 
             box-shadow: 0 0 10px rgba(230,196,122,0.5);
-            text-transform: none;
             transition: 0.3s;
             font-family: inherit;
         }
@@ -50,96 +48,93 @@
             color: #e6c47a; 
         }
 
-        /* Główny kontener */
+        /* GŁÓWNY KONTENER - teraz poprawnie dzieli miejsce między mapę a tekst */
         .container {
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 100px; /* Zwiększony odstęp, by rogi mapy nie dotykały tekstu */
-            padding: 20px;
+            gap: 120px; /* Duży odstęp zabezpieczający przed rogami mapy */
+            z-index: 5;
         }
 
-        /* Kontener na mapę - klucz do uniknięcia nachodzenia */
         .map-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Zapewniamy dodatkowe miejsce na wystające rogi obróconej mapy */
-            padding: 60px; 
+            /* Padding tworzy niewidzialną barierę wokół obróconej mapy */
+            padding: 50px;
         }
 
         .mapa-arrakis {
-            max-width: 40vw;
-            max-height: 40vh;
+            max-width: 35vw;
+            max-height: 50vh;
             display: block;
-            /* KLUCZOWA ZMIANA: Obrót o 45 stopni w prawo */
-            transform: rotate(45deg);
-            /* Opcjonalnie: płynne przejście przy ładowaniu */
+            transform: rotate(45deg); /* Obrót mapy */
             transition: transform 0.5s ease-in-out;
         }
 
         .ukryty-tekst {
-                user-select: text; 
-                width: 250px;
-                /* Stylizacja tekstu na "epicki" */
-                font-weight: 300;
-                text-transform: uppercase; /* Wielkie litery dodają powagi */
-                letter-spacing: 3px;       /* Większe odstępy między literami */
-                line-height: 1.6;
-                font-size: 1.2rem;
-                text-align: justify;
-            }
-    
-            /* Zmiana koloru zaznaczenia, żeby tekst wyglądał jak ogień/złoto po odkryciu */
-            .ukryty-tekst::selection {
-                background: #ff8c00; /* Kolor przyprawy (pomarańczowy) */
-                color: #000000;
-            }
+            user-select: text; 
+            width: 300px;
+            font-weight: 300;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            line-height: 1.6;
+            font-size: 1.2rem;
+            text-align: justify;
+            transition: color 0.3s ease;
+        }
+
+        /* EFEKT ZAZNACZENIA Z POŚWIATĄ (TEXT-SHADOW) */
+        .ukryty-tekst::selection {
+            background: #ff8c00;
+            color: #ffffff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
+        }
+        
+        .ukryty-tekst::-moz-selection {
+            background: #ff8c00;
+            color: #ffffff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
+        }
     </style>
 </head>
 <body>
 
-        <div id="controls-container">
+    <div id="controls-container">
         <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
 
     <div class="container">
         <div class="map-wrapper">
-        <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
+            <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
+        </div>
         
         <div class="ukryty-tekst">
-            Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat.
+            Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat. Strach to zabójca umysłu.
         </div>
     </div>
 
-</body>
-
-    
     <script>
         let narratorAudio = null;
         
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
-            
-            // Inicjalizacja przy pierwszym kliknięciu
             if (!narratorAudio) {
                 narratorAudio = new Audio("Zaproszenie.mp3");
-                
-                // Obsługa zakończenia nagrania
                 narratorAudio.addEventListener('ended', () => {
                     btn.innerText = "🎙️ Narrator (Start)";
                     narratorAudio.currentTime = 0;
                 });
             }
 
-            // Logika odtwarzania/pauzowania
             if (narratorAudio.paused) {
                 narratorAudio.play().then(() => {
                     btn.innerText = "⏸️ Narrator (Pauza)";
                 }).catch((e) => {
                     console.error(e);
-                    alert("Błąd: Upewnij się, że plik 'Zaproszenie.mp3' jest w folderze.");
+                    alert("Upewnij się, że plik 'Zaproszenie.mp3' istnieje.");
                 });
             } else {
                 narratorAudio.pause();
@@ -147,4 +142,5 @@
             }
         }
     </script>
+</body>
 </html>

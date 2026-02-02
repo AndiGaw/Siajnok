@@ -14,7 +14,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Rozkłada elementy równomiernie w pionie */
+            /* To tworzy równe, dynamiczne odstępy między elementami */
             justify-content: space-between; 
             padding: 40px 0;
             box-sizing: border-box;
@@ -23,16 +23,35 @@
             overflow: hidden;
         }
 
-        #controls-container { width: 100%; display: flex; justify-content: center; }
+        /* PRZYWRÓCONY STYL PRZYCISKU */
+        .ui-btn { 
+            font-size: 1.2em; 
+            padding: 10px 20px; 
+            width: 320px; 
+            background: #111; 
+            color: #e6c47a; 
+            border: 2px solid #e6c47a; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(230,196,122,0.5); 
+            transition: 0.3s; 
+            font-family: inherit; 
+            z-index: 10;
+        }
 
+        .ui-btn:hover { 
+            background: #222; 
+            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
+            color: #e6c47a; 
+        }
+
+        /* CENTRUM: MAPA I TEKST */
         .map-section {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%;
-            /* Mapa zajmuje środek, ale ma elastyczność */
-            flex-grow: 0; 
         }
 
         .map-wrapper {
@@ -42,6 +61,7 @@
             width: 60vh;
             height: 60vh;
             position: relative;
+            flex-shrink: 0;
         }
 
         .mapa-arrakis {
@@ -54,28 +74,42 @@
 
         .ukryty-tekst {
             position: absolute;
-            left: calc(50% + 32vh);
+            left: calc(50% + 40vh);
             width: 300px;
-            text-align: center;
-            color: transparent;
-            transition: color 0.5s ease;
+            font-weight: 300;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            text-align: center;
+            color: transparent; /* Ukryty */
+            transition: color 0.5s ease;
         }
 
+        .revealed { 
+            color: #e6c47a; 
+            text-shadow: 0 0 10px rgba(230,196,122,0.5); 
+        }
+
+        /* DÓŁ: POLE HASŁA */
         .input-field {
-            background: #111;
+            background-color: #111;
             border: 2px solid #5a4422;
             color: #e6c47a;
             padding: 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            border-radius: 8px;
             width: 300px;
             text-align: center;
-            border-radius: 8px;
-            font-family: inherit;
             outline: none;
+            transition: 0.3s;
         }
 
-        .revealed { color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.5); }
+        .input-field:focus { 
+            border-color: #e6c47a; 
+            box-shadow: 0 0 15px rgba(230,196,122,0.3); 
+        }
     </style>
 </head>
 <body>
@@ -96,13 +130,17 @@
     <input type="text" class="input-field" placeholder="WPISZ HASŁO..." oninput="checkPass(this)">
 
     <script>
-        // Funkcje JavaScript pozostają bez zmian
         let audio = null;
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
             if (!audio) audio = new Audio("Zaproszenie.mp3");
-            if (audio.paused) { audio.play(); btn.innerText = "⏸️ Pauza"; } 
-            else { audio.pause(); btn.innerText = "▶️ Wznów"; }
+            if (audio.paused) { 
+                audio.play(); 
+                btn.innerText = "⏸️ Narrator (Pauza)"; 
+            } else { 
+                audio.pause(); 
+                btn.innerText = "▶️ Narrator (Wznów)"; 
+            }
         }
 
         function checkPass(el) {
@@ -112,9 +150,11 @@
             if (val === "tukan") {
                 map.style.transform = "rotate(405deg)";
                 txt.classList.add('revealed');
+                el.style.borderColor = "#e6c47a";
             } else {
                 map.style.transform = "rotate(45deg)";
                 txt.classList.remove('revealed');
+                el.style.borderColor = "#5a4422";
             }
         }
     </script>

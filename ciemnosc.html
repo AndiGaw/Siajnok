@@ -24,9 +24,13 @@
         }
 
         .mapa-arrakis {
-            max-width: 80vw;
-            max-height: 80vh;
+            max-width: 60vw;
+            max-height: 60vh;
             display: block;
+            /* KLUCZOWA ZMIANA: Obrót o 45 stopni w prawo */
+            transform: rotate(45deg);
+            /* Opcjonalnie: płynne przejście przy ładowaniu */
+            transition: transform 0.5s ease-in-out;
         }
 
         .ukryty-tekst {

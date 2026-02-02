@@ -20,25 +20,25 @@
             overflow: hidden;
         }
 
-        /* Główny kontener trzymający mapę i przyciski w pionie */
+        /* Główny kontener osi centralnej */
         .central-axis {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            position: relative; /* Baza dla pozycjonowania tekstu na prawo */
+            position: relative; /* Baza dla tekstu po prawej */
         }
 
         .ui-btn {
-            font-size: 1.1em; 
+            font-size: 1.2em; /* Twoja wielkość */
             padding: 10px 20px; 
-            width: 320px; 
+            width: 320px; /* Twoja szerokość */
             background: #111; 
             color: #e6c47a;
             border: 2px solid #e6c47a; 
             border-radius: 8px; 
             cursor: pointer; 
-            box-shadow: 0 0 10px rgba(230,196,122,0.3);
+            box-shadow: 0 0 10px rgba(230,196,122,0.5);
             transition: 0.3s;
             font-family: inherit;
             z-index: 10;
@@ -46,61 +46,64 @@
 
         .ui-btn:hover { 
             background: #222; 
-            box-shadow: 0 0 20px rgba(230,196,122,0.6); 
+            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
         }
 
+        /* Kontener mapy z zapasem na obrót */
         .map-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 400px;
-            height: 400px;
+            width: 60vh; /* Większy kontener dopasowany do wysokości */
+            height: 60vh;
             position: relative;
         }
 
         .mapa-arrakis {
-            max-width: 280px;
-            height: auto;
+            max-width: 35vw; /* Twoje wymiary */
+            max-height: 50vh; /* Twoje wymiary */
+            display: block;
             transform: rotate(45deg);
-            transition: transform 0.5s ease-in-out;
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* TEKST NA PRAWO OD MAPY */
+        /* TEKST PO PRAWEJ */
         .ukryty-tekst {
             user-select: text; 
             width: 300px;
-            color: #000000; /* Ukryty */
+            color: #000000;
             font-weight: 300;
             text-transform: uppercase;
             letter-spacing: 3px;
             line-height: 1.6;
             font-size: 1.2rem;
-            text-align: left;
+            text-align: center;
             position: absolute;
-            left: 450px; /* Odsuwa tekst na prawo od osi mapy */
+            left: 110%; /* Wypchnięcie poza kontener mapy na prawo */
             top: 50%;
             transform: translateY(-50%);
+            white-space: nowrap; /* Zapobiega łamaniu w dziwnych miejscach */
         }
 
         .ukryty-tekst::selection {
             background: #ff8c00;
             color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
         }
 
-        /* Pole na hasło pod drugim przyciskiem */
+        /* Pole na hasło */
         .answer-input {
             background: #111;
             border: 2px solid #5a4422;
             color: #e6c47a;
-            padding: 10px;
+            padding: 12px;
             font-family: 'Cinzel', serif;
-            font-size: 1rem;
+            font-size: 1.1rem;
             text-align: center;
-            border-radius: 4px;
-            width: 200px;
+            border-radius: 8px;
+            width: 316px; /* Dopasowane do szerokości przycisków */
             outline: none;
-            margin-top: 10px;
+            box-shadow: 0 0 10px rgba(230,196,122,0.2);
         }
     </style>
 </head>
@@ -115,7 +118,9 @@
             <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
             
             <div class="ukryty-tekst">
-                Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat.
+                Przyprawa musi płynąć. <br>
+                Kto kontroluje przyprawę, <br>
+                ten kontroluje wszechświat.
             </div>
         </div>
 

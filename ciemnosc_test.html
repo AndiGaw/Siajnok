@@ -20,19 +20,19 @@
             overflow: hidden;
         }
 
-        /* Główny kontener osi centralnej */
+        /* Oś centralna: Narrator -> Mapa -> Narrator -> Hasło */
         .central-axis {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
-            position: relative; /* Baza dla tekstu po prawej */
+            gap: 40px; /* Stały odstęp między elementami */
+            position: relative;
         }
 
         .ui-btn {
-            font-size: 1.2em; /* Twoja wielkość */
+            font-size: 1.2em; 
             padding: 10px 20px; 
-            width: 320px; /* Twoja szerokość */
+            width: 320px; 
             background: #111; 
             color: #e6c47a;
             border: 2px solid #e6c47a; 
@@ -49,49 +49,54 @@
             box-shadow: 0 0 20px rgba(230,196,122,0.8); 
         }
 
-        /* Kontener mapy z zapasem na obrót */
+        /* Wrapper mapy: wymuszamy wysokość, by rogi przy obrocie nie biły w przyciski */
         .map-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 60vh; /* Większy kontener dopasowany do wysokości */
-            height: 60vh;
+            height: 55vh; 
+            width: 55vh;
             position: relative;
         }
 
         .mapa-arrakis {
-            max-width: 35vw; /* Twoje wymiary */
-            max-height: 50vh; /* Twoje wymiary */
+            max-width: 35vw;
+            max-height: 50vh;
             display: block;
             transform: rotate(45deg);
             transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* TEKST PO PRAWEJ */
+        /* UKRYTY TEKST - PO PRAWEJ */
         .ukryty-tekst {
             user-select: text; 
-            width: 300px;
-            color: #000000;
-            font-weight: 300;
+            width: 350px;
+            color: #000000; /* Startowo niewidoczny */
+            font-weight: 400;
             text-transform: uppercase;
             letter-spacing: 3px;
             line-height: 1.6;
             font-size: 1.2rem;
             text-align: center;
             position: absolute;
-            left: 110%; /* Wypchnięcie poza kontener mapy na prawo */
+            left: 115%; /* Bezpieczna odległość na prawo od mapy */
             top: 50%;
             transform: translateY(-50%);
-            white-space: nowrap; /* Zapobiega łamaniu w dziwnych miejscach */
+            transition: color 1s ease, text-shadow 1s ease;
+        }
+
+        /* Klasa aktywowana przez JS po wpisaniu hasła */
+        .reveal-text {
+            color: #e6c47a !important;
+            text-shadow: 0 0 10px rgba(230,196,122,0.8), 0 0 20px rgba(255,140,0,0.5);
         }
 
         .ukryty-tekst::selection {
             background: #ff8c00;
             color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00;
         }
 
-        /* Pole na hasło */
         .answer-input {
             background: #111;
             border: 2px solid #5a4422;
@@ -101,9 +106,9 @@
             font-size: 1.1rem;
             text-align: center;
             border-radius: 8px;
-            width: 316px; /* Dopasowane do szerokości przycisków */
+            width: 316px;
             outline: none;
-            box-shadow: 0 0 10px rgba(230,196,122,0.2);
+            transition: 0.3s;
         }
     </style>
 </head>
@@ -117,10 +122,11 @@
         <div class="map-wrapper">
             <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
             
-            <div class="ukryty-tekst">
+            <div id="secretText" class="ukryty-tekst">
                 Przyprawa musi płynąć. <br>
                 Kto kontroluje przyprawę, <br>
-                ten kontroluje wszechświat.
+                ten kontroluje wszechświat. <br>
+                Strach to zabójca umysłu.
             </div>
         </div>
 
@@ -156,12 +162,19 @@
         function checkAnswer(input) {
             const val = input.value.toLowerCase().trim();
             const mapa = document.getElementById('mapa');
+            const secretText = document.getElementById('secretText');
+            
             if (val === "tukan") {
                 input.style.borderColor = "#00ff00";
+                input.style.boxShadow = "0 0 15px rgba(0,255,0,0.3)";
                 mapa.style.transform = "rotate(405deg)";
+                // Ujawnienie tekstu
+                secretText.classList.add('reveal-text');
             } else {
                 input.style.borderColor = "#5a4422";
+                input.style.boxShadow = "none";
                 mapa.style.transform = "rotate(45deg)";
+                secretText.classList.remove('reveal-text');
             }
         }
     </script>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrakis - Tajna Mapa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Forum&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #e6c47a;
+            font-family: 'Cinzel', serif;
+            overflow: hidden;
+        }
+
+        /* GŁÓWNY KONTENER */
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 150px; /* Szeroki odstęp zabezpieczający przed rogami mapy */
+            z-index: 5;
+        }
+
+        /* LEWA STRONA: MAPA + INPUT */
+        .left-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+            /* Rezerwujemy stałą przestrzeń, by obrót nic nie przesuwał */
+            flex-basis: 400px; 
+            flex-shrink: 0;
+        }
+
+        .map-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 350px;
+            height: 350px;
+        }
+
+        .mapa-arrakis {
+            max-width: 250px; /* Rozmiar dopasowany, by po obrocie o 45 st. nie wykraczał za wrapper */
+            height: auto;
+            display: block;
+            transform: rotate(45deg); 
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* STYL POLA TEKSTOWEGO */
+        .answer-input {
+            background: #111;
+            border: 2px solid #5a4422;
+            color: #e6c47a;
+            padding: 12px 20px;
+            font-family: 'Forum', serif;
+            font-size: 1.2rem;
+            text-align: center;
+            border-radius: 4px;
+            outline: none;
+            transition: 0.3s;
+            width: 240px;
+            letter-spacing: 2px;
+        }
+
+        .answer-input:focus {
+            border-color: #e6c47a;
+            box-shadow: 0 0 15px rgba(230, 196, 122, 0.4);
+        }
+
+        .answer-input.correct {
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        /* PRAWA STRONA: UKRYTY TEKST */
+        .ukryty-tekst {
+            user-select: text; 
+            width: 400px;
+            color: #000; /* Ukryty (czarny na czarnym) */
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            line-height: 1.8;
+            font-size: 1.3rem;
+            text-align: center; /* PEŁNE CENTROWANIE */
+        }
+
+        .ukryty-tekst::selection {
+            background: #ff8c00;
+            color: #ffffff;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 40px #ff4500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="left-side">
+            <div class="map-wrapper">
+                <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
+            </div>
+            
+            <input type="text" 
+                   id="questInput" 
+                   class="answer-input" 
+                   placeholder="WPISZ HASŁO..." 
+                   autocomplete="off"
+                   oninput="checkAnswer(this)">
+        </div>
+        
+        <div class="ukryty-tekst">
+            Strach to zabójca umysłu. Strach to mała śmierć, która przynosi całkowite unicestwienie. Przepuszczę go przez siebie.
+        </div>
+    </div>
+
+    <script>
+        function checkAnswer(input) {
+            const val = input.value.toLowerCase().trim();
+            const mapa = document.getElementById('mapa');
+            
+            if (val === "tukan") {
+                input.classList.add('correct');
+                // Obrót o dodatkowe 360 stopni (nagroda za hasło)
+                mapa.style.transform = "rotate(405deg)";
+            } else {
+                input.classList.remove('correct');
+                mapa.style.transform = "rotate(45deg)";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -7,14 +7,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; background-color: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #000; font-family: 'Cinzel', serif; overflow: hidden; }
+        
         #controls-container { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; z-index: 10; }
+        
         .ui-btn { font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5); transition: 0.3s; font-family: inherit; }
         .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); color: #e6c47a; }
-        .container { display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 120px; z-index: 5; }
-        .map-wrapper { display: flex; justify-content: center; align-items: center; width: 50vh; height: 50vh; position: relative; flex-shrink: 0; }
-        .mapa-arrakis { max-width: 35vw; max-height: 50vh; display: block; transform: rotate(45deg); transition: transform 0.5s ease-in-out; }
-        .ukryty-tekst { user-select: text; width: 300px; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; line-height: 1.6; font-size: 1.2rem; text-align: center; transition: color 0.3s ease; }
-        .ukryty-tekst { user-select: text; width: 300px; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; line-height: 1.6; font-size: 1.2rem; text-align: center; transition: color 0.3s ease; }
+
+        .container { 
+            position: relative; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 100%; 
+        }
+
+        /* Kwadrat o boku równym max wymiarowi mapy (np. 50vh) */
+        .map-wrapper { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            width: 50vh; 
+            height: 50vh; 
+            position: relative; 
+            flex-shrink: 0; 
+            z-index: 5;
+        }
+
+        .mapa-arrakis { 
+            /* Obrazek wypełnia kwadrat, zachowując proporcje */
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain;
+            display: block; 
+            transform: rotate(45deg); 
+            transition: transform 0.5s ease-in-out; 
+        }
+
+        .ukryty-tekst { 
+            position: absolute;
+            /* Przesunięcie tekstu na prawo od wycentrowanej mapy */
+            left: calc(50% + 30vh); 
+            user-select: text; 
+            width: 300px; 
+            font-weight: 300; 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            line-height: 1.6; 
+            font-size: 1.2rem; 
+            text-align: center; 
+            transition: color 0.3s ease; 
+            z-index: 4;
+        }
+
         .ukryty-tekst::selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
         .ukryty-tekst::-moz-selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
     </style>
@@ -23,6 +67,7 @@
     <div id="controls-container">
         <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
+
     <div class="container">
         <div class="map-wrapper">
             <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
@@ -31,6 +76,7 @@
             Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat. Strach to zabójca umysłu.
         </div>
     </div>
+
     <script>
         let narratorAudio = null;
         function playNarrator() {

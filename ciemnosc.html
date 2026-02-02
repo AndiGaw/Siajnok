@@ -26,8 +26,8 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            width: 75vh; 
-            height: 75vh; 
+            width: 60vh; 
+            height: 60vh; 
             position: relative; 
             flex-shrink: 0; 
             z-index: 5;
@@ -46,7 +46,7 @@
         .ukryty-tekst { 
             position: absolute;
             /* 50% ekranu + połowa szerokości mapy (37.5vh) + margines (5vh) */
-            left: calc(50% + 42.5vh);
+            left: calc(50% + 35vh);
             user-select: text; 
             width: 300px; 
             font-weight: 300; 
@@ -61,6 +61,24 @@
 
         .ukryty-tekst::selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
         .ukryty-tekst::-moz-selection { background: #ff8c00; color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500; }
+
+        /* Styl pola do wpisywania tekstu */
+        .input-field {
+            background-color: #111;
+            border: 2px solid #e6c47a;
+            color: #e6c47a;
+            padding: 10px 15px;
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 0 5px rgba(230,196,122,0.3);
+            transition: 0.3s;
+        }
+        .input-field:focus { box-shadow: 0 0 15px rgba(230,196,122,0.6); border-color: #fff; }
+        
     </style>
 </head>
 <body>
@@ -76,6 +94,8 @@
             Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat. Strach to zabójca umysłu.
         </div>
     </div>
+
+    <input type="text" class="input-field" placeholder="WPISZ HASŁO...">
 
     <script>
         let narratorAudio = null;

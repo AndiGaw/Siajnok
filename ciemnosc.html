@@ -4,141 +4,142 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arrakis - Tajna Mapa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Forum&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #000000;
+            background-color: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: #000000;
+            color: #e6c47a;
             font-family: 'Cinzel', serif;
             overflow: hidden;
         }
 
-        #controls-container {
-            position: absolute;
-            top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .ui-btn {
-            font-size: 1.2em; 
-            padding: 10px 20px; 
-            width: 320px; 
-            background: #111; 
-            color: #e6c47a;
-            border: 2px solid #e6c47a; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            box-shadow: 0 0 10px rgba(230,196,122,0.5);
-            transition: 0.3s;
-            font-family: inherit;
-        }
-
-        .ui-btn:hover { 
-            background: #222; 
-            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
-            color: #e6c47a; 
-        }
-
-        /* GŁÓWNY KONTENER - teraz poprawnie dzieli miejsce między mapę a tekst */
         .container {
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 120px; /* Duży odstęp zabezpieczający przed rogami mapy */
-            z-index: 5;
+            /* Zwiększony dystans między sekcjami */
+            gap: 150px; 
+            width: 90%;
+            max-width: 1400px;
+        }
+
+        /* Lewa strona - stała szerokość, by obrót nie przesuwał tekstu */
+        .left-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+            flex-basis: 500px; 
+            flex-shrink: 0;
         }
 
         .map-wrapper {
+            position: relative;
+            width: 300px;
+            height: 300px;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Padding tworzy niewidzialną barierę wokół obróconej mapy */
-            padding: 50px;
         }
 
         .mapa-arrakis {
-            max-width: 35vw;
-            max-height: 50vh;
+            /* Rozmiar mapy dopasowany tak, by rogi przy 45° nie wychodziły poza wrapper */
+            width: 100%; 
+            height: auto;
             display: block;
-            transform: rotate(45deg); /* Obrót mapy */
-            transition: transform 0.5s ease-in-out;
+            transform: rotate(45deg);
+            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .ukryty-tekst {
-            user-select: text; 
-            width: 300px;
-            font-weight: 300;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            line-height: 1.6;
+        /* Styl pola tekstowego */
+        .answer-input {
+            background: #111;
+            border: 2px solid #5a4422;
+            color: #e6c47a;
+            padding: 12px 20px;
+            font-family: 'Forum', serif;
             font-size: 1.2rem;
             text-align: center;
-            transition: color 0.3s ease;
+            border-radius: 4px;
+            outline: none;
+            transition: 0.3s;
+            width: 250px;
+            letter-spacing: 2px;
         }
 
-        /* EFEKT ZAZNACZENIA Z POŚWIATĄ (TEXT-SHADOW) */
+        .answer-input:focus {
+            border-color: #e6c47a;
+            box-shadow: 0 0 15px rgba(230, 196, 122, 0.4);
+        }
+
+        .answer-input.correct {
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            color: #00ff00;
+        }
+
+        /* UKRYTY TEKST - PEŁNE CENTROWANIE */
+        .ukryty-tekst {
+            user-select: text; 
+            width: 400px;
+            color: #000; /* Ukryty na czarnym tle */
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            line-height: 1.8;
+            font-size: 1.3rem;
+            /* Wyrównanie do środka */
+            text-align: center; 
+            transition: 0.5s;
+        }
+
         .ukryty-tekst::selection {
             background: #ff8c00;
             color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
-        }
-        
-        .ukryty-tekst::-moz-selection {
-            background: #ff8c00;
-            color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 30px #ff4500;
+            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00, 0 0 40px #ff4500;
         }
     </style>
 </head>
 <body>
 
-    <div id="controls-container">
-        <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
-    </div>
-
     <div class="container">
-        <div class="map-wrapper">
-            <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
+        <div class="left-side">
+            <div class="map-wrapper">
+                <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
+            </div>
+            
+            <input type="text" 
+                   id="questInput" 
+                   class="answer-input" 
+                   placeholder="WPISZ HASŁO..." 
+                   autocomplete="off"
+                   oninput="checkAnswer(this)">
         </div>
         
         <div class="ukryty-tekst">
-            Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat. Strach to zabójca umysłu.
+            Strach to zabójca umysłu. Strach to mała śmierć, która przynosi całkowite unicestwienie. Przepuszczę go przez siebie.
         </div>
     </div>
 
     <script>
-        let narratorAudio = null;
-        
-        function playNarrator() {
-            const btn = document.getElementById("narratorBtn");
-            if (!narratorAudio) {
-                narratorAudio = new Audio("Zaproszenie.mp3");
-                narratorAudio.addEventListener('ended', () => {
-                    btn.innerText = "🎙️ Narrator (Start)";
-                    narratorAudio.currentTime = 0;
-                });
-            }
-
-            if (narratorAudio.paused) {
-                narratorAudio.play().then(() => {
-                    btn.innerText = "⏸️ Narrator (Pauza)";
-                }).catch((e) => {
-                    console.error(e);
-                    alert("Upewnij się, że plik 'Zaproszenie.mp3' istnieje.");
-                });
+        function checkAnswer(input) {
+            const val = input.value.toLowerCase().trim();
+            const mapa = document.getElementById('mapa');
+            
+            if (val === "tukan") {
+                input.classList.add('correct');
+                mapa.style.transform = "rotate(405deg)";
+                input.blur();
             } else {
-                narratorAudio.pause();
-                btn.innerText = "▶️ Narrator (Wznów)";
+                input.classList.remove('correct');
+                mapa.style.transform = "rotate(45deg)";
             }
         }
     </script>

@@ -19,6 +19,38 @@
             overflow: hidden;
         }
 
+                /* Kontener na przycisk (żeby ładnie wisiał na górze) */
+        #controls-container {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* STYL PRZYCISKU (identyczny jak w grze) */
+        .ui-btn {
+            font-size: 1.2em; 
+            padding: 10px 20px; 
+            width: 320px; 
+            background: #111; 
+            color: #e6c47a;
+            border: 2px solid #e6c47a; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            box-shadow: 0 0 10px rgba(230,196,122,0.5);
+            text-transform: none;
+            transition: 0.3s;
+            font-family: inherit;
+        }
+
+        .ui-btn:hover { 
+            background: #222; 
+            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
+            color: #e6c47a; 
+        }
+
         .container {
             display: flex;
             align-items: center;
@@ -57,6 +89,10 @@
 </head>
 <body>
 
+        <div id="controls-container">
+        <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+    </div>
+
     <div class="container">
         <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis">
         
@@ -66,4 +102,37 @@
     </div>
 
 </body>
+
+    
+    <script>
+        let narratorAudio = null;
+        
+        function playNarrator() {
+            const btn = document.getElementById("narratorBtn");
+            
+            // Inicjalizacja przy pierwszym kliknięciu
+            if (!narratorAudio) {
+                narratorAudio = new Audio("Zaproszenie.mp3");
+                
+                // Obsługa zakończenia nagrania
+                narratorAudio.addEventListener('ended', () => {
+                    btn.innerText = "🎙️ Narrator (Start)";
+                    narratorAudio.currentTime = 0;
+                });
+            }
+
+            // Logika odtwarzania/pauzowania
+            if (narratorAudio.paused) {
+                narratorAudio.play().then(() => {
+                    btn.innerText = "⏸️ Narrator (Pauza)";
+                }).catch((e) => {
+                    console.error(e);
+                    alert("Błąd: Upewnij się, że plik 'Zaproszenie.mp3' jest w folderze.");
+                });
+            } else {
+                narratorAudio.pause();
+                btn.innerText = "▶️ Narrator (Wznów)";
+            }
+        }
+    </script>
 </html>

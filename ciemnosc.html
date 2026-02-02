@@ -6,194 +6,156 @@
     <title>Arrakis - Tajna Mapa</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Fundament: Pionowa oś jak w grze o czerwiu */
         html, body {
             margin: 0;
             padding: 0;
-            height: 100%;
-            background-color: #000000;
+            min-height: 100vh;
+            background-color: #000;
             color: #e6c47a;
             font-family: 'Cinzel', serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             overflow-x: hidden;
-            overflow-y: auto; /* Pozwala przewijać na małych ekranach */
+            overflow-y: auto;
         }
 
-        /* Główny kontener (odpowiednik .container z gry) */
-        .main-wrapper {
+        /* Główny kontener - stos pionowy */
+        .container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 40px; /* Stały odstęp między sekcjami */
-            padding: 20px;
             width: 100%;
-            z-index: 2;
-        }
-
-        /* Panel przycisków */
-        #controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+            max-width: 1200px;
+            padding: 40px 20px;
+            gap: 20px; /* Stały odstęp między sekcjami */
         }
 
         .ui-btn {
-            font-size: 1.2em; 
-            padding: 10px 20px; 
-            width: 320px; 
+            font-size: 1.1em; 
+            padding: 12px; 
+            width: 300px; 
             background: #111; 
             color: #e6c47a;
             border: 2px solid #e6c47a; 
             border-radius: 8px; 
-            cursor: pointer; 
-            box-shadow: 0 0 10px rgba(230,196,122,0.5);
-            transition: 0.3s;
-            font-family: inherit;
+            cursor: pointer;
+            z-index: 10;
         }
 
-        .ui-btn:hover { 
-            background: #222; 
-            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
-        }
-
-        /* Obszar gry/mapy (odpowiednik #game-area) */
-        .map-display {
+        /* KLUCZOWA ZMIANA: Kontener mapy z wymuszonym rozmiarem */
+        .map-section {
             display: flex;
-            flex-direction: column; /* Na telefonach pionowo */
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 40px;
+            /* Rezerwujemy stałą wysokość, aby rogi mapy miały "pusty plac" wokół siebie */
+            height: 60vh; 
+            width: 100%;
+            position: relative;
             margin: 20px 0;
         }
 
-        /* Na komputerach mapa i tekst obok siebie */
+        /* Na komputerach tekst ląduje obok mapy */
         @media (min-width: 1024px) {
-            .map-display {
+            .map-section {
                 flex-direction: row;
-                gap: 100px;
+                gap: 80px;
             }
         }
 
-        /* Kontener mapy z zapasem na obrót (jak #board-wrapper) */
         .map-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             position: relative;
-            padding: 40px; /* Bezpieczna strefa dla rogów mapy */
+            width: 300px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .mapa-arrakis {
-            max-width: 70vw; /* Responsywna szerokość */
-            max-height: 40vh;
-            width: auto;
-            display: block;
-            transform: rotate(45deg); 
-            transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-            filter: drop-shadow(0 0 15px rgba(230,196,122,0.3));
+            width: 100%;
+            height: auto;
+            transform: rotate(45deg);
+            transition: transform 1.5s ease-in-out;
+            /* Drop-shadow zamiast border, żeby nie ucinało rogów */
+            filter: drop-shadow(0 0 10px rgba(230,196,122,0.3));
         }
 
-        /* Ukryty tekst */
         .ukryty-tekst {
-            user-select: text; 
-            width: 300px;
-            font-weight: 300;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            line-height: 1.6;
-            font-size: 1.2rem;
+            width: 280px;
             text-align: center;
-            color: #000; /* Ukryty w ciemności */
+            font-size: 1rem;
+            letter-spacing: 2px;
+            line-height: 1.6;
+            color: rgba(0,0,0,0); /* Całkowicie ukryty */
             transition: color 1s ease;
         }
 
-        /* Stylizacja zaznaczenia */
-        .ukryty-tekst::selection {
-            background: #ff8c00;
-            color: #ffffff;
-            text-shadow: 0 0 10px #fff, 0 0 20px #ffae00;
+        .revealed {
+            color: #e6c47a;
+            text-shadow: 0 0 10px rgba(230,196,122,0.5);
         }
 
-        /* Pole hasła (jak w grze) */
         .answer-input {
             background: #111;
             border: 2px solid #5a4422;
             color: #e6c47a;
             padding: 12px;
-            font-family: 'Cinzel', serif;
-            font-size: 1.1rem;
+            width: 290px;
             text-align: center;
             border-radius: 8px;
-            width: 316px;
-            outline: none;
-            transition: 0.3s;
+            font-family: inherit;
         }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
-        <h1>Tajemnice Arrakis</h1>
+    <div class="container">
+        <button id="narratorBtn" class="ui-btn" onclick="playAudio()">🎙️ Narrator (Start)</button>
 
-        <div id="controls">
-            <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
-        </div>
-
-        <div class="map-display">
+        <div class="map-section">
             <div class="map-wrapper">
                 <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" id="mapa" class="mapa-arrakis">
             </div>
-            
+
             <div id="secretText" class="ukryty-tekst">
-                Przyprawa musi płynąć. <br>
-                Kto kontroluje przyprawę, <br>
-                ten kontroluje wszechświat.
+                PRZYPRAWA MUSI PŁYNĄĆ. <br>
+                KTO KONTROLUJE PRZYPRAWĘ, <br>
+                TEN KONTROLUJE WSZECHŚWIAT.
             </div>
         </div>
 
-        <input type="text" class="answer-input" placeholder="WPISZ HASŁO..." oninput="checkAnswer(this)">
+        <input type="text" id="pass" class="answer-input" placeholder="WPISZ HASŁO..." oninput="check(this)">
     </div>
 
     <script>
-        let narratorAudio = null;
+        let audio = new Audio('Zaproszenie.mp3');
         
-        function playNarrator() {
+        function playAudio() {
             const btn = document.getElementById("narratorBtn");
-            if (!narratorAudio) {
-                narratorAudio = new Audio("Zaproszenie.mp3");
-                narratorAudio.addEventListener('ended', () => {
-                    btn.innerText = "🎙️ Narrator (Start)";
-                    narratorAudio.currentTime = 0;
-                });
-            }
-
-            if (narratorAudio.paused) {
-                narratorAudio.play().then(() => {
-                    btn.innerText = "⏸️ Narrator (Pauza)";
-                }).catch(e => alert("Błąd pliku audio."));
+            if (audio.paused) {
+                audio.play();
+                btn.innerText = "⏸️ Pauza";
             } else {
-                narratorAudio.pause();
-                btn.innerText = "▶️ Narrator (Wznów)";
+                audio.pause();
+                btn.innerText = "▶️ Wznów";
             }
         }
 
-        function checkAnswer(input) {
-            const val = input.value.toLowerCase().trim();
+        function check(el) {
+            const val = el.value.toLowerCase().trim();
             const mapa = document.getElementById('mapa');
-            const secretText = document.getElementById('secretText');
-            
+            const txt = document.getElementById('secretText');
+
             if (val === "tukan") {
-                input.style.borderColor = "#00ff00";
                 mapa.style.transform = "rotate(405deg)";
-                secretText.style.color = "#e6c47a"; // Ujawnij tekst
+                txt.classList.add('revealed');
+                el.style.borderColor = "#00ff00";
             } else {
-                input.style.borderColor = "#5a4422";
                 mapa.style.transform = "rotate(45deg)";
-                secretText.style.color = "#000"; // Ukryj tekst
+                txt.classList.remove('revealed');
+                el.style.borderColor = "#5a4422";
             }
         }
     </script>

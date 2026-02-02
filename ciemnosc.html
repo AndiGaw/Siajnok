@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arrakis - Tajna Mapa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -14,7 +15,8 @@
             align-items: center;
             min-height: 100vh;
             color: #000000; /* Tekst domyślnie czarny */
-            font-family: Arial, sans-serif;
+            font-family: 'Cinzel', serif; /* Ustawienie epickiego fontu dla całości */
+            overflow: hidden;
         }
 
         .container {
@@ -34,10 +36,22 @@
         }
 
         .ukryty-tekst {
-            /* Tekst jest czarny na czarnym tle, 
-               więc będzie widoczny tylko po zaznaczeniu myszką */
-            user-select: text; 
-            width: 200px;
+                user-select: text; 
+                width: 250px;
+                /* Stylizacja tekstu na "epicki" */
+                font-weight: 700;
+                text-transform: uppercase; /* Wielkie litery dodają powagi */
+                letter-spacing: 3px;       /* Większe odstępy między literami */
+                line-height: 1.6;
+                font-size: 1.2rem;
+                text-align: justify;
+            }
+    
+            /* Zmiana koloru zaznaczenia, żeby tekst wyglądał jak ogień/złoto po odkryciu */
+            .ukryty-tekst::selection {
+                background: #ff8c00; /* Kolor przyprawy (pomarańczowy) */
+                color: #000000;
+            }
         }
     </style>
 </head>

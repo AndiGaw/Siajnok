@@ -3,36 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lot</title>
+    <title>Lot - Arrakis</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
-            overflow: hidden;
-            font-family: "Georgia", serif;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #000; overflow: hidden;
+            font-family: 'Cinzel', serif;
         }
 
-        /* Kontener, który będzie się trząsł */
         #viewport {
-            width: 100vw;
-            height: 100vh;
+            width: 100vw; height: 100vh;
             background-image: url('Lot.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            background-size: cover; background-position: center;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; position: relative;
             transition: background-image 2s ease-in-out;
-            position: relative;
         }
 
-        /* Animacja turbulencji */
+        /* --- STYL PRZYCISKU WYSIĄDŹ --- */
+        .btn-exit {
+            position: absolute; z-index: 15; background: transparent;
+            border: 2px solid #e6c47a; color: #e6c47a; padding: 15px 40px;
+            font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.5rem;
+            cursor: pointer; border-radius: 50px; opacity: 0; pointer-events: none;
+            transition: opacity 1.5s ease;
+            text-shadow: 0 0 10px #e6c47a; box-shadow: 0 0 15px rgba(181, 176, 166, 0.6);
+            text-transform: uppercase;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-active { 
+            opacity: 1; 
+            pointer-events: auto; 
+            animation: pulse 2s infinite ease-in-out; 
+        }
+
+        /* --- ANIMACJE I STATUS --- */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-2px, -3px) rotate(-1deg); }
@@ -40,42 +52,22 @@
             30% { transform: translate(4px, 3px) rotate(0deg); }
             40% { transform: translate(2px, -2px) rotate(1deg); }
             50% { transform: translate(-2px, 3px) rotate(-1deg); }
-            60% { transform: translate(-4px, 2px) rotate(0deg); }
-            70% { transform: translate(4px, 2px) rotate(-1deg); }
-            80% { transform: translate(-2px, -2px) rotate(1deg); }
-            90% { transform: translate(2px, 3px) rotate(0deg); }
             100% { transform: translate(2px, -3px) rotate(-1deg); }
         }
 
-        .shaking {
-            animation: shake 0.15s infinite;
-            filter: blur(1px); /* Dodaje realizmu przy wstrząsach */
-        }
+        .shaking { animation: shake 0.15s infinite; filter: blur(1px); }
 
-        /* Nakładka informacyjna na początku */
         #overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            cursor: pointer;
-            color: #e6c47a;
-            font-family: 'Cinzel', serif;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: flex; justify-content: center;
+            align-items: center; z-index: 100; cursor: pointer; color: #e6c47a;
             text-align: center;
         }
 
         .status-text {
-            position: absolute;
-            bottom: 50px;
-            color: #e6c47a;
+            position: absolute; bottom: 50px; color: #e6c47a;
+            letter-spacing: 2px; text-transform: uppercase; opacity: 0.8;
             text-shadow: 0 0 10px #000;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            opacity: 0.8;
         }
     </style>
 </head>
@@ -86,7 +78,11 @@
     </div>
 
     <div id="viewport">
-        <div class="status-text" id="status">Status: W locie...</div>
+        <div class="status-text" id="status">Status: Oczekiwanie...</div>
+        
+        <button id="exitBtn" class="btn-exit" onclick="location.href='https://andigaw.github.io/Siajnok/pustynia.html'">
+            WYSIĄDŹ
+        </button>
     </div>
 
     <script>
@@ -94,31 +90,47 @@
         const viewport = document.getElementById('viewport');
         const statusText = document.getElementById('status');
         const overlay = document.getElementById('overlay');
+        const exitBtn = document.getElementById('exitBtn');
 
         function startJourney() {
-            // Ukrywamy ekran startowy
             overlay.style.display = 'none';
-            
-            // Start dźwięku
-            flightAudio.play().catch(e => console.log("Błąd audio:", e));
-            console.log("Lot rozpoczęty...");
+            flightAudio.play().catch(e => console.log("Audio play error:", e));
+            statusText.innerText = "Status: W locie...";
 
-            // 1. PO 20 SEKUNDACH - START TRZĘSIENIA (20000ms)
+            // 1. PO 20 SEKUNDACH - START TRZĘSIENIA
             setTimeout(() => {
                 viewport.classList.add('shaking');
                 statusText.innerText = "ALARM: Turbulencje lądowania!";
                 statusText.style.color = "#ff4400";
-                console.log("Rozpoczęto turbulencje...");
 
-                // 2. PO KOLEJNYCH 12 SEKUNDACH (łącznie 32s) - LĄDOWANIE (12000ms)
+                // 2. PO KOLEJNYCH 12 SEKUNDACH (łącznie 32s) - LĄDOWANIE
                 setTimeout(() => {
                     viewport.classList.remove('shaking');
                     viewport.style.backgroundImage = "url('Ladowisko.png')"; 
                     statusText.innerText = "Status: Wylądowano bezpiecznie.";
                     statusText.style.color = "#00ff00";
-                    console.log("Wylądowano.");
-            }, 20000); // Start po 20 sekundach
+                    
+                    // Pojawienie się przycisku
+                    exitBtn.classList.add('btn-active');
+                    
+                    // Opcjonalne wyciszenie audio
+                    fadeOutAudio(flightAudio);
+                }, 12000); 
+
+            }, 20000); 
         }
+
+        function fadeOutAudio(audio) {
+            let volume = 1.0;
+            const fadeInterval = setInterval(() => {
+                if (volume > 0.1) {
+                    volume -= 0.1;
+                    audio.volume = volume;
+                } else {
+                    audio.pause();
+                    clearInterval(fadeInterval);
+                }
+            }, 300);
         }
     </script>
 </body>

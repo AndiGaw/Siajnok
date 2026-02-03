@@ -103,14 +103,14 @@
             flightAudio.play().catch(e => console.log("Błąd audio:", e));
             console.log("Lot rozpoczęty...");
 
-            // 1. PO 15 SEKUNDACH - START TRZĘSIENIA
+            // 1. PO 20 SEKUNDACH - START TRZĘSIENIA (20000ms)
             setTimeout(() => {
                 viewport.classList.add('shaking');
                 statusText.innerText = "ALARM: Turbulencje lądowania!";
                 statusText.style.color = "#ff4400";
                 console.log("Rozpoczęto turbulencje...");
 
-                // 2. PO KOLEJNYCH 5 SEKUNDACH (łącznie 20s) - LĄDOWANIE
+                // 2. PO KOLEJNYCH 12 SEKUNDACH (łącznie 32s) - LĄDOWANIE (12000ms)
                 setTimeout(() => {
                     viewport.classList.remove('shaking');
                     viewport.style.backgroundImage = "url('Ladowisko.png')"; 
@@ -118,11 +118,11 @@
                     statusText.style.color = "#00ff00";
                     console.log("Wylądowano.");
 
-                    // Opcjonalne: płynne wyciszenie dźwięku silników po lądowaniu
+                    // Płynne wyciszenie dźwięku silników
                     fadeOutAudio(flightAudio);
-                }, 5000); 
+                }, 12000); // 12 sekund trzęsienia
 
-            }, 15000); 
+            }, 20000); // Start po 20 sekundach
         }
 
         function fadeOutAudio(audio) {

@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Serce Sziczy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    /* ===== STYL BAZOWY ===== */
+    html, body {
+        margin: 0; padding: 0; min-height: 100vh;
+        background: #000; color: #e6c47a; font-family: "Georgia", serif;
+        overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        position: relative; width: 100%;
+    }
 
+    /* ===== WARSTWA SYPIĄCEGO SIĘ PIASKU (Twój plik piasek.png) ===== */
+    .sand-overlay {
+        position: fixed;
+        top: -100%; /* Zaczyna nad ekranem */
+        left: 0;
+        width: 100%;
+        height: 200%; /* Podwójna wysokość dla płynnej pętli */
+        background-image: url('piasek.png');
+        background-repeat: repeat;
+        background-size: 400px; /* Dostosuj wielkość tekstury piasku */
+        opacity: 0.3; /* Półprzezroczystość, by nie zasłaniać wszystkiego */
+        pointer-events: none;
+        z-index: 1;
+        animation: fall 10s linear infinite;
+    }
+
+    /* Animacja spadania */
+    @keyframes fall {
+        from { transform: translateY(0); }
+        to { transform: translateY(50%); }
+    }
+
+    /* ===== RESZTA INTERFEJSU (SPÓJNA Z TWOIM KODEM) ===== */
+    .gate-frame {
+        width: 450px; height: 650px; 
+        border: 12px solid #2a1f0d; border-bottom: none; 
+        border-radius: 225px 225px 10px 10px;
+        background: rgba(21, 21, 21, 0.8); /* Lekka przezroczystość by widzieć piasek za wrotami */
+        box-shadow: 0 0 60px rgba(230, 196, 122, 0.2);
+        display: flex; flex-direction: column; align-items: center;
+        padding-top: 280px; position: relative; z-index: 5;
+        margin-top: 50px;
+    }
+
+    .inputs-container { display: flex; gap: 20px; }
+    .code-input {
+        width: 70px; height: 100px; background: #000; 
+        border: 3px solid #5a4422; color: #e6c47a; 
+        font-size: 3.5em; text-align: center; border-radius: 8px;
+    }
+
+    #revealBtn {
+        display: none; margin-top: 40px; 
+        background: #111; color: #e6c47a; border: 3px solid #e6c47a;
+        padding: 20px 40px; font-size: 1.4em; font-weight: bold;
+        text-transform: uppercase; cursor: pointer;
+        box-shadow: 0 0 20px rgba(230, 196, 122, 0.3);
+    }
+</style>
+</head>
+<body>
+
+<div class="sand-overlay"></div>
+
+<div class="gate-frame">
+    <div class="inputs-container">
+        <input type="tel" class="code-input" maxlength="1">
+        <input type="tel" class="code-input" maxlength="1">
+        <input type="tel" class="code-input" maxlength="1">
+        <input type="tel" class="code-input" maxlength="1">
+    </div>
+    <button id="revealBtn">Wstąp do Siczy</button>
+</div>
+
+</body>
+</html>

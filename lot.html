@@ -117,25 +117,8 @@
                     statusText.innerText = "Status: Wylądowano bezpiecznie.";
                     statusText.style.color = "#00ff00";
                     console.log("Wylądowano.");
-
-                    // Płynne wyciszenie dźwięku silników
-                    fadeOutAudio(flightAudio);
-                }, 12000); // 12 sekund trzęsienia
-
             }, 20000); // Start po 20 sekundach
         }
-
-        function fadeOutAudio(audio) {
-            let volume = 1.0;
-            const fadeInterval = setInterval(() => {
-                if (volume > 0.1) {
-                    volume -= 0.1;
-                    audio.volume = volume;
-                } else {
-                    audio.pause();
-                    clearInterval(fadeInterval);
-                }
-            }, 200);
         }
     </script>
 </body>

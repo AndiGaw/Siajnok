@@ -106,7 +106,7 @@
 
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
-            if (!audio) audio = new Audio("Zaproszenie.mp3");
+            if (!audio) audio = new Audio("Mapa.mp3");
             if (audio.paused) { audio.play(); btn.innerText = "⏸️ Narrator (Pauza)"; } 
             else { audio.pause(); btn.innerText = "▶️ Narrator (Wznów)"; }
         }

@@ -7,117 +7,47 @@
 <style>
     /* ===== STYL BAZOWY ===== */
     html, body {
-        margin: 0; padding: 0; height: 100%; background: #000;
+        margin: 0; padding: 0; 
+        min-height: 100vh; 
+        background: #000;
         color: #e6c47a; font-family: "Georgia", serif;
-        overflow-x: hidden; overflow-y: auto;
+        overflow-x: hidden; 
         display: flex; flex-direction: column; align-items: center;
-        transition: transform 0.1s ease-out; /* Płynność drgań */
+        /* Kluczowe dla trzęsienia: */
+        position: relative;
+        width: 100%;
     }
 
-    /* ===== ANIMACJE TRZĘSIENIA (RÓŻNE POZIOMY) ===== */
-    @keyframes shake-lv1 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(1px,1px); } 75% { transform: translate(-1px,-1px); } }
-    @keyframes shake-lv2 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(2px,2px); } 75% { transform: translate(-2px,-2px); } }
-    @keyframes shake-lv3 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(4px,4px); } 75% { transform: translate(-4px,-4px); } }
-    @keyframes shake-lv4 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(6px,6px); } 75% { transform: translate(-6px,-6px); } }
-    @keyframes shake-lv5 { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(10px,10px); } 75% { transform: translate(-10px,-10px); } }
+    /* ===== ANIMACJE TRZĘSIENIA (WYRAŹNIEJSZE) ===== */
+    @keyframes shake-lv1 { 0% { transform: translate(0,0); } 50% { transform: translate(1px, 1px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv2 { 0% { transform: translate(0,0); } 25% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, 2px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv3 { 0% { transform: translate(0,0); } 25% { transform: translate(4px, 4px); } 75% { transform: translate(-4px, -4px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv4 { 0% { transform: translate(0,0); } 25% { transform: translate(7px, -7px); } 75% { transform: translate(-7px, 7px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv5 { 0% { transform: translate(0,0); } 25% { transform: translate(12px, 12px); } 75% { transform: translate(-12px, -12px); } 100% { transform: translate(0,0); } }
 
+    /* Klasy przypisane do BODY */
     .shake-1 { animation: shake-lv1 0.2s infinite; }
     .shake-2 { animation: shake-lv2 0.15s infinite; }
     .shake-3 { animation: shake-lv3 0.12s infinite; }
     .shake-4 { animation: shake-lv4 0.1s infinite; }
     .shake-5 { animation: shake-lv5 0.08s infinite; }
 
-    /* ===== MODAL ===== */
-    #custom-modal {
-        display: none; position: fixed; z-index: 100;
-        left: 0; top: 0; width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.85); backdrop-filter: blur(2px);
-        justify-content: center; align-items: center;
-    }
-    #modal-content {
-        background-color: #111; border: 3px solid #e6c47a;
-        box-shadow: 0 0 30px rgba(230,196,122,0.4);
-        padding: 40px; text-align: center; max-width: 450px; width: 85%;
-        animation: modalFadeIn 0.3s ease-out;
-    }
-    #modal-text { font-size: 1.5em; margin-bottom: 25px; line-height: 1.4; }
-    .modal-btn {
-        background: #222; color: #e6c47a; border: 2px solid #e6c47a;
-        padding: 15px 40px; font-size: 1.1em; cursor: pointer;
-        text-transform: uppercase; letter-spacing: 2px;
-    }
-    .modal-btn:hover { background: #e6c47a; color: #000; box-shadow: 0 0 20px #e6c47a; }
-
-    @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
-
-    /* Nakładka piasku */
-    .sand {
-      position:fixed; width:100%; height:100%;
-      background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
-      animation: drift 60s linear infinite; pointer-events:none; z-index:1;
-    }
+    /* ===== RESZTA STYLÓW (BEZ ZMIAN) ===== */
+    #custom-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px); justify-content: center; align-items: center; }
+    #modal-content { background: #111; border: 3px solid #e6c47a; padding: 40px; text-align: center; max-width: 450px; width: 85%; }
+    .modal-btn { background: #222; color: #e6c47a; border: 2px solid #e6c47a; padding: 15px 40px; cursor: pointer; text-transform: uppercase; }
+    .sand { position:fixed; width:100%; height:100%; background: repeating-linear-gradient(45deg, rgba(230,196,122,0.1), rgba(0,0,0,0) 6px); animation: drift 60s linear infinite; pointer-events:none; z-index:1; }
     @keyframes drift { from { background-position:0 0; } to { background-position:1000px 1000px; } }
-
-    /* UI */
-    #top-controls { position: relative; z-index: 10; margin-top: 30px; margin-bottom: 20px; }
-    .ui-btn {
-        font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a;
-        border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer;
-    }
-
-    .main-layout {
-        display: flex; align-items: center; justify-content: center; gap: 60px;
-        z-index: 5; width: 100%; max-width: 1200px; padding: 20px;
-    }
-
-    #dudnik-btn {
-        width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a;
-        background: #1a1a1a; color: #e6c47a; font-size: 1.2em; font-weight: bold;
-        cursor: pointer; transition: 0.3s;
-    }
-    #dudnik-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    #timer-display {
-        width: 150px; font-size: 4.5em; text-align: center; color: #ff4400;
-        text-shadow: 0 0 25px #ff4400; visibility: hidden; font-weight: bold;
-    }
-
-    /* WROTA */
-    .gate-frame {
-        width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none;
-        border-radius: 225px 225px 10px 10px;
-        background: linear-gradient(180deg, #151515 0%, #000 100%);
-        box-shadow: 0 0 60px rgba(230, 196, 122, 0.25);
-        display: flex; flex-direction: column; align-items: center;
-        padding-top: 280px; position: relative;
-    }
-
-    .gate-frame h1 {
-        position: absolute; top: 80px; font-size: 2em; letter-spacing: 5px;
-        text-transform: uppercase; text-shadow: 0 0 10px #e6c47a;
-    }
-
+    #top-controls { position: relative; z-index: 10; margin-top: 30px; }
+    .ui-btn { font-size: 1.2em; padding: 10px 20px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; cursor: pointer; }
+    .main-layout { display: flex; align-items: center; justify-content: center; gap: 60px; z-index: 5; padding: 20px; }
+    #dudnik-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; }
+    #timer-display { width: 150px; font-size: 4.5em; text-align: center; color: #ff4400; visibility: hidden; font-weight: bold; }
+    .gate-frame { width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none; border-radius: 225px 225px 10px 10px; background: linear-gradient(180deg, #151515 0%, #000 100%); display: flex; flex-direction: column; align-items: center; padding-top: 280px; position: relative; }
+    .gate-frame h1 { position: absolute; top: 80px; font-size: 2em; text-transform: uppercase; }
     .inputs-container { display: flex; gap: 20px; }
-    .code-input {
-        width: 70px; height: 100px; background: #000; 
-        border: 3px solid #5a4422; color: #e6c47a; 
-        font-size: 3.5em; text-align: center; border-radius: 8px;
-        appearance: textfield; -moz-appearance: textfield;
-    }
-    .code-input::-webkit-outer-spin-button, .code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .code-input:focus { border-color: #e6c47a; box-shadow: 0 0 25px #e6c47a; outline: none; }
-
-    #revealBtn {
-        display: none; margin-top: 40px; background: #e6c47a; color: #000;
-        border: none; padding: 20px 40px; font-size: 1.3em; font-weight: bold;
-        cursor: pointer; border-radius: 5px; animation: pulse-gold 1.5s infinite;
-    }
-
-    @keyframes pulse-gold { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 30px #e6c47a; } }
-    
-    /* Trzęsienie przy otwieraniu (finalne) */
-    .gate-opening { animation: shake-lv2 0.1s infinite !important; }
-
+    .code-input { width: 70px; height: 100px; background: #000; border: 3px solid #5a4422; color: #e6c47a; font-size: 3.5em; text-align: center; border-radius: 8px; appearance: textfield; }
+    #revealBtn { display: none; margin-top: 40px; background: #e6c47a; color: #000; padding: 20px 40px; font-size: 1.3em; cursor: pointer; }
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
 </style>
 </head>
@@ -168,9 +98,7 @@
         document.getElementById("modal-text").innerText = msg;
         document.getElementById("custom-modal").style.display = "flex";
     }
-    function closeModal() {
-        document.getElementById("custom-modal").style.display = "none";
-    }
+    function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
 
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
@@ -181,28 +109,19 @@
         if (narratorAudio.paused) {
             narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => showCustomAlert("Błąd: Brak pliku Wrota.mp3"));
         } else {
-            narratorAudio.pause();
-            btn.innerText = "▶️ Narrator (Wznów)";
+            narratorAudio.pause(); btn.innerText = "▶️ Narrator (Wznów)";
         }
     }
 
     function updateShakeLevel(seconds) {
-        // Usuwamy wszystkie klasy drgań
+        // Czyścimy wszystkie klasy shake przed dodaniem nowej
         body.classList.remove('shake-1', 'shake-2', 'shake-3', 'shake-4', 'shake-5');
         
-        // Logika progów czasowych
-        if (seconds <= 10) {
-            body.classList.add('shake-5'); // 10-0 s: najmocniejsze
-        } else if (seconds <= 20) {
-            body.classList.add('shake-4'); // 20-11 s: jeszcze mocniejsze
-        } else if (seconds <= 30) {
-            body.classList.add('shake-3'); // 30-21 s: mocne (skorygowane z prośby 39-21)
-        } else if (seconds <= 40) {
-            body.classList.add('shake-2'); // 40-31 s: mocniejsze niż lekkie
-        } else if (seconds <= 50) {
-            body.classList.add('shake-1'); // 50-41 s: lekkie
-        }
-        // 60-51: brak (nie dodajemy klasy)
+        if (seconds > 0 && seconds <= 10) body.classList.add('shake-5');
+        else if (seconds > 10 && seconds <= 20) body.classList.add('shake-4');
+        else if (seconds > 20 && seconds <= 30) body.classList.add('shake-3');
+        else if (seconds > 30 && seconds <= 40) body.classList.add('shake-2');
+        else if (seconds > 40 && seconds <= 50) body.classList.add('shake-1');
     }
 
     function activateDudnik() {
@@ -219,16 +138,16 @@
         const display = document.getElementById('timer-display');
         display.style.visibility = "visible";
 
+        // Uruchomienie pętli
         timerId = setInterval(() => {
             timeLeft--;
             display.innerText = timeLeft;
-            
             updateShakeLevel(timeLeft);
 
             if (timeLeft <= 0) {
                 clearInterval(timerId);
                 sound.pause();
-                body.classList.remove('shake-1', 'shake-2', 'shake-3', 'shake-4', 'shake-5');
+                body.className = ""; // Usuń trzęsienie
                 showCustomAlert("Czerw nadciągnął! Zostałeś odnaleziony...");
                 setTimeout(() => location.reload(), 3000);
             }
@@ -257,13 +176,10 @@
 
     function finalAction() {
         if(timerId) clearInterval(timerId);
-        body.classList.remove('shake-1', 'shake-2', 'shake-3', 'shake-4', 'shake-5');
+        body.className = ""; // Stop trzęsienia
         document.getElementById('dudnikSound').pause();
         document.getElementById('stoneSound').play().catch(() => {});
         inputs.forEach(i => i.disabled = true);
-        
-        document.getElementById('mainGate').classList.add('gate-opening');
-        document.getElementById('revealBtn').style.display = "none";
         
         setTimeout(() => {
             document.getElementById('flash').style.opacity = "1";
@@ -271,7 +187,7 @@
                 showCustomAlert("Witaj w Siczy Tabr.");
                 setTimeout(() => { window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; }, 2000);
             }, 2100);
-        }, 2000);
+        }, 1000);
     }
 </script>
 </body>

@@ -22,8 +22,8 @@
     @keyframes shake-lv1 { 0% { transform: translate(0,0); } 50% { transform: translate(1px, 1px); } 100% { transform: translate(0,0); } }
     @keyframes shake-lv2 { 0% { transform: translate(0,0); } 25% { transform: translate(2px, -2px); } 75% { transform: translate(-2px, 2px); } 100% { transform: translate(0,0); } }
     @keyframes shake-lv3 { 0% { transform: translate(0,0); } 25% { transform: translate(4px, 4px); } 75% { transform: translate(-4px, -4px); } 100% { transform: translate(0,0); } }
-    @keyframes shake-lv4 { 0% { transform: translate(0,0); } 25% { transform: translate(7px, -7px); } 75% { transform: translate(-7px, 7px); } 100% { transform: translate(0,0); } }
-    @keyframes shake-lv5 { 0% { transform: translate(0,0); } 25% { transform: translate(12px, 12px); } 75% { transform: translate(-12px, -12px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv4 { 0% { transform: translate(0,0); } 25% { transform: translate(5px, -5px); } 75% { transform: translate(-5px, 5px); } 100% { transform: translate(0,0); } }
+    @keyframes shake-lv5 { 0% { transform: translate(0,0); } 25% { transform: translate(10px, 10px); } 75% { transform: translate(-10px, -10px); } 100% { transform: translate(0,0); } }
 
     /* Klasy przypisane do BODY */
     .shake-1 { animation: shake-lv1 0.2s infinite; }
@@ -41,7 +41,7 @@
     #top-controls { position: relative; z-index: 10; margin-top: 30px; }
     .ui-btn { font-size: 1.2em; padding: 10px 20px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; cursor: pointer; }
     .main-layout { display: flex; align-items: center; justify-content: center; gap: 60px; z-index: 5; padding: 20px; }
-    #dudnik-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; }
+    /* #dudnik-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; } */
     #timer-display { width: 150px; font-size: 4.5em; text-align: center; color: #ff4400; visibility: hidden; font-weight: bold; }
     .gate-frame { width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none; border-radius: 225px 225px 10px 10px; background: linear-gradient(180deg, #151515 0%, #000 100%); display: flex; flex-direction: column; align-items: center; padding-top: 280px; position: relative; }
     .gate-frame h1 { position: absolute; top: 80px; font-size: 2em; text-transform: uppercase; }
@@ -49,6 +49,40 @@
     .code-input { width: 70px; height: 100px; background: #000; border: 3px solid #5a4422; color: #e6c47a; font-size: 3.5em; text-align: center; border-radius: 8px; appearance: textfield; }
     #revealBtn { display: none; margin-top: 40px; background: #e6c47a; color: #000; padding: 20px 40px; font-size: 1.3em; cursor: pointer; }
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
+
+    /* Zaktualizowany styl przycisku Dudnik */
+    #dudnik-btn {
+        width: 150px; 
+        height: 150px; 
+        border-radius: 50%; 
+        border: 6px double #e6c47a;
+        background: #1a1a1a; 
+        color: #e6c47a; 
+        
+        /* Zmiana czcionki */
+        font-size: 1.5em; /* Zwiększona z 1.2em */
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        
+        cursor: pointer; 
+        transition: 0.4s ease; /* Płynne przejście efektu */
+    }
+
+    /* Wygląd po aktywacji (gdy jest disabled) */
+    #dudnik-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #0a0a0a; /* Ciemniejsze tło */
+        color: #8a7a5a; /* Wyblakły złoty */
+        border-color: #5a4422; /* Ciemniejsza ramka */
+        
+        /* Efekt braku nasycenia */
+        filter: grayscale(100%) contrast(0.8);
+        box-shadow: none;
+    }
+
+    
 </style>
 </head>
 <body id="body-main">

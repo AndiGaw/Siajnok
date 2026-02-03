@@ -20,7 +20,7 @@
         align-items: center;
     }
 
-    /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
+    /* ===== MODAL (DIUNA STYLE) ===== */
     #custom-modal {
         display: none; 
         position: fixed;
@@ -76,7 +76,7 @@
         to { opacity: 1; transform: scale(1); }
     }
 
-    /* Nakładka ruchomego piasku */
+    /* Nakładka piasku */
     .sand {
       position:fixed;
       width:100%; height:100%;
@@ -116,38 +116,38 @@
         text-shadow: 0 0 25px #ff4400; visibility: hidden; font-weight: bold;
     }
 
-    /* ===== WROTA (Z POPRAWKĄ POŁOŻENIA) ===== */
+    /* ===== WROTA ===== */
     .gate-frame {
-        width: 450px; 
-        height: 650px; 
-        border: 12px solid #2a1f0d;
-        border-bottom: none;
+        width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none;
         border-radius: 225px 225px 10px 10px;
         background: linear-gradient(180deg, #151515 0%, #000 100%);
         box-shadow: 0 0 60px rgba(230, 196, 122, 0.25);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        /* OBNIŻENIE ZAWARTOŚCI: */
-        padding-top: 280px; 
-        position: relative;
+        display: flex; flex-direction: column; align-items: center;
+        padding-top: 280px; position: relative;
     }
 
     .gate-frame h1 {
-        position: absolute;
-        top: 80px;
-        font-size: 2em;
-        letter-spacing: 5px;
-        text-transform: uppercase;
-        text-shadow: 0 0 10px #e6c47a;
+        position: absolute; top: 80px; font-size: 2em; letter-spacing: 5px;
+        text-transform: uppercase; text-shadow: 0 0 10px #e6c47a;
     }
 
     .inputs-container { display: flex; gap: 20px; }
+
+    /* USUNIĘCIE STRZAŁEK */
     .code-input {
         width: 70px; height: 100px; background: #000; 
         border: 3px solid #5a4422; color: #e6c47a; 
         font-size: 3.5em; text-align: center; border-radius: 8px;
+        -moz-appearance: textfield; /* Firefox */
+        appearance: textfield;
     }
+
+    .code-input::-webkit-outer-spin-button,
+    .code-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
     .code-input:focus { border-color: #e6c47a; box-shadow: 0 0 25px #e6c47a; outline: none; }
 
     #revealBtn {
@@ -188,10 +188,10 @@
     <div class="gate-frame" id="mainGate">
         <h1>Wrota</h1>
         <div class="inputs-container">
-            <input type="number" class="code-input" id="c1" oninput="limit(this)">
-            <input type="number" class="code-input" id="c2" oninput="limit(this)">
-            <input type="number" class="code-input" id="c3" oninput="limit(this)">
-            <input type="number" class="code-input" id="c4" oninput="limit(this)">
+            <input type="tel" class="code-input" id="c1" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c2" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c3" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c4" oninput="limit(this)" maxlength="1">
         </div>
         <button id="revealBtn" onclick="finalAction()">Wstąp do Siczy</button>
     </div>
@@ -208,7 +208,6 @@
     let timerId = null;
     const inputs = document.querySelectorAll('.code-input');
 
-    // FUNKCJA MODALA
     function showCustomAlert(msg) {
         document.getElementById("modal-text").innerText = msg;
         document.getElementById("custom-modal").style.display = "flex";
@@ -257,7 +256,11 @@
         }, 1000);
     }
 
-    function limit(el) { if (el.value.length > 1) el.value = el.value.slice(0, 1); }
+    // Blokada znaków nie-numerycznych i ograniczenie długości
+    function limit(el) { 
+        el.value = el.value.replace(/[^0-9]/g, ''); 
+        if (el.value.length > 1) el.value = el.value.slice(0, 1); 
+    }
 
     inputs.forEach((input, index) => {
         input.addEventListener('input', () => {

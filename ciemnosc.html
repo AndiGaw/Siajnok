@@ -92,7 +92,7 @@
 
     <script>
         let audio = null;
-        let doorAudio = new Audio("Drzwi.mp3");
+        let doorAudio = new Audio("Stone_door.mp3");
         let timers = []; // Tablica do przechowywania timerów, aby móc je wyczyścić
 
         function playNarrator() {
@@ -114,7 +114,7 @@
 
             if (val === "tukan") {
                 // 1. Start rotacji (trwa 3s)
-                map.style.transform = "rotate(405deg)";
+                map.style.transform = "rotate(360deg)";
                 el.style.borderColor = "#e6c47a";
 
                 // 2. Po 2 sekundach od startu pojawia się tekst

@@ -130,10 +130,12 @@
 
                 timers.push(setTimeout(() => {
                     doorAudio.play();
-                    // MAPA ZNIKA, PRZYCISK SIĘ POJAWIA
+                }, 5000));
+
+                timers.push(setTimeout(() => {
                     map.classList.add('map-hidden');
                     enterBtn.classList.add('btn-active');
-                }, 10000));
+                }, 1000));
 
             } else {
                 map.style.transform = "rotate(45deg)";

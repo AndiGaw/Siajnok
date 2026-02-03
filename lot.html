@@ -3,70 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokój w klimacie Diuny</title>
+    <title>Arrakis - Lot i Lądowanie</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
+        body, html {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: "Georgia", serif;
+        }
+
+        /* Kontener, który będzie się trząsł */
+        #viewport {
+            width: 100vw;
             height: 100vh;
             background-image: url('Lot.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: background-image 2s ease-in-out;
             position: relative;
-            font-family: "Georgia", serif;
-            overflow: hidden;
-            transition: background-image 2s ease-in-out; /* Płynne przejście przy lądowaniu */
         }
 
-        /* Animacja trzęsienia ekranu */
+        /* Animacja turbulencji */
         @keyframes shake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
-            10% { transform: translate(-1px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            10% { transform: translate(-2px, -3px) rotate(-1deg); }
+            20% { transform: translate(-4px, 0px) rotate(1deg); }
+            30% { transform: translate(4px, 3px) rotate(0deg); }
+            40% { transform: translate(2px, -2px) rotate(1deg); }
+            50% { transform: translate(-2px, 3px) rotate(-1deg); }
+            60% { transform: translate(-4px, 2px) rotate(0deg); }
+            70% { transform: translate(4px, 2px) rotate(-1deg); }
+            80% { transform: translate(-2px, -2px) rotate(1deg); }
+            90% { transform: translate(2px, 3px) rotate(0deg); }
+            100% { transform: translate(2px, -3px) rotate(-1deg); }
         }
 
         .shaking {
-            animation: shake 0.2s infinite;
+            animation: shake 0.15s infinite;
+            filter: blur(1px); /* Dodaje realizmu przy wstrząsach */
+        }
+
+        /* Nakładka informacyjna na początku */
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            cursor: pointer;
+            color: #e6c47a;
+            font-family: 'Cinzel', serif;
+            text-align: center;
+        }
+
+        .status-text {
+            position: absolute;
+            bottom: 50px;
+            color: #e6c47a;
+            text-shadow: 0 0 10px #000;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
+    <div id="overlay" onclick="startJourney()">
+        <h1>KLIKNIJ, ABY ROZPOCZĄĆ SEKWENCJĘ LOTU</h1>
+    </div>
+
+    <div id="viewport">
+        <div class="status-text" id="status">Status: W locie...</div>
+    </div>
+
     <script>
-        // Inicjalizacja dźwięku
         const flightAudio = new Audio('lot.mp3');
-        flightAudio.loop = false;
+        const viewport = document.getElementById('viewport');
+        const statusText = document.getElementById('status');
+        const overlay = document.getElementById('overlay');
 
-        // Start sekwencji po pierwszym kliknięciu użytkownika (wymóg przeglądarek dla dźwięku)
-        window.addEventListener('click', () => {
-            if (flightAudio.paused) {
-                flightAudio.play();
-                startLandingSequence();
-            }
-        }, { once: true });
+        function startJourney() {
+            // Ukrywamy ekran startowy
+            overlay.style.display = 'none';
+            
+            // Start dźwięku
+            flightAudio.play().catch(e => console.log("Błąd audio:", e));
+            console.log("Lot rozpoczęty...");
 
-        function startLandingSequence() {
-            // 1. Po 20 sekundach zacznij trząść ekranem
+            // 1. PO 20 SEKUNDACH - START TRZĘSIENIA
             setTimeout(() => {
-                document.body.classList.add('shaking');
+                viewport.classList.add('shaking');
+                statusText.innerText = "ALARM: Turbulencje lądowania!";
+                statusText.style.color = "#ff4400";
                 console.log("Rozpoczęto turbulencje...");
 
-                // 2. Po kolejnych 5 sekundach trzęsienia (łącznie 25s) "wyląduj"
+                // 2. PO KOLEJNYCH 5 SEKUNDACH (łącznie 25s) - LĄDOWANIE
                 setTimeout(() => {
-                    document.body.classList.remove('shaking');
-                    document.body.style.backgroundImage = "url('Ladowisko.png')"; 
+                    viewport.classList.remove('shaking');
+                    viewport.style.backgroundImage = "url('Ladowisko.png')"; 
+                    statusText.innerText = "Status: Wylądowano bezpiecznie.";
+                    statusText.style.color = "#00ff00";
                     console.log("Wylądowano.");
+
+                    // Opcjonalne: płynne wyciszenie dźwięku silników po lądowaniu
+                    fadeOutAudio(flightAudio);
                 }, 5000); 
 
-            }, 20000); // 20000 ms = 20 sekund
+            }, 20000); 
+        }
+
+        function fadeOutAudio(audio) {
+            let volume = 1.0;
+            const fadeInterval = setInterval(() => {
+                if (volume > 0.1) {
+                    volume -= 0.1;
+                    audio.volume = volume;
+                } else {
+                    audio.pause();
+                    clearInterval(fadeInterval);
+                }
+            }, 200);
         }
     </script>
 </body>

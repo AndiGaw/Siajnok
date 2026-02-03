@@ -20,18 +20,67 @@
         align-items: center;
     }
 
+    /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
+    #custom-modal {
+        display: none; 
+        position: fixed;
+        z-index: 100;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0,0,0,0.85);
+        backdrop-filter: blur(2px);
+        justify-content: center;
+        align-items: center;
+    }
+
+    #modal-content {
+        background-color: #111;
+        border: 3px solid #e6c47a;
+        box-shadow: 0 0 30px rgba(230,196,122,0.4);
+        padding: 40px;
+        text-align: center;
+        max-width: 450px;
+        width: 85%;
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    #modal-text {
+        font-size: 1.5em;
+        margin-bottom: 25px;
+        color: #e6c47a;
+        text-shadow: 0 0 10px rgba(230,196,122,0.3);
+        line-height: 1.4;
+    }
+
+    .modal-btn {
+        background: #222;
+        color: #e6c47a;
+        border: 2px solid #e6c47a;
+        padding: 15px 40px;
+        font-size: 1.1em;
+        font-family: "Georgia", serif;
+        cursor: pointer;
+        transition: 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .modal-btn:hover {
+        background: #e6c47a;
+        color: #000;
+        box-shadow: 0 0 20px rgba(230,196,122,0.8);
+    }
+
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.8); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
     /* Nakładka ruchomego piasku */
     .sand {
       position:fixed;
-      width:100%;
-      height:100%;
-      background:
-        repeating-linear-gradient(
-          45deg,
-          rgba(230,196,122,0.2),  
-          rgba(230,196,122,0.2) 2px,
-          rgba(0,0,0,0) 6px        
-        );
+      width:100%; height:100%;
+      background: repeating-linear-gradient(45deg, rgba(230,196,122,0.2), rgba(230,196,122,0.2) 2px, rgba(0,0,0,0) 6px);
       animation: drift 60s linear infinite;
       pointer-events:none;
       z-index:1;
@@ -42,74 +91,32 @@
       to { background-position:1000px 1000px; }
     }
 
-    /* UI - GÓRNE PRZYCISKI */
-    #top-controls {
-        position: relative;
-        z-index: 10;
-        margin-top: 30px;
-        margin-bottom: 20px;
-    }
+    /* UI */
+    #top-controls { position: relative; z-index: 10; margin-top: 30px; margin-bottom: 20px; }
     .ui-btn {
-        font-size: 1.2em; 
-        padding: 10px 20px; 
-        width: 320px; 
-        background: #111; 
-        color: #e6c47a;
-        border: 2px solid #e6c47a; 
-        border-radius: 8px; 
-        cursor: pointer; 
-        box-shadow: 0 0 10px rgba(230,196,122,0.5);
-        transition: 0.3s;
-        font-family: inherit;
+        font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; color: #e6c47a;
+        border: 2px solid #e6c47a; border-radius: 8px; cursor: pointer; transition: 0.3s;
     }
+    .ui-btn:hover { background: #222; box-shadow: 0 0 20px rgba(230,196,122,0.8); }
 
-    .ui-btn:hover { 
-        background: #222; 
-        box-shadow: 0 0 20px rgba(230,196,122,0.8); 
-    }
-
-    /* UKŁAD GŁÓWNY */
     .main-layout {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 60px;
-        z-index: 5;
-        width: 100%;
-        max-width: 1200px;
-        padding: 20px;
+        display: flex; align-items: center; justify-content: center; gap: 60px;
+        z-index: 5; width: 100%; max-width: 1200px; padding: 20px;
     }
 
-    /* DUDNIK */
     #dudnik-btn {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        border: 6px double #e6c47a;
-        background: #1a1a1a;
-        color: #e6c47a;
-        font-size: 1.2em;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 0 20px rgba(230,196,122,0.3);
+        width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a;
+        background: #1a1a1a; color: #e6c47a; font-size: 1.2em; font-weight: bold;
+        cursor: pointer; transition: 0.3s;
     }
-    #dudnik-btn:hover:not(:disabled) { background: #222; transform: scale(1.05); }
-    #dudnik-btn:disabled { opacity: 0.4; cursor: not-allowed; border-style: solid; }
+    #dudnik-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* LICZNIK */
     #timer-display {
-        width: 150px;
-        font-size: 4.5em;
-        text-align: center;
-        color: #ff4400;
-        text-shadow: 0 0 25px #ff4400;
-        visibility: hidden;
-        font-family: 'Courier New', Courier, monospace;
-        font-weight: bold;
+        width: 150px; font-size: 4.5em; text-align: center; color: #ff4400;
+        text-shadow: 0 0 25px #ff4400; visibility: hidden; font-weight: bold;
     }
 
-    /* WROTA */
+    /* ===== WROTA (Z POPRAWKĄ POŁOŻENIA) ===== */
     .gate-frame {
         width: 450px; 
         height: 650px; 
@@ -121,69 +128,40 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding-top: 80px;
+        /* OBNIŻENIE ZAWARTOŚCI: */
+        padding-top: 280px; 
         position: relative;
     }
 
     .gate-frame h1 {
+        position: absolute;
+        top: 80px;
         font-size: 2em;
         letter-spacing: 5px;
-        margin-bottom: 60px;
         text-transform: uppercase;
         text-shadow: 0 0 10px #e6c47a;
     }
 
-    /* POLA WPISU */
     .inputs-container { display: flex; gap: 20px; }
     .code-input {
-        width: 70px;  
-        height: 100px; 
-        background: #000; 
-        border: 3px solid #5a4422;
-        color: #e6c47a; 
-        font-size: 3.5em; 
-        text-align: center;
-        border-radius: 8px;
-        font-family: "Georgia", serif;
-        transition: 0.3s;
+        width: 70px; height: 100px; background: #000; 
+        border: 3px solid #5a4422; color: #e6c47a; 
+        font-size: 3.5em; text-align: center; border-radius: 8px;
     }
-    .code-input:focus {
-        border-color: #e6c47a;
-        box-shadow: 0 0 25px #e6c47a;
-        outline: none;
-    }
-    .code-input:disabled { opacity: 0.6; }
+    .code-input:focus { border-color: #e6c47a; box-shadow: 0 0 25px #e6c47a; outline: none; }
 
-    /* Ukrywanie strzałek w inputach number */
-    .code-input::-webkit-outer-spin-button,
-    .code-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .code-input[type=number] { -moz-appearance: textfield; }
-
-    /* PRZYCISK WEJŚCIA */
     #revealBtn {
-        display: none;
-        margin-top: 50px;
-        background: #e6c47a;
-        color: #000;
-        border: none;
-        padding: 20px 50px;
-        font-size: 1.5em;
-        font-weight: bold;
-        text-transform: uppercase;
-        cursor: pointer;
-        border-radius: 5px;
-        animation: pulse-gold 1.5s infinite;
+        display: none; margin-top: 40px; background: #e6c47a; color: #000;
+        border: none; padding: 20px 40px; font-size: 1.3em; font-weight: bold;
+        cursor: pointer; border-radius: 5px; animation: pulse-gold 1.5s infinite;
     }
 
     @keyframes pulse-gold { 
-        0% { transform: scale(1); box-shadow: 0 0 10px #e6c47a; } 
-        50% { transform: scale(1.05); box-shadow: 0 0 30px #e6c47a; } 
-        100% { transform: scale(1); box-shadow: 0 0 10px #e6c47a; } 
+        0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 30px #e6c47a; } 
     }
 
-    /* Efekt otwierania wrót */
-    .opening { animation: shake 0.1s infinite !important; border-color: #fff !important; }
-    @keyframes shake { 0% { transform: translate(0,0); } 50% { transform: translate(3px, 3px); } 100% { transform: translate(-3px, -3px); } }
+    .opening { animation: shake 0.1s infinite !important; }
+    @keyframes shake { 0% { transform: translate(3px,3px); } 50% { transform: translate(-3px,-3px); } }
 
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
 </style>
@@ -193,6 +171,13 @@
 <div class="sand"></div>
 <div id="flash"></div>
 
+<div id="custom-modal">
+    <div id="modal-content">
+        <div id="modal-text">Komunikat</div>
+        <button class="modal-btn" onclick="closeModal()">Dalej</button>
+    </div>
+</div>
+
 <div id="top-controls">
     <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
 </div>
@@ -201,6 +186,7 @@
     <button id="dudnik-btn" onclick="activateDudnik()">DUDNIK</button>
 
     <div class="gate-frame" id="mainGate">
+        <h1>Wrota</h1>
         <div class="inputs-container">
             <input type="number" class="code-input" id="c1" oninput="limit(this)">
             <input type="number" class="code-input" id="c2" oninput="limit(this)">
@@ -222,22 +208,23 @@
     let timerId = null;
     const inputs = document.querySelectorAll('.code-input');
 
+    // FUNKCJA MODALA
+    function showCustomAlert(msg) {
+        document.getElementById("modal-text").innerText = msg;
+        document.getElementById("custom-modal").style.display = "flex";
+    }
+    function closeModal() {
+        document.getElementById("custom-modal").style.display = "none";
+    }
+
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
         if (!narratorAudio) {
             narratorAudio = new Audio("Wrota.mp3");
-            narratorAudio.addEventListener('ended', () => {
-                btn.innerText = "🎙️ Narrator (Start)";
-                narratorAudio.currentTime = 0;
-            });
+            narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; };
         }
-
         if (narratorAudio.paused) {
-            narratorAudio.play().then(() => {
-                btn.innerText = "⏸️ Narrator (Pauza)";
-            }).catch(() => {
-                alert("Błąd: Brak pliku Wrota.mp3");
-            });
+            narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => showCustomAlert("Błąd: Brak pliku Wrota.mp3"));
         } else {
             narratorAudio.pause();
             btn.innerText = "▶️ Narrator (Wznów)";
@@ -245,46 +232,32 @@
     }
 
     function activateDudnik() {
-        // Blokada restartu
         if (timerId !== null) return;
-
-        const dudnikBtn = document.getElementById('dudnik-btn');
-        const dudnikSound = document.getElementById('dudnikSound');
         
-        // Wizualne wyłączenie przycisku
-        dudnikBtn.disabled = true;
-        dudnikBtn.innerText = "AKTYWNY";
+        const btn = document.getElementById('dudnik-btn');
+        btn.disabled = true;
+        btn.innerText = "AKTYWNY";
 
-        // Dźwięk w pętli
-        dudnikSound.loop = true;
-        dudnikSound.play().catch(() => {});
+        const sound = document.getElementById('dudnikSound');
+        sound.loop = true;
+        sound.play().catch(() => {});
 
-        const timerDisplay = document.getElementById('timer-display');
-        timerDisplay.style.visibility = "visible";
-        
-        timeLeft = 60;
-        timerDisplay.innerText = timeLeft;
+        const display = document.getElementById('timer-display');
+        display.style.visibility = "visible";
 
         timerId = setInterval(() => {
             timeLeft--;
-            timerDisplay.innerText = timeLeft;
-            
-            if (timeLeft <= 10) {
-                timerDisplay.style.animation = "pulse-gold 0.5s infinite";
-            }
-
+            display.innerText = timeLeft;
             if (timeLeft <= 0) {
                 clearInterval(timerId);
-                dudnikSound.pause();
-                alert("Czerw nadciągnął! Zostałeś odnaleziony...");
-                location.reload();
+                sound.pause();
+                showCustomAlert("Czerw nadciągnął! Zostałeś odnaleziony...");
+                setTimeout(() => location.reload(), 3000);
             }
         }, 1000);
     }
 
-    function limit(el) {
-        if (el.value.length > 1) el.value = el.value.slice(0, 1);
-    }
+    function limit(el) { if (el.value.length > 1) el.value = el.value.slice(0, 1); }
 
     inputs.forEach((input, index) => {
         input.addEventListener('input', () => {
@@ -305,21 +278,18 @@
         if(timerId) clearInterval(timerId);
         document.getElementById('dudnikSound').pause();
         document.getElementById('stoneSound').play().catch(() => {});
-        
-        // Zablokowanie inputów
         inputs.forEach(i => i.disabled = true);
-
         document.getElementById('mainGate').classList.add('opening');
         document.getElementById('revealBtn').style.display = "none";
         
         setTimeout(() => {
             document.getElementById('flash').style.opacity = "1";
             setTimeout(() => { 
-                window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; 
+                showCustomAlert("Witaj w Siczy Tabr.");
+                setTimeout(() => { window.location.href = "https://andigaw.github.io/Siajnok/pokoj.html"; }, 2000);
             }, 2100);
         }, 2000);
     }
 </script>
-
 </body>
 </html>

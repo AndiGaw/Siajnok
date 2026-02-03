@@ -70,6 +70,23 @@
             padding: 12px; font-family: 'Cinzel', serif; font-size: 1rem;
             border-radius: 8px; width: 300px; text-align: center; outline: none; transition: 0.3s;
         }
+
+        .stone-door-wing {
+        position: absolute;
+        top: 0;
+        width: 50%; /* Każde skrzydło zajmuje połowę mapy */
+        height: 100%;
+        background-color: #000; /* Kolor tła maskującego */
+        z-index: 12; /* Nad mapą, ale pod przyciskiem Wejdź */
+        transition: transform 3s ease-in-out; /* Prędkość otwierania drzwi */
+        }
+
+        .stone-door-wing.left { left: 0; transform-origin: left; }
+        .stone-door-wing.right { right: 0; transform-origin: right; }
+
+        /* Klasa aktywująca otwarcie */
+        .doors-open.left { transform: translateX(-100%); }
+        .doors-open.right { transform: translateX(100%); }
     </style>
 </head>
 <body>
@@ -78,11 +95,12 @@
         <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
 
-    <div class="map-section">
-        <div class="map-wrapper">
-            <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis" id="map">
-            <button id="enterBtn" class="btn-enter" onclick="alert('Wchodzisz do Arrakis...')">WEJDŹ</button>
-        </div>
+<div class="map-wrapper">
+    <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis" id="map">
+    <div id="doorL" class="stone-door-wing left"></div>
+    <div id="doorR" class="stone-door-wing right"></div>
+    <button id="enterBtn" class="btn-enter" onclick="location.href='https://www.www.www'">WEJDŹ</button>
+</div>
         <div class="ukryty-tekst" id="secretText">
             Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat.
         </div>
@@ -122,20 +140,30 @@
                     txt.classList.add('revealed');
                 }, 2000));
 
-                // 3. Po kolejnych 3 sekundach (łącznie 5s) dźwięk drzwi i przycisk
+                // 3. Po kolejnych 3 sekundach (łącznie 5s) dźwięk drzwi, otwarcie i przycisk
                 timers.push(setTimeout(() => {
                     doorAudio.play();
+                    
+                    // NOWE: Dodanie klas otwierających panele
+                    document.getElementById('doorL').classList.add('doors-open');
+                    document.getElementById('doorR').classList.add('doors-open');
+                    
                     enterBtn.classList.add('btn-active');
                 }, 5000));
-
+            
             } else {
                 // Reset wszystkiego
                 map.style.transform = "rotate(45deg)";
                 txt.classList.remove('revealed');
                 enterBtn.classList.remove('btn-active');
+                
+                // RESET DRZWI
+                document.getElementById('doorL').classList.remove('doors-open');
+                document.getElementById('doorR').classList.remove('doors-open');
+                
                 el.style.borderColor = "#5a4422";
+            }erColor = "#5a4422";
             }
-        }
     </script>
 </body>
 </html>

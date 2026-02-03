@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arrakis - Lot i Lądowanie</title>
+    <title>Lot</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html {
@@ -103,14 +103,14 @@
             flightAudio.play().catch(e => console.log("Błąd audio:", e));
             console.log("Lot rozpoczęty...");
 
-            // 1. PO 20 SEKUNDACH - START TRZĘSIENIA
+            // 1. PO 15 SEKUNDACH - START TRZĘSIENIA
             setTimeout(() => {
                 viewport.classList.add('shaking');
                 statusText.innerText = "ALARM: Turbulencje lądowania!";
                 statusText.style.color = "#ff4400";
                 console.log("Rozpoczęto turbulencje...");
 
-                // 2. PO KOLEJNYCH 5 SEKUNDACH (łącznie 25s) - LĄDOWANIE
+                // 2. PO KOLEJNYCH 5 SEKUNDACH (łącznie 20s) - LĄDOWANIE
                 setTimeout(() => {
                     viewport.classList.remove('shaking');
                     viewport.style.backgroundImage = "url('Ladowisko.png')"; 
@@ -122,7 +122,7 @@
                     fadeOutAudio(flightAudio);
                 }, 5000); 
 
-            }, 20000); 
+            }, 15000); 
         }
 
         function fadeOutAudio(audio) {

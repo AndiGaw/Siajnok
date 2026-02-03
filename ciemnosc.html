@@ -7,108 +7,68 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* To tworzy równe, dynamiczne odstępy między elementami */
-            justify-content: space-between; 
-            padding: 40px 0;
-            box-sizing: border-box;
-            color: #e6c47a;
-            font-family: 'Cinzel', serif;
-            overflow: hidden;
+            margin: 0; padding: 0; height: 100vh; background-color: #000;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: space-between; padding: 40px 0; box-sizing: border-box;
+            color: #e6c47a; font-family: 'Cinzel', serif; overflow: hidden;
         }
 
-        /* PRZYWRÓCONY STYL PRZYCISKU */
         .ui-btn { 
-            font-size: 1.2em; 
-            padding: 10px 20px; 
-            width: 320px; 
-            background: #111; 
-            color: #e6c47a; 
-            border: 2px solid #e6c47a; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            box-shadow: 0 0 10px rgba(230,196,122,0.5); 
-            transition: 0.3s; 
-            font-family: inherit; 
-            z-index: 10;
+            font-size: 1.2em; padding: 10px 20px; width: 320px; background: #111; 
+            color: #e6c47a; border: 2px solid #e6c47a; border-radius: 8px; 
+            cursor: pointer; box-shadow: 0 0 10px rgba(230,196,122,0.5); 
+            transition: 0.3s; font-family: inherit; z-index: 10;
         }
 
-        .ui-btn:hover { 
-            background: #222; 
-            box-shadow: 0 0 20px rgba(230,196,122,0.8); 
-            color: #e6c47a; 
-        }
-
-        /* CENTRUM: MAPA I TEKST */
         .map-section {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
+            position: relative; display: flex; justify-content: center;
+            align-items: center; width: 100%;
         }
 
         .map-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 60vh;
-            height: 60vh;
-            position: relative;
-            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+            width: 60vh; height: 60vh; position: relative; flex-shrink: 0;
         }
 
         .mapa-arrakis {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transform: rotate(45deg);
-            transition: transform 0.8s ease-in-out;
+            max-width: 100%; max-height: 100%; object-fit: contain;
+            transform: rotate(45deg); 
+            /* ROTACJA TRWA 3 SEKUNDY */
+            transition: transform 3s ease-in-out; 
         }
+
+        .btn-enter {
+            position: absolute; z-index: 15; background: transparent;
+            border: 2px solid #e6c47a; color: #e6c47a; padding: 15px 30px;
+            font-family: 'Cinzel', serif; font-weight: bold; font-size: 1.5rem;
+            cursor: pointer; border-radius: 50px; opacity: 0; pointer-events: none;
+            transition: opacity 1.5s ease;
+            text-shadow: 0 0 10px #e6c47a; box-shadow: 0 0 15px rgba(230,196,122,0.4);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-active { opacity: 1; pointer-events: auto; animation: pulse 2s infinite ease-in-out; }
 
         .ukryty-tekst {
-            position: absolute;
-            left: calc(50% + 40vh);
-            width: 300px;
-            font-weight: 300;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            line-height: 1.6;
-            font-size: 1.1rem;
-            text-align: center;
-            color: transparent; /* Ukryty */
-            transition: color 0.5s ease;
+            position: absolute; left: calc(50% + 40vh); width: 300px;
+            font-weight: 300; text-transform: uppercase; letter-spacing: 3px;
+            line-height: 1.6; font-size: 1.1rem; text-align: center;
+            color: transparent; 
+            /* TEKST POJAWIA SIĘ PŁYNNIE */
+            transition: color 1.5s ease; 
         }
 
-        .revealed { 
-            color: #e6c47a; 
-            text-shadow: 0 0 10px rgba(230,196,122,0.5); 
-        }
+        .revealed { color: #e6c47a; text-shadow: 0 0 10px rgba(230,196,122,0.5); }
 
-        /* DÓŁ: POLE HASŁA */
         .input-field {
-            background-color: #111;
-            border: 2px solid #5a4422;
-            color: #e6c47a;
-            padding: 12px;
-            font-family: 'Cinzel', serif;
-            font-size: 1rem;
-            border-radius: 8px;
-            width: 300px;
-            text-align: center;
-            outline: none;
-            transition: 0.3s;
-        }
-
-        .input-field:focus { 
-            border-color: #e6c47a; 
-            box-shadow: 0 0 15px rgba(230,196,122,0.3); 
+            background-color: #111; border: 2px solid #5a4422; color: #e6c47a;
+            padding: 12px; font-family: 'Cinzel', serif; font-size: 1rem;
+            border-radius: 8px; width: 300px; text-align: center; outline: none; transition: 0.3s;
         }
     </style>
 </head>
@@ -121,39 +81,58 @@
     <div class="map-section">
         <div class="map-wrapper">
             <img src="Mapa_Arrakis.png" alt="Mapa Arrakis" class="mapa-arrakis" id="map">
+            <button id="enterBtn" class="btn-enter" onclick="alert('Wchodzisz do Arrakis...')">WEJDŹ</button>
         </div>
         <div class="ukryty-tekst" id="secretText">
             Przyprawa musi płynąć. Kto kontroluje przyprawę, ten kontroluje wszechświat.
         </div>
     </div>
 
-    <input type="text" class="input-field" placeholder="WPISZ HASŁO..." oninput="checkPass(this)">
+    <input type="text" id="passwordInput" class="input-field" placeholder="WPISZ HASŁO..." oninput="checkPass(this)">
 
     <script>
         let audio = null;
+        let doorAudio = new Audio("Drzwi.mp3");
+        let timers = []; // Tablica do przechowywania timerów, aby móc je wyczyścić
+
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
             if (!audio) audio = new Audio("Zaproszenie.mp3");
-            if (audio.paused) { 
-                audio.play(); 
-                btn.innerText = "⏸️ Narrator (Pauza)"; 
-            } else { 
-                audio.pause(); 
-                btn.innerText = "▶️ Narrator (Wznów)"; 
-            }
+            if (audio.paused) { audio.play(); btn.innerText = "⏸️ Narrator (Pauza)"; } 
+            else { audio.pause(); btn.innerText = "▶️ Narrator (Wznów)"; }
         }
 
         function checkPass(el) {
             const val = el.value.toLowerCase().trim();
             const map = document.getElementById('map');
             const txt = document.getElementById('secretText');
+            const enterBtn = document.getElementById('enterBtn');
+
+            // Czyścimy stare timery, jeśli użytkownik szybko zmienia tekst
+            timers.forEach(clearTimeout);
+            timers = [];
+
             if (val === "tukan") {
+                // 1. Start rotacji (trwa 3s)
                 map.style.transform = "rotate(405deg)";
-                txt.classList.add('revealed');
                 el.style.borderColor = "#e6c47a";
+
+                // 2. Po 2 sekundach od startu pojawia się tekst
+                timers.push(setTimeout(() => {
+                    txt.classList.add('revealed');
+                }, 2000));
+
+                // 3. Po kolejnych 3 sekundach (łącznie 5s) dźwięk drzwi i przycisk
+                timers.push(setTimeout(() => {
+                    doorAudio.play();
+                    enterBtn.classList.add('btn-active');
+                }, 5000));
+
             } else {
+                // Reset wszystkiego
                 map.style.transform = "rotate(45deg)";
                 txt.classList.remove('revealed');
+                enterBtn.classList.remove('btn-active');
                 el.style.borderColor = "#5a4422";
             }
         }

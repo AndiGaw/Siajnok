@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-PB6TX54M');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serce Siczy</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            background-image: url('Piasek.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            overflow: hidden;
+            display: flex;
+            align-items: center; /* Centrowanie w pionie */
+            justify-content: flex-start; /* Przycisk do lewej */
+            padding-left: 50px; /* Odstęp od lewej krawędzi */
+        }
+
+        /* ===== STYL PRZYCISKU (SPÓJNY Z SICZĄ) ===== */
+        .audio-btn {
+            background: #111; 
+            color: #e6c47a; 
+            border: 3px solid #e6c47a;
+            border-radius: 8px;
+            padding: 20px 30px; 
+            font-family: "Georgia", serif;
+            font-size: 1.2em; 
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(230, 196, 122, 0.3);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .audio-btn:hover {
+            background: #e6c47a;
+            color: #000;
+            box-shadow: 0 0 40px rgba(230, 196, 122, 0.6);
+        }
+
+        /* Efekt ziarnistego piasku w tle (opcjonalny, dla klimatu) */
+        .sand-overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(230,196,122,0.05), rgba(0,0,0,0) 6px);
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PB6TX54M"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div class="sand-overlay"></div>
+
+    <button class="audio-btn" onclick="playAudio()">Aktywuj ABC</button>
+
+    <audio id="abcAudio">
+        <source src="Glos_Serca_Siczy.mp3" type="audio/mpeg">
+        Twoja przeglądarka nie obsługuje elementu audio.
+    </audio>
+
+    <script>
+        function playAudio() {
+            const audio = document.getElementById("abcAudio");
+            audio.play().catch(error => {
+                console.log("Odtwarzanie zablokowane przez przeglądarkę. Wymagana interakcja użytkownika.");
+            });
+        }
+    </script>
+
+</body>
+</html>

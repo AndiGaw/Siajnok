@@ -9,6 +9,7 @@
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-PB6TX54M');</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serce Siczy</title>
@@ -24,10 +25,13 @@
             background-repeat: no-repeat;
             background-color: #000; 
             overflow: hidden;
+            
+            /* ===== ZMIANY UKŁADU (TOP CENTER) ===== */
             display: flex;
-            align-items: center; 
-            justify-content: flex-start; 
-            padding-left: 50px; 
+            flex-direction: column; /* Układ pionowy */
+            align-items: center;    /* Wyśrodkowanie w poziomie */
+            justify-content: flex-start; /* Elementy od góry */
+            padding-top: 50px;      /* Odstęp od górnej krawędzi */
         }
 
         /* ===== STYL PRZYCISKU (Zachowany styl Serca Siczy) ===== */
@@ -46,7 +50,7 @@
             box-shadow: 0 0 20px rgba(230, 196, 122, 0.3);
             transition: all 0.3s ease;
             z-index: 10;
-            min-width: 280px; /* Aby tekst pauzy nie skakał za mocno */
+            min-width: 280px; 
             text-align: center;
         }
 

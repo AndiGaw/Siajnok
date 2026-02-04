@@ -265,10 +265,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h1>Przeprawa przez Arrakis</h1>
 
   <div id="controls">
-    <button id="narratorBtn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
-    <button onclick="startGame()">🏜️ Wyrusz do Siczy Tabr</button>
+    <button id="narratorBtn" data-umami-event="Saper Narrator" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+    <button data-umami-event="Saper Start" onclick="startGame()">🏜️ Wyrusz do Siczy Tabr</button>
     <button onclick="showLeaderboard(null, null)">🏆 Pokaż Ranking</button>
-    <label><input type="checkbox" id="hardMode"> Hard Mode – ruchome czerwie</label>
+    <label><input type="checkbox" id="hardMode" data-umami-event="Hard Mode"
+         data-umami-event-type="click"> Hard Mode – ruchome czerwie</label>
   </div>
 
   <div id="stats">Kroki: 0 | Punktacja: 0</div>
@@ -281,7 +282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <div id="worm-map"></div>
     </div>
 
-<div id="helipadB" onclick="goToSich()">Sicz Tabr</div>
+<div id="helipadB" data-umami-event="Saper Sicz" onclick="goToSich()">Sicz Tabr</div>
   </div>
 </div>
 

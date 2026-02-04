@@ -13,21 +13,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serce Siczy</title>
     <style>
-        body {
+       body {
             margin: 0;
             padding: 0;
             height: 100vh;
             width: 100vw;
             background-image: url('Piasek.png');
-            background-size: cover;
+            /* Zmieniamy 'cover' na 'contain' aby widzieć CAŁY obraz */
+            background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
+            /* Kolor tła dopasowany do piasku, gdy obrazek się kończy */
+            background-color: #000; 
             overflow: hidden;
             display: flex;
-            align-items: center; /* Centrowanie w pionie */
-            justify-content: flex-start; /* Przycisk do lewej */
-            padding-left: 50px; /* Odstęp od lewej krawędzi */
+            align-items: center; 
+            justify-content: flex-start; 
+            padding-left: 50px; 
         }
 
         /* ===== STYL PRZYCISKU (SPÓJNY Z SICZĄ) ===== */

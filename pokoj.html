@@ -2,6 +2,8 @@
 <html lang="pl">
 <head>
 
+<script defer src="https://cloud.umami.is/script.js" data-website-id="ffca1a39-e7ff-4a37-a12b-802355b0c181"></script>
+
         <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -175,12 +177,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
 
     <div id="controls-container">
-        <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+        <button id="narratorBtn" class="ui-btn" data-umami-event="Pokój Narrator" onclick="playNarrator()">🎙️ Narrator (Start)</button>
     </div>
 
-    <div id="clickArea" title="Kliknij kopertę" onclick="openLetter()"></div>
+    <div id="clickArea" title="Kliknij kopertę" data-umami-event="Pokój Koperta" onclick="openLetter()"></div>
 
-<button id="door-btn" onclick="goToNextLoc()">
+<button id="door-btn" data-umami-event="Pokój Ornitopter" onclick="goToNextLoc()">
     <span style="font-size: 2em; margin-bottom: 10px;">🚁</span>
     ORNITOPTER
 </button>

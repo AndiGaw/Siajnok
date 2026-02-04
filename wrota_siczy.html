@@ -2,7 +2,6 @@
 <html lang="pl">
 <head>
 
-    
 <script defer src="https://cloud.umami.is/script.js" data-website-id="ffca1a39-e7ff-4a37-a12b-802355b0c181"></script>
 
     <!-- Google Tag Manager -->
@@ -185,11 +184,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <div id="top-controls">
-    <button id="narratorBtn" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+    <button id="narratorBtn" data-umami-event="Wrota Narrator" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
 </div>
 
 <div class="main-layout">
-    <button id="dudnik-btn" onclick="activateDudnik()">DUDNIK</button>
+    <button id="dudnik-btn" data-umami-event="Wrota Dudnik" onclick="activateDudnik()">DUDNIK</button>
 
     <div class="gate-frame" id="mainGate">
         <h1>Wrota</h1>
@@ -199,7 +198,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <input type="tel" class="code-input" id="c3" oninput="limit(this)" maxlength="1">
             <input type="tel" class="code-input" id="c4" oninput="limit(this)" maxlength="1">
         </div>
-        <button id="revealBtn" onclick="finalAction()">Wstąp do Siczy</button>
+        <button id="revealBtn" data-umami-event="Wrota Wejście do Siczy" onclick="finalAction()">Wstąp do Siczy</button>
     </div>
 
     <div id="timer-display">60</div>

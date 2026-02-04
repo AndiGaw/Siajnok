@@ -13,17 +13,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serce Siczy</title>
     <style>
-       body {
+        body {
             margin: 0;
             padding: 0;
             height: 100vh;
             width: 100vw;
             background-image: url('Piasek_szeroki.png');
-            /* Zmieniamy 'cover' na 'contain' aby widzieć CAŁY obraz */
             background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
-            /* Kolor tła dopasowany do piasku, gdy obrazek się kończy */
             background-color: #000; 
             overflow: hidden;
             display: flex;
@@ -32,7 +30,7 @@
             padding-left: 50px; 
         }
 
-        /* ===== STYL PRZYCISKU (SPÓJNY Z SICZĄ) ===== */
+        /* ===== STYL PRZYCISKU (Zachowany styl Serca Siczy) ===== */
         .audio-btn {
             background: #111; 
             color: #e6c47a; 
@@ -48,6 +46,8 @@
             box-shadow: 0 0 20px rgba(230, 196, 122, 0.3);
             transition: all 0.3s ease;
             z-index: 10;
+            min-width: 280px; /* Aby tekst pauzy nie skakał za mocno */
+            text-align: center;
         }
 
         .audio-btn:hover {
@@ -56,7 +56,7 @@
             box-shadow: 0 0 40px rgba(230, 196, 122, 0.6);
         }
 
-        /* Efekt ziarnistego piasku w tle (opcjonalny, dla klimatu) */
+        /* Efekt ziarnistego piasku w tle */
         .sand-overlay {
             position: fixed;
             width: 100%;
@@ -71,26 +71,45 @@
     
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PB6TX54M"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    
     <div class="sand-overlay"></div>
 
-<button id="heart-btn"
-        class="audio-btn" 
-        data-umami-event="Aktywacja Serca Siczy" 
-        onclick="playAudio()">
-    Aktywuj ABC
-</button>
-
-    <audio id="abcAudio">
-        <source src="Glos_Serca_Siczy.mp3" type="audio/mpeg">
-        Twoja przeglądarka nie obsługuje elementu audio.
-    </audio>
+    <button id="narratorBtn" 
+            class="audio-btn" 
+            data-umami-event="Aktywacja Serca Siczy" 
+            onclick="playNarrator()">
+        🎙️ Głos Serca (Start)
+    </button>
     
     <script>
-        function playAudio() {
-            const audio = document.getElementById("abcAudio");
-            audio.play().catch(error => {
-                console.log("Odtwarzanie zablokowane przez przeglądarkę. Wymagana interakcja użytkownika.");
-            });
+        let narratorAudio = null;
+
+        function playNarrator() {
+            const btn = document.getElementById("narratorBtn");
+
+            // Tworzymy obiekt Audio tylko raz, przy pierwszym kliknięciu
+            if (!narratorAudio) {
+                // Podmiana pliku na właściwy dla tej podstrony
+                narratorAudio = new Audio("Piaskowa_pieczara.mp3");
+                
+                // Gdy nagranie się skończy, resetujemy przycisk
+                narratorAudio.onended = () => {
+                    btn.innerText = "🎙️ Głos Serca (Start)";
+                };
+            }
+
+            // Logika Pauza / Start
+            if (narratorAudio.paused) {
+                narratorAudio.play().then(() => {
+                    btn.innerText = "⏸️ Głos Serca (Pauza)";
+                }).catch(error => {
+                    console.log("Odtwarzanie zablokowane lub brak pliku.", error);
+                    alert("Błąd: Nie można odtworzyć pliku mp3");
+                });
+            } else {
+                narratorAudio.pause();
+                btn.innerText = "▶️ Głos Serca (Wznów)";
+            }
         }
     </script>
 

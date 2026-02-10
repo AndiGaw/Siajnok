@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wideo Lewo/Prawo</title>
+    <style>
+        /* Reset ustawień domyślnych i czarne tło */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            overflow: hidden; /* Ukrywa paski przewijania */
+        }
+
+        /* Kontener ustawiający elementy obok siebie */
+        .container {
+            display: flex;
+            justify-content: space-around; /* Odstęp między oknami */
+            align-items: center; /* Wyśrodkowanie w pionie */
+            height: 100vh; /* Pełna wysokość ekranu */
+            width: 100%;
+        }
+
+        /* Stylizacja okien wideo */
+        .video-wrapper {
+            width: 45%; /* Każde wideo zajmuje nieco mniej niż połowę ekranu */
+            max-width: 800px;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border: 1px solid #333; /* Opcjonalna, subtelna ramka */
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="background-audio" loop>
+        <source src="szum.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <div class="video-wrapper">
+            <video src="jeden.mp4" autoplay loop muted playsinline></video>
+        </div>
+
+        <div class="video-wrapper">
+            <video src="dwa.mp4" autoplay loop muted playsinline></video>
+        </div>
+    </div>
+
+    <script>
+        // Nowoczesne przeglądarki blokują automatyczne odtwarzanie dźwięku.
+        // Dodałem skrypt, który włączy szum po pierwszym kliknięciu gdziekolwiek na stronie.
+        document.addEventListener('click', function() {
+            var audio = document.getElementById('background-audio');
+            audio.play().catch(error => {
+                console.log("Odtwarzanie zablokowane: ", error);
+            });
+        }, { once: true }); // Uruchomi się tylko raz
+    </script>
+
+</body>
+</html>

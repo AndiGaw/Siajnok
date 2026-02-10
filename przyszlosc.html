@@ -19,43 +19,45 @@
         /* Kontener główny */
         .container {
             display: flex;
-            justify-content: space-around;
+            justify-content: center; /* Wyśrodkowanie */
+            gap: 50px; /* Odstęp między filmami */
             align-items: center;
             height: 100vh;
             width: 100%;
         }
 
-        /* Stylizacja okien wideo */
+        /* Stylizacja okien wideo - PIONOWE (9:16) */
         .video-wrapper {
-            width: 45%;
-            max-width: 800px;
-            /* Ustawiamy proporcje 16:9, żeby okno miało kształt przed załadowaniem */
-            aspect-ratio: 16 / 9;
+            height: 85vh; /* Wysokość na 85% ekranu */
+            aspect-ratio: 9 / 16; /* Proporcje pionowe */
             position: relative;
-            background-color: #111; /* Ciemne tło zanim wideo ruszy */
+            background-color: #111;
             border: 1px solid #333;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, transform 0.2s;
         }
 
         .video-wrapper:hover {
             border-color: #777;
+            transform: scale(1.02);
         }
 
         /* Przycisk startu / Zaślepka */
         .play-button {
             position: absolute;
             color: white;
-            font-size: 1.5rem;
-            border: 2px solid white;
-            padding: 10px 20px;
+            font-size: 1.2rem;
+            border: 1px solid white;
+            padding: 15px 10px;
+            text-align: center;
             text-transform: uppercase;
             letter-spacing: 2px;
             z-index: 2;
-            pointer-events: none; /* Kliknięcie przenika do wrappera */
+            width: 80%;
+            pointer-events: none;
         }
 
         /* Wideo domyślnie ukryte */
@@ -63,10 +65,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none; /* Ukryte dopóki nie klikniemy */
+            display: none;
         }
 
-        /* Klasa dodawana po kliknięciu - pokazuje wideo, ukrywa przycisk */
+        /* Pokazywanie wideo po aktywacji */
         .video-wrapper.active video {
             display: block;
         }
@@ -84,51 +86,49 @@
     <div class="container">
         
         <div class="video-wrapper" onclick="playVideo(this)">
-            <div class="play-button">Start: Zagłada</div>
+            <div class="play-button">Start<br>Zagłada</div>
             <video src="Zaglada.mp4" loop playsinline></video>
         </div>
 
         <div class="video-wrapper" onclick="playVideo(this)">
-            <div class="play-button">Start: Złoty Szlak</div>
+            <div class="play-button">Start<br>Złoty Szlak</div>
             <video src="Zloty_szlak.mp4" loop playsinline></video>
         </div>
 
     </div>
 
     <script>
+        // --- KONFIGURACJA AUDIO ---
+        const audio = document.getElementById('background-audio');
+        
+        // USTAWIENIE GŁOŚNOŚCI NA 50%
+        audio.volume = 0.5; 
+
         // --- CZĘŚĆ 1: Obsługa Wideo ---
         function playVideo(element) {
-            // Jeśli wideo już gra, nic nie rób (lub można dodać pauzę)
             if (element.classList.contains('active')) return;
 
-            // Dodaj klasę active (pokazuje tag video, ukrywa napis)
+            // Pokazujemy wideo
             element.classList.add('active');
-
-            // Znajdź element <video> wewnątrz klikniętego diva i odpal go
             const video = element.querySelector('video');
             video.play();
             
-            // Przy okazji upewnij się, że muzyka w tle gra (jeśli przeglądarka zablokowała auto-start)
+            // Próbujemy odpalić tło muzyczne
             tryStartAudio(); 
         }
 
-        // --- CZĘŚĆ 2: Obsługa Audio (Szepty.mp3) ---
-        const audio = document.getElementById('background-audio');
-
+        // --- CZĘŚĆ 2: Obsługa Startu Audio ---
         function tryStartAudio() {
             if (audio.paused) {
                 audio.play().catch(err => {
-                    console.log("Przeglądarka zablokowała audio (czeka na kliknięcie).");
+                    console.log("Czekam na interakcję użytkownika...");
                 });
             }
         }
 
-        // Próba uruchomienia dźwięku po 3 sekundach od wejścia
+        // Próba uruchomienia dźwięku po 3 sekundach
         window.addEventListener('load', () => {
             setTimeout(() => {
-                // To zadziała tylko, jeśli użytkownik w ciągu tych 3 sekund
-                // kliknął gdziekolwiek na stronie. Jeśli nie, przeglądarka zablokuje
-                // i dźwięk ruszy dopiero przy kliknięciu w wideo (dzięki funkcji tryStartAudio).
                 tryStartAudio();
             }, 3000);
         });

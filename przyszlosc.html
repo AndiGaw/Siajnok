@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wizja przyszłości</title>
     <style>
-        /* Reset ustawień i czarne tło */
+        /* Reset i tło */
         body, html {
             margin: 0;
             padding: 0;
@@ -16,20 +16,20 @@
             font-family: Arial, sans-serif;
         }
 
-        /* Kontener główny */
+        /* Główny kontener */
         .container {
             display: flex;
-            justify-content: center; /* Wyśrodkowanie */
-            gap: 50px; /* Odstęp między filmami */
+            justify-content: center;
+            gap: 50px;
             align-items: center;
             height: 100vh;
             width: 100%;
         }
 
-        /* Stylizacja okien wideo - PIONOWE (9:16) */
+        /* PIONOWE OKNA (9:16) */
         .video-wrapper {
-            height: 85vh; /* Wysokość na 85% ekranu */
-            aspect-ratio: 9 / 16; /* Proporcje pionowe */
+            height: 85vh; /* 85% wysokości ekranu */
+            aspect-ratio: 9 / 16; /* Format pionowy */
             position: relative;
             background-color: #111;
             border: 1px solid #333;
@@ -42,10 +42,10 @@
 
         .video-wrapper:hover {
             border-color: #777;
-            transform: scale(1.02);
+            transform: scale(1.01);
         }
 
-        /* Przycisk startu / Zaślepka */
+        /* Przycisk START (znika po aktywacji) */
         .play-button {
             position: absolute;
             color: white;
@@ -57,18 +57,18 @@
             letter-spacing: 2px;
             z-index: 2;
             width: 80%;
-            pointer-events: none;
+            pointer-events: none; /* Kliknięcie przechodzi niżej */
         }
 
-        /* Wideo domyślnie ukryte */
+        /* Wideo */
         video {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            display: none;
+            display: none; /* Ukryte na początku */
         }
 
-        /* Pokazywanie wideo po aktywacji */
+        /* Klasa .active włącza widoczność wideo */
         .video-wrapper.active video {
             display: block;
         }
@@ -85,12 +85,12 @@
 
     <div class="container">
         
-        <div class="video-wrapper" onclick="playVideo(this)">
+        <div class="video-wrapper" onclick="toggleVideo(this)">
             <div class="play-button">Start<br>Zagłada</div>
             <video src="Zaglada.mp4" loop playsinline></video>
         </div>
 
-        <div class="video-wrapper" onclick="playVideo(this)">
+        <div class="video-wrapper" onclick="toggleVideo(this)">
             <div class="play-button">Start<br>Złoty Szlak</div>
             <video src="Zloty_szlak.mp4" loop playsinline></video>
         </div>
@@ -100,33 +100,40 @@
     <script>
         // --- KONFIGURACJA AUDIO ---
         const audio = document.getElementById('background-audio');
-        
-        // USTAWIENIE GŁOŚNOŚCI NA 50%
-        audio.volume = 0.5; 
+        audio.volume = 0.5; // Głośność tła: 50%
 
-        // --- CZĘŚĆ 1: Obsługa Wideo ---
-        function playVideo(element) {
-            if (element.classList.contains('active')) return;
-
-            // Pokazujemy wideo
-            element.classList.add('active');
+        // --- FUNKCJA OBSŁUGUJĄCA WIDEO (START / PAUZA / WZNOWIENIE) ---
+        function toggleVideo(element) {
             const video = element.querySelector('video');
-            video.play();
-            
-            // Próbujemy odpalić tło muzyczne
-            tryStartAudio(); 
+
+            // Scenariusz 1: Pierwsze kliknięcie (Aktywacja)
+            if (!element.classList.contains('active')) {
+                element.classList.add('active'); // Chowa napis, pokazuje wideo
+                video.play();
+                
+                // Przy okazji próbujemy włączyć tło muzyczne
+                tryStartAudio();
+            } 
+            // Scenariusz 2: Kolejne kliknięcia (Pauza / Play)
+            else {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
         }
 
-        // --- CZĘŚĆ 2: Obsługa Startu Audio ---
+        // --- OBSŁUGA STARTU AUDIO TŁA ---
         function tryStartAudio() {
             if (audio.paused) {
                 audio.play().catch(err => {
-                    console.log("Czekam na interakcję użytkownika...");
+                    console.log("Audio tła czeka na interakcję...");
                 });
             }
         }
 
-        // Próba uruchomienia dźwięku po 3 sekundach
+        // Próba auto-startu audio po 3 sekundach
         window.addEventListener('load', () => {
             setTimeout(() => {
                 tryStartAudio();

@@ -94,6 +94,7 @@
         position: relative; 
         z-index: 10; 
         margin-top: 40px; 
+        margin-bottom: 20px;
     }
     
     .ui-btn { 
@@ -105,18 +106,22 @@
         cursor: pointer; 
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        transition: 0.3s;
     }
 
+    /* Zmiana układu na poziomy */
     .main-layout { 
         display: flex; 
-        flex-direction: column; 
+        flex-direction: row; /* Elementy obok siebie */
         align-items: center; 
         justify-content: center; 
-        gap: 40px; /* Odstęp między Glifem a Inputami */
+        gap: 60px; 
         z-index: 5; 
         padding: 20px; 
         margin-top: auto; 
         margin-bottom: auto;
+        width: 100%;
+        max-width: 900px;
     }
 
     /* Styl przycisku Glif */
@@ -134,9 +139,22 @@
         cursor: pointer; 
         transition: 0.3s ease;
         box-shadow: 0 0 20px rgba(230, 196, 122, 0.2);
+        
+        /* Pozycjonowanie relatywne dla Glifa */
+        order: 1; 
     }
 
-    #echo-btn:active {
+    /* Styl zablokowanego przycisku */
+    #echo-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        border-color: #555;
+        color: #555;
+        box-shadow: none;
+        filter: grayscale(100%);
+    }
+
+    #echo-btn:active:not(:disabled) {
         transform: scale(0.95);
         box-shadow: 0 0 5px rgba(230, 196, 122, 0.5);
     }
@@ -144,6 +162,9 @@
     .inputs-container { 
         display: flex; 
         gap: 15px; 
+        order: 2;
+        /* Przesunięcie pól do góry */
+        transform: translateY(-40px);
     }
     
     .code-input { 
@@ -156,9 +177,16 @@
         text-align: center; 
         border-radius: 8px; 
         outline: none;
-        /* Zmiana na małe litery w CSS */
         text-transform: lowercase;
         transition: 0.3s;
+    }
+
+    /* Zablokowane pola */
+    .code-input:disabled {
+        background: rgba(0,0,0,0.5);
+        border-color: #333;
+        color: #555;
+        cursor: not-allowed;
     }
 
     .code-input:focus {
@@ -169,7 +197,7 @@
     #flash { 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
         background: #000; opacity: 0; pointer-events: none; z-index: 100; 
-        transition: opacity 3s; 
+        transition: opacity 2s; 
     }
     
 </style>
@@ -192,13 +220,13 @@
 </div>
 
 <div class="main-layout">
-    <button id="echo-btn" data-umami-event="Echo Szyfr" onclick="activateGlif()">Glif</button>
+    <button id="echo-btn" disabled data-umami-event="Echo Szyfr" onclick="toggleGlif()">Glif</button>
 
     <div class="inputs-container">
-        <input type="text" class="code-input" maxlength="1" data-index="0">
-        <input type="text" class="code-input" maxlength="1" data-index="1">
-        <input type="text" class="code-input" maxlength="1" data-index="2">
-        <input type="text" class="code-input" maxlength="1" data-index="3">
+        <input type="text" class="code-input" maxlength="1" disabled data-index="0">
+        <input type="text" class="code-input" maxlength="1" disabled data-index="1">
+        <input type="text" class="code-input" maxlength="1" disabled data-index="2">
+        <input type="text" class="code-input" maxlength="1" disabled data-index="3">
     </div>
 </div>
 
@@ -207,16 +235,27 @@
 
 <script>
     let narratorAudio = null;
+    let glifAudio = null;
     const inputs = document.querySelectorAll('.code-input');
     const body = document.getElementById('body-main');
+    const glifBtn = document.getElementById('echo-btn');
 
-    // --- Obsługa Narratora ---
+    // --- 1. Obsługa Narratora ---
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
         if (!narratorAudio) {
             narratorAudio = new Audio("Zaglebienie.mp3");
-            narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; };
+            
+            // Kiedy Narrator skończy -> odblokuj Glif
+            narratorAudio.onended = () => { 
+                btn.innerText = "🎙️ Narrator (Koniec)"; 
+                glifBtn.disabled = false; // Odblokowanie Glifa
+                glifBtn.style.opacity = "1";
+                // Opcjonalnie: animacja pulsowania, żeby zwrócić uwagę
+                glifBtn.style.boxShadow = "0 0 40px rgba(230, 196, 122, 0.6)";
+            };
         }
+
         if (narratorAudio.paused) {
             narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => alert("Brak pliku Zaglebienie.mp3!"));
         } else {
@@ -224,48 +263,56 @@
         }
     }
 
-    // --- Obsługa Glifa (Tylko dźwięk) ---
-    function activateGlif() {
-        const sound = document.getElementById('glosSound');
-        if (sound) {
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log("Brak pliku audio Glif"));
+    // --- 2. Obsługa Glifa (Play/Pause + Odblokowanie inputów) ---
+    function toggleGlif() {
+        if (!glifAudio) {
+            glifAudio = document.getElementById('glosSound');
+            
+            // Kiedy Glif skończy -> odblokuj Inputy
+            glifAudio.onended = () => {
+                glifBtn.innerText = "Glif";
+                enableInputs();
+            };
         }
-        // Opcjonalnie: lekki wstrząs przy kliknięciu Glifa
-        const btn = document.getElementById('echo-btn');
-        btn.style.transform = "scale(0.95)";
-        setTimeout(() => btn.style.transform = "scale(1)", 200);
+
+        if (glifAudio.paused) {
+            glifAudio.play();
+            glifBtn.innerText = "Pauza";
+        } else {
+            glifAudio.pause();
+            glifBtn.innerText = "Wznów";
+        }
     }
 
-    // --- Logika Inputów ---
-    inputs.forEach((input, index) => {
-        // Obsługa wpisywania
-        input.addEventListener('input', (e) => {
-            // ZMIANA NA MAŁE LITERY
-            e.target.value = e.target.value.toLowerCase();
+    function enableInputs() {
+        inputs.forEach(input => {
+            input.disabled = false;
+            input.style.borderColor = "#e6c47a"; // Wizualne potwierdzenie aktywacji
+        });
+        // Ustawienie fokusu na pierwszym polu
+        inputs[0].focus();
+    }
 
-            // Przejście do następnego pola
+    // --- 3. Logika Inputów ---
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toLowerCase();
             if (e.target.value.length === 1 && index < inputs.length - 1) {
                 inputs[index + 1].focus();
             }
-
-            // Sprawdzenie hasła po każdym znaku
             checkCode();
         });
 
-        // Obsługa Backspace (cofanie)
         input.addEventListener('keydown', (e) => {
             if (e.key === "Backspace" && input.value === "" && index > 0) {
                 inputs[index - 1].focus();
             }
         });
         
-        // Obsługa wklejania
         input.addEventListener('paste', (e) => {
             e.preventDefault();
             const pasteData = (e.clipboardData || window.clipboardData).getData('text').toLowerCase();
             let currentIndex = index;
-            
             for (let char of pasteData) {
                 if (currentIndex < inputs.length) {
                     inputs[currentIndex].value = char;
@@ -277,40 +324,36 @@
         });
     });
 
-    // --- Sprawdzanie hasła ---
+    // --- 4. Sprawdzanie hasła ---
     function checkCode() {
         const code = Array.from(inputs).map(i => i.value).join('');
-        
-        // Warunek: okon lub okoń (małe litery)
         if (code === "okon" || code === "okoń") {
             triggerSuccess();
         }
     }
 
-    // --- Efekt Sukcesu (Zapadnia) ---
+    // --- 5. Sekwencja Końcowa ---
     function triggerSuccess() {
-        // Zablokuj inputy
+        // Blokada interfejsu
         inputs.forEach(i => i.disabled = true);
+        glifBtn.disabled = true;
         
-        // 1. Uruchom trzęsienie ekranu
+        // 1. Trzęsienie ekranu
         body.classList.add('shake-active');
         
-        // 2. Odtwórz dźwięk zapadni
-        const audio = document.getElementById('zapadniaSound');
-        if (audio) {
-            audio.play().catch(e => console.log("Błąd audio zapadni:", e));
+        // 2. Ciemność (fade to black)
+        document.getElementById('flash').style.opacity = "1";
+
+        // 3. Audio Zapadni (natychmiast)
+        const zapadniaAudio = document.getElementById('zapadniaSound');
+        if (zapadniaAudio) {
+            zapadniaAudio.play().catch(e => console.log("Błąd audio zapadni:", e));
         }
 
-        // 3. Efekt wizualny (ściemnienie) i przekierowanie
-        setTimeout(() => {
-            // Po 1.5 sekundy trzęsienia -> wygaszanie do czerni
-            document.getElementById('flash').style.opacity = "1";
-            
-            setTimeout(() => { 
-                // Przekierowanie
-                window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; 
-            }, 2000);
-        }, 1500);
+        // 4. Przekierowanie po 40 sekundach
+        setTimeout(() => { 
+            window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; 
+        }, 40000); 
     }
 </script>
 </body>

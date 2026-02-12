@@ -78,7 +78,7 @@
     .ui-btn { font-size: 1.2em; padding: 10px 20px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; cursor: pointer; border-radius: 8px;}
     
     .main-layout { display: flex; align-items: center; justify-content: center; gap: 60px; z-index: 5; padding: 20px; }
-    /* #dudnik-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; } */
+    /* #echo-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; } */
     #timer-display { width: 150px; font-size: 4.5em; text-align: center; color: #ff4400; visibility: hidden; font-weight: bold; }
     .gate-frame { width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none; border-radius: 225px 225px 10px 10px; background: linear-gradient(180deg, #151515 0%, #000 100%); display: flex; flex-direction: column; align-items: center; padding-top: 280px; position: relative; }
     .gate-frame h1 { position: absolute; top: 80px; font-size: 2em; text-transform: uppercase; }
@@ -118,7 +118,7 @@
     #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
 
     /* Zaktualizowany styl przycisku Dudnik */
-    #dudnik-btn {
+    #echo-btn {
         width: 150px; 
         height: 150px; 
         border-radius: 50%; 
@@ -137,7 +137,7 @@
     }
 
     /* Wygląd po aktywacji (gdy jest disabled) */
-    #dudnik-btn:disabled {
+    #echo-btn:disabled {
         opacity: 0.6;
         cursor: not-allowed;
         background: #0a0a0a; /* Ciemniejsze tło */
@@ -174,7 +174,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <div class="main-layout">
-    <button id="dudnik-btn" data-umami-event="Echo Szyfr" onclick="activateDudnik()">Glif</button>
+    <button id="echo-btn" data-umami-event="Echo Szyfr" onclick="activateDudnik()">Glif</button>
 
     <div class="gate-frame" id="mainGate">
         <h1>Wrota</h1>
@@ -191,7 +191,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>
 
 <audio id="stoneSound"><source src="stone_gate.mp3" type="audio/mpeg"></audio>
-<audio id="dudnikSound"><source src="Wrota_dudnik.mp3" type="audio/mpeg"></audio>
+<audio id="GlosSound"><source src="Glos_Serca_Siczy.mp3.mp3" type="audio/mpeg"></audio>
 
 <script>
     let narratorAudio = null;
@@ -233,11 +233,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function activateDudnik() {
         if (timerId !== null) return;
         
-        const btn = document.getElementById('dudnik-btn');
+        const btn = document.getElementById('echo-btn');
         btn.disabled = true;
         btn.innerText = "AKTYWNY";
 
-        const sound = document.getElementById('dudnikSound');
+        const sound = document.getElementById('GlosSound');
         sound.loop = true;
         sound.play().catch(() => {});
 
@@ -283,7 +283,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     function finalAction() {
         if(timerId) clearInterval(timerId);
         body.className = ""; // Stop trzęsienia
-        document.getElementById('dudnikSound').pause();
+        document.getElementById('GlosSound').pause();
         document.getElementById('stoneSound').play().catch(() => {});
         inputs.forEach(i => i.disabled = true);
         

@@ -202,7 +202,7 @@
     </div>
 </div>
 
-<audio id="zapadniaSound"><source src="zapadnia.mp3" type="audio/mpeg"></audio>
+<audio id="zapadniaSound"><source src="Zapadnia.mp3" type="audio/mpeg"></audio>
 <audio id="glosSound"><source src="Glos_Serca_Siczy.mp3" type="audio/mpeg"></audio>
 
 <script>
@@ -214,11 +214,11 @@
     function playNarrator() {
         const btn = document.getElementById("narratorBtn");
         if (!narratorAudio) {
-            narratorAudio = new Audio("Wrota.mp3");
+            narratorAudio = new Audio("Zaglebienie.mp3");
             narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; };
         }
         if (narratorAudio.paused) {
-            narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => alert("Brak pliku Wrota.mp3!"));
+            narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => alert("Brak pliku Zaglebienie.mp3!"));
         } else {
             narratorAudio.pause(); btn.innerText = "▶️ Narrator (Wznów)";
         }

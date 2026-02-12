@@ -24,12 +24,13 @@
             align-items: center;
             height: 100vh;
             width: 100%;
+            transition: opacity 0.5s; /* Płynne znikanie tła */
         }
 
-        /* PIONOWE OKNA (9:16) */
+        /* PIONOWE OKNA (9:16) - Stan domyślny */
         .video-wrapper {
-            height: 85vh; /* 85% wysokości ekranu */
-            aspect-ratio: 9 / 16; /* Format pionowy */
+            height: 85vh;
+            aspect-ratio: 9 / 16;
             position: relative;
             background-color: #111;
             border: 1px solid #333;
@@ -37,15 +38,36 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: border-color 0.3s, transform 0.2s;
+            transition: all 0.5s ease-in-out; /* Płynna animacja powiększania */
+            z-index: 1;
         }
 
         .video-wrapper:hover {
             border-color: #777;
-            transform: scale(1.01);
+            transform: scale(1.02);
         }
 
-        /* Przycisk START (znika po aktywacji) */
+        /* --- TRYB PEŁNOEKRANOWY (Klasa dodawana przez JS) --- */
+        .video-wrapper.expanded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000; /* Musi być na samym wierzchu */
+            border: none;
+            transform: none !important; /* Resetuje efekt hover */
+            background-color: black;
+        }
+
+        /* Wideo w trybie pełnoekranowym */
+        .video-wrapper.expanded video {
+            /* 'contain' sprawi, że widać CAŁY pionowy film na środku ekranu. 
+               Jeśli wolisz, żeby wypełnił ekran (ucinając górę/dół), zmień na 'cover' */
+            object-fit: contain; 
+        }
+
+        /* Przycisk START */
         .play-button {
             position: absolute;
             color: white;
@@ -57,24 +79,48 @@
             letter-spacing: 2px;
             z-index: 2;
             width: 80%;
-            pointer-events: none; /* Kliknięcie przechodzi niżej */
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        /* Przycisk ZAMKNIJ (X) - widoczny tylko w trybie expanded */
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+            display: none; /* Domyślnie ukryty */
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .close-btn:hover {
+            opacity: 1;
         }
 
         /* Wideo */
         video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: none; /* Ukryte na początku */
+            object-fit: cover; /* W małym oknie wypełnia całość */
+            display: none;
         }
 
-        /* Klasa .active włącza widoczność wideo */
+        /* Aktywne stany */
         .video-wrapper.active video {
             display: block;
         }
         .video-wrapper.active .play-button {
             display: none;
         }
+        /* Pokaz X tylko gdy jest expanded */
+        .video-wrapper.expanded .close-btn {
+            display: block;
+        }
+
     </style>
 </head>
 <body>
@@ -85,12 +131,14 @@
 
     <div class="container">
         
-        <div class="video-wrapper" onclick="toggleVideo(this)">
+        <div class="video-wrapper" onclick="expandVideo(this)">
+            <div class="close-btn" onclick="closeVideo(event, this)">×</div>
             <div class="play-button">Start<br>Zagłada</div>
             <video src="Zaglada.mp4" loop playsinline></video>
         </div>
 
-        <div class="video-wrapper" onclick="toggleVideo(this)">
+        <div class="video-wrapper" onclick="expandVideo(this)">
+            <div class="close-btn" onclick="closeVideo(event, this)">×</div>
             <div class="play-button">Start<br>Złoty Szlak</div>
             <video src="Zloty_szlak.mp4" loop playsinline></video>
         </div>
@@ -98,47 +146,62 @@
     </div>
 
     <script>
-        // --- KONFIGURACJA AUDIO ---
+        // --- AUDIO ---
         const audio = document.getElementById('background-audio');
-        audio.volume = 0.5; // Głośność tła: 50%
+        audio.volume = 0.5;
 
-        // --- FUNKCJA OBSŁUGUJĄCA WIDEO (START / PAUZA / WZNOWIENIE) ---
-        function toggleVideo(element) {
-            const video = element.querySelector('video');
+        // Hack na start audio przy pierwszym kliknięciu gdziekolwiek
+        document.body.addEventListener('click', function() {
+            if (audio.paused) audio.play().catch(e => {});
+        }, { once: true });
 
-            // Scenariusz 1: Pierwsze kliknięcie (Aktywacja)
-            if (!element.classList.contains('active')) {
-                element.classList.add('active'); // Chowa napis, pokazuje wideo
-                video.play();
-                
-                // Przy okazji próbujemy włączyć tło muzyczne
-                tryStartAudio();
-            } 
-            // Scenariusz 2: Kolejne kliknięcia (Pauza / Play)
-            else {
-                if (video.paused) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
+
+        // --- OBSŁUGA ROZWIJANIA WIDEO ---
+        function expandVideo(wrapper) {
+            // Jeśli już jest otwarte, kliknięcie w wideo robi Play/Pause
+            if (wrapper.classList.contains('expanded')) {
+                const video = wrapper.querySelector('video');
+                if (video.paused) video.play(); else video.pause();
+                return;
             }
+
+            // 1. Zresetuj inne filmy
+            document.querySelectorAll('.video-wrapper').forEach(w => {
+                w.classList.remove('expanded', 'active');
+                w.querySelector('video').pause();
+                w.querySelector('video').currentTime = 0; // Opcjonalnie: przewiń do początku
+            });
+
+            // 2. Aktywuj kliknięty
+            wrapper.classList.add('active');   // Pokazuje wideo, chowa napis Start
+            wrapper.classList.add('expanded'); // Rozciąga na pełny ekran
+            
+            const video = wrapper.querySelector('video');
+            video.play();
         }
 
-        // --- OBSŁUGA STARTU AUDIO TŁA ---
-        function tryStartAudio() {
-            if (audio.paused) {
-                audio.play().catch(err => {
-                    console.log("Audio tła czeka na interakcję...");
-                });
-            }
+        // --- OBSŁUGA ZAMYKANIA (X) ---
+        function closeVideo(event, btn) {
+            // Zatrzymaj propagację, żeby kliknięcie w X nie uruchomiło funkcji expandVideo (która jest pod spodem)
+            event.stopPropagation();
+
+            // Znajdź rodzica (video-wrapper)
+            const wrapper = btn.parentElement;
+            const video = wrapper.querySelector('video');
+
+            // Wyłącz wideo i wyjdź z pełnego ekranu
+            video.pause();
+            wrapper.classList.remove('expanded');
+            // Zostawiamy klasę 'active', żeby nie wracał napis START od razu,
+            // albo usuwamy 'active' jeśli chcesz, żeby wrócił napis START:
+            // wrapper.classList.remove('active'); 
         }
 
-        // Próba auto-startu audio po 3 sekundach
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                tryStartAudio();
-            }, 3000);
-        });
+        // Timeout na audio (jeśli user był aktywny wcześniej)
+        setTimeout(() => {
+            if (audio.paused) audio.play().catch(e => {});
+        }, 3000);
+
     </script>
 
 </body>

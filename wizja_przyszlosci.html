@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wizja Przyszłości</title>
+    <title>Wizja Przyszłości: Arrakis</title>
     <style>
-        /* --- STYLIZACJA OGÓLNA --- */
+        /* --- STYLIZACJA OGÓLNA (DIUNA STYLE) --- */
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: black;
+            background-color: #000;
+            color: #e6c47a; /* Złoto Diuny */
+            font-family: "Georgia", serif;
             overflow: hidden;
-            font-family: 'Courier New', Courier, monospace; /* Techniczny klimat */
-            color: white;
         }
 
-        /* Kontener centrujący (używany do tekstów i przycisku) */
+        /* --- EFEKT RUCHOMEGO PIASKU (Z Twojego kodu) --- */
+        .sand {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(230,196,122,0.15),
+                rgba(230,196,122,0.15) 2px,
+                rgba(0,0,0,0) 6px
+            );
+            animation: drift 60s linear infinite;
+            pointer-events: none; /* Żeby kliki przechodziły przez piasek */
+            z-index: 1;
+        }
+
+        @keyframes drift {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 1000px; }
+        }
+
+        /* --- KONTENER CENTRUJĄCY --- */
         .center-container {
             position: absolute;
             top: 0;
@@ -27,36 +48,44 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10; /* Teksty są nad wideo */
-            pointer-events: none; /* Żeby kliki przechodziły, chyba że to przycisk */
+            z-index: 10;
+            pointer-events: none;
         }
 
-        /* --- PRZYCISK STARTOWY --- */
+        /* --- PRZYCISK STARTOWY (DIUNA STYLE) --- */
         #start-btn {
-            font-size: 2rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
+            font-size: 1.5rem;
+            padding: 20px 50px;
+            background: #111;
+            color: #e6c47a;
+            border: 2px solid #e6c47a;
+            border-radius: 8px;
             cursor: pointer;
-            border: 1px solid white;
-            padding: 20px 40px;
-            transition: all 0.5s;
-            pointer-events: auto; /* Przycisk musi być klikalny */
-            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 15px rgba(230,196,122,0.4);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.3s;
+            pointer-events: auto;
+            font-family: "Georgia", serif;
+            font-weight: bold;
         }
 
         #start-btn:hover {
-            background: white;
-            color: black;
-            letter-spacing: 6px;
+            background: #e6c47a;
+            color: #000;
+            box-shadow: 0 0 30px rgba(230,196,122,0.8);
+            transform: scale(1.05);
         }
 
         /* --- NAPISY MIĘDZY FILMAMI --- */
         #message-text {
-            font-size: 1.5rem;
-            letter-spacing: 3px;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
             text-align: center;
-            opacity: 0; /* Domyślnie niewidoczny */
-            transition: opacity 2s ease-in-out; /* Płynne pojawianie się przez 2s */
+            color: #e6c47a;
+            text-shadow: 0 0 20px rgba(230,196,122,0.6);
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
         }
 
         /* --- WIDEO (PEŁNY EKRAN) --- */
@@ -66,16 +95,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* 'contain' = widać całe wideo pionowe na czarnym tle. 
-               'cover' = utnie górę/dół, ale wypełni ekran. 
-               Zalecam 'contain' dla pionowych filmów na monitorze PC */
-            object-fit: contain; 
+            object-fit: contain; /* Cały kadr widoczny */
             z-index: 5;
-            display: none; /* Domyślnie ukryte */
+            display: none;
             background: black;
+            cursor: pointer; /* Sygnalizuje, że można klikać */
         }
 
-        /* Klasa pomocnicza do ukrywania elementów */
+        /* Klasa pomocnicza */
         .hidden {
             display: none !important;
         }
@@ -83,17 +110,19 @@
 </head>
 <body>
 
+    <div class="sand"></div>
+
     <audio id="bg-audio" loop>
         <source src="Szepty.mp3" type="audio/mpeg">
     </audio>
 
     <div class="center-container">
-        <div id="start-btn">Wkrocz w wizję</div>
+        <button id="start-btn">Wkrocz w wizję</button>
         <div id="message-text"></div>
     </div>
 
-    <video id="video1" src="Zaglada.mp4" playsinline></video>
-    <video id="video2" src="Zloty_szlak.mp4" playsinline></video>
+    <video id="video1" src="Zaglada.mp4" playsinline onclick="togglePlayback(this)"></video>
+    <video id="video2" src="Zloty_szlak.mp4" playsinline onclick="togglePlayback(this)"></video>
 
     <script>
         // --- KONFIGURACJA ---
@@ -103,53 +132,59 @@
         const vid1 = document.getElementById('video1');
         const vid2 = document.getElementById('video2');
 
-        // Ustaw głośność szumu
         audio.volume = 0.5;
+
+        // --- FUNKCJA START/STOP DLA WIDEO ---
+        function togglePlayback(videoElement) {
+            if (videoElement.paused) {
+                videoElement.play();
+            } else {
+                videoElement.pause();
+            }
+        }
 
         // --- SEKWENCJA ZDARZEŃ ---
 
-        // 1. START: Kliknięcie w przycisk
+        // 1. START
         startBtn.addEventListener('click', () => {
-            // Ukryj przycisk
             startBtn.classList.add('hidden');
             
-            // Włącz dźwięk
+            // Start Audio
             audio.play().then(() => {
-                // Rozpocznij odliczanie 5 sekund w czerni
+                // 5 sekund ciemności i szumu
                 setTimeout(sequenceStep1, 5000);
             }).catch(e => console.log("Audio error:", e));
         });
 
-        // 2. KROK PIERWSZY: Wyświetl napis "Świat bez Złotego Szlaku"
+        // 2. NAPIS 1: Świat bez Złotego Szlaku
         function sequenceStep1() {
             showMessage("Świat bez Złotego Szlaku");
 
-            // Napis świeci przez 3 sekundy, potem startuje film
+            // Czas na czytanie: 4 sekundy -> Start Video 1
             setTimeout(() => {
                 hideMessage();
                 playVideo1();
             }, 4000); 
         }
 
-        // 3. START FILMU 1 (Zagłada)
+        // 3. WIDEO 1: Zagłada
         function playVideo1() {
             vid1.style.display = 'block';
             vid1.play();
 
-            // Gdy film się skończy, idź do kroku 4
             vid1.onended = () => {
-                vid1.style.display = 'none'; // Schowaj wideo
-                sequenceStep2(); // Odpal przerwę
+                vid1.style.display = 'none';
+                sequenceStep2(); 
             };
         }
 
-        // 4. KROK DRUGI: Przerwa 5 sekund po filmie
+        // 4. PRZERWA PO FILMIE 1
         function sequenceStep2() {
-            // Czekamy 5 sekund w czerni (zgodnie z instrukcją)
+            // 5 sekund ciemności
             setTimeout(() => {
                 showMessage("Złoty Szlak");
                 
-                // Napis świeci przez 3 sekundy, potem startuje film 2
+                // Czas na czytanie: 4 sekundy -> Start Video 2
                 setTimeout(() => {
                     hideMessage();
                     playVideo2();
@@ -158,28 +193,28 @@
             }, 5000);
         }
 
-        // 5. START FILMU 2 (Złoty Szlak)
+        // 5. WIDEO 2: Złoty Szlak
         function playVideo2() {
             vid2.style.display = 'block';
             vid2.play();
 
-            // Opcjonalnie: co po zakończeniu?
             vid2.onended = () => {
-                // Możesz tu zostawić wideo na ostatniej klatce, 
-                // albo schować i pokazać napisy końcowe.
-                // Na razie: zostawiamy czarny ekran.
-                vid2.style.display = 'none'; 
+                vid2.style.display = 'none';
+                // Opcjonalnie: Koniec sekwencji, np. powrót menu
+                startBtn.innerText = "Wizja Zakończona";
+                startBtn.classList.remove('hidden');
+                startBtn.onclick = () => location.reload();
             };
         }
 
-        // --- FUNKCJE POMOCNICZE DO TEKSTU ---
+        // --- FUNKCJE POMOCNICZE ---
         function showMessage(text) {
             messageEl.innerText = text;
-            messageEl.style.opacity = 1; // Fade in
+            messageEl.style.opacity = 1;
         }
 
         function hideMessage() {
-            messageEl.style.opacity = 0; // Fade out
+            messageEl.style.opacity = 0;
         }
 
     </script>

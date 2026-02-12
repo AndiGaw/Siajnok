@@ -66,7 +66,7 @@
         #nextStepBtn {
             display: none; /* Domyślnie ukryty */
             position: absolute;
-            right: 5%;      /* Margines od prawej krawędzi */
+            right: 25%;      /* Margines od prawej krawędzi */
             bottom: 20%;    /* 20% od dołu ekranu */
             animation: fadeIn 2s forwards; /* Powolne pojawianie się */
         }
@@ -98,11 +98,11 @@
             class="audio-btn" 
             data-umami-event="Aktywacja Serca Siczy" 
             onclick="playNarrator()">
-        🎙️ Głos Serca (Start)
+        🎙️ Narrator (Start)
     </button>
     
     <a id="nextStepBtn" href="https://www.www.www" class="audio-btn">
-        ABCD
+        Podejdź
     </a>
     
     <script>
@@ -119,9 +119,9 @@
                 
                 // GDY NAGRANIE SIĘ SKOŃCZY:
                 narratorAudio.onended = () => {
-                    btn.innerText = "🎙️ Głos Serca (Start)";
+                    btn.innerText = "🎙️ Narrator (Start)";
                     
-                    // Pokaż przycisk ABCD
+                    // Pokaż przycisk Podejdź
                     nextBtn.style.display = "block";
                 };
             }
@@ -129,14 +129,14 @@
             // Logika Pauza / Start
             if (narratorAudio.paused) {
                 narratorAudio.play().then(() => {
-                    btn.innerText = "⏸️ Głos Serca (Pauza)";
+                    btn.innerText = "⏸️ Narrator (Pauza)";
                 }).catch(error => {
                     console.log("Odtwarzanie zablokowane lub brak pliku.", error);
                     alert("Błąd: Nie można odtworzyć pliku mp3");
                 });
             } else {
                 narratorAudio.pause();
-                btn.innerText = "▶️ Głos Serca (Wznów)";
+                btn.innerText = "▶️ Narrator (Wznów)";
             }
         }
     </script>

@@ -4,338 +4,297 @@
 
 <script defer src="https://cloud.umami.is/script.js" data-website-id="ffca1a39-e7ff-4a37-a12b-802355b0c181"></script>
 
+    <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
     new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
     j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
     })(window,document,'script','dataLayer','GTM-PB6TX54M');</script>
-    <meta charset="UTF-8">
-<title>Echo Przeszłości</title>
+    <!-- End Google Tag Manager -->
+    
+<meta charset="UTF-8">
+<title>Echo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     /* ===== STYL BAZOWY ===== */
     html, body {
         margin: 0; padding: 0; 
-        height: 100vh; 
+        min-height: 100vh; 
         background: #000;
-        color: #e6c47a; 
-        font-family: "Georgia", serif;
-        overflow: hidden; /* Zapobiega paskom przewijania przy pozycjonowaniu absolutnym */
-        display: flex; 
-        flex-direction: column; 
-        align-items: center;
+        color: #e6c47a; font-family: "Georgia", serif;
+        overflow-x: hidden; 
+        display: flex; flex-direction: column; align-items: center;
+        /* Kluczowe dla trzęsienia: */
         position: relative;
-    }
-
-    /* ===== TŁO I PIASEK ===== */
-    .sand {
-        position: fixed;
         width: 100%;
-        height: 100%;
-        background: repeating-linear-gradient(
-            45deg,
-            rgba(230,196,122,0.15), 
-            rgba(230,196,122,0.15) 2px,
-            rgba(0,0,0,0) 6px
-        );
-        animation: drift 60s linear infinite;
-        pointer-events: none;
-        z-index: 1;
     }
 
-    @keyframes drift {
-        from { background-position: 0 0; }
-        to { background-position: 1000px 1000px; }
-    }
+    /* ===== RESZTA STYLÓW (BEZ ZMIAN) ===== */
+    #custom-modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px); justify-content: center; align-items: center; }
 
-    /* ===== PRZYCISKI (STYL WSPÓLNY) ===== */
-    .dune-btn {
-        background: #111; 
+    /* ===== NOWY SYSTEM ALERTÓW (DIUNA STYLE) ===== */
+    #custom-modal {
+      display: none; /* Domyślnie ukryty */
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.85); /* Ciemne przyciemnienie tła */
+      backdrop-filter: blur(2px);
+      justify-content: center;
+      align-items: center;
+    }
+    
+    #modal-content {
+      background-color: #111;
+      border: 3px solid #e6c47a;
+      box-shadow: 0 0 30px rgba(230,196,122,0.4);
+      padding: 40px;
+      text-align: center;
+      max-width: 450px;
+      width: 85%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalFadeIn 0.3s ease-out;
+
+      border-radius: 15px;  
+    }
+    
+    #modal-text {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+      color: #e6c47a;
+      text-shadow: 0 0 10px rgba(230,196,122,0.3);
+      line-height: 1.4;
+    }
+    
+    /* #modal-content { background: #111; border: 3px solid #e6c47a; padding: 40px; text-align: center; max-width: 450px; width: 85%; } */
+    .modal-btn { background: #222; color: #e6c47a; border: 2px solid #e6c47a; padding: 15px 40px; cursor: pointer; text-transform: uppercase; border-radius: 8px;}
+    .sand { position:fixed; width:100%; height:100%; background: repeating-linear-gradient(45deg, rgba(230,196,122,0.1), rgba(0,0,0,0) 6px); animation: drift 60s linear infinite; pointer-events:none; z-index:1; }
+    @keyframes drift { from { background-position:0 0; } to { background-position:1000px 1000px; } }
+    #top-controls { position: relative; z-index: 10; margin-top: 30px; }
+    .ui-btn { font-size: 1.2em; padding: 10px 20px; background: #111; color: #e6c47a; border: 2px solid #e6c47a; cursor: pointer; border-radius: 8px;}
+    
+    .main-layout { display: flex; align-items: center; justify-content: center; gap: 60px; z-index: 5; padding: 20px; }
+    /* #dudnik-btn { width: 150px; height: 150px; border-radius: 50%; border: 6px double #e6c47a; background: #1a1a1a; color: #e6c47a; cursor: pointer; } */
+    #timer-display { width: 150px; font-size: 4.5em; text-align: center; color: #ff4400; visibility: hidden; font-weight: bold; }
+    .gate-frame { width: 450px; height: 650px; border: 12px solid #2a1f0d; border-bottom: none; border-radius: 225px 225px 10px 10px; background: linear-gradient(180deg, #151515 0%, #000 100%); display: flex; flex-direction: column; align-items: center; padding-top: 280px; position: relative; }
+    .gate-frame h1 { position: absolute; top: 80px; font-size: 2em; text-transform: uppercase; }
+    .inputs-container { display: flex; gap: 20px; }
+    .code-input { width: 70px; height: 100px; background: #000; border: 3px solid #5a4422; color: #e6c47a; font-size: 3.5em; text-align: center; border-radius: 8px; appearance: textfield; }
+    /* #revealBtn { display: none; margin-top: 40px; background: #e6c47a; color: #000; padding: 20px 40px; font-size: 1.3em; cursor: pointer; } */
+
+    #revealBtn {
+            display: none; 
+            margin-top: 40px; 
+            
+            /* Kolorystyka zgodna z modalem i Siczą */
+            background: #111; 
+            color: #e6c47a; 
+            border: 3px solid #e6c47a;
+            border-radius: 8px;
+            
+            padding: 20px 40px; 
+            font-size: 1.4em; 
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            
+            /* Delikatny blask diunowski (jak w modal-content) */
+            box-shadow: 0 0 20px rgba(230, 196, 122, 0.3);
+            transition: all 0.3s ease;
+        }
+    
+        #revealBtn:hover {
+            /* Efekt najechania - odwrócenie kolorów lub wzmocnienie blasku */
+            background: #e6c47a;
+            color: #000;
+            box-shadow: 0 0 40px rgba(230, 196, 122, 0.6);
+        }
+
+    #flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; opacity: 0; pointer-events: none; z-index: 100; transition: opacity 2s; }
+
+    /* Zaktualizowany styl przycisku Dudnik */
+    #dudnik-btn {
+        width: 150px; 
+        height: 150px; 
+        border-radius: 50%; 
+        border: 6px double #e6c47a;
+        background: #1a1a1a; 
         color: #e6c47a; 
-        border: 2px solid #e6c47a;
-        border-radius: 8px;
-        padding: 15px 30px; 
-        font-family: "Georgia", serif;
-        font-size: 1.1em; 
+        
+        /* Zmiana czcionki */
+        font-size: 1.5em; /* Zwiększona z 1.2em */
         font-weight: bold;
         text-transform: uppercase;
         letter-spacing: 1px;
-        cursor: pointer;
-        box-shadow: 0 0 15px rgba(230, 196, 122, 0.2);
-        transition: all 0.3s ease;
-        z-index: 10;
-        text-decoration: none;
+        
+        cursor: pointer; 
+        transition: 0.4s ease; /* Płynne przejście efektu */
     }
 
-    .dune-btn:hover {
-        background: #e6c47a;
-        color: #000;
-        box-shadow: 0 0 30px rgba(230, 196, 122, 0.6);
+    /* Wygląd po aktywacji (gdy jest disabled) */
+    #dudnik-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #0a0a0a; /* Ciemniejsze tło */
+        color: #8a7a5a; /* Wyblakły złoty */
+        border-color: #5a4422; /* Ciemniejsza ramka */
+        
+        /* Efekt braku nasycenia */
+        filter: grayscale(100%) contrast(0.8);
+        box-shadow: none;
     }
 
-    /* ===== ROZMIESZCZENIE ELEMENTÓW ===== */
     
-    /* 1. Narrator na górze */
-    #top-bar {
-        position: relative;
-        z-index: 10;
-        margin-top: 40px;
-        margin-bottom: auto; /* Wypycha resztę w dół */
-    }
-
-    /* 2. Ukryta zapadnia po prawej */
-    #right-panel {
-        position: absolute;
-        right: 5%;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-    }
-
-    /* 3. Pola tekstowe pośrodku */
-    #center-stage {
-        z-index: 10;
-        margin-bottom: auto; /* Wypycha od dołu, centrując wertykalnie razem z margin-top */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-        padding-bottom: 100px; /* Korekta optyczna */
-    }
-
-    .input-group {
-        display: flex;
-        gap: 15px;
-    }
-
-    .code-input {
-        width: 60px;
-        height: 80px;
-        background: #000;
-        border: 3px solid #5a4422; /* Ciemniejsze złoto */
-        color: #e6c47a;
-        font-family: "Georgia", serif;
-        font-size: 3em;
-        text-align: center;
-        border-radius: 8px;
-        outline: none;
-        text-transform: uppercase;
-        transition: border-color 0.3s, box-shadow 0.3s;
-    }
-
-    .code-input:focus {
-        border-color: #e6c47a;
-        box-shadow: 0 0 20px rgba(230, 196, 122, 0.4);
-    }
-
-    h2 {
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        font-size: 1.2em;
-        opacity: 0.8;
-        margin-bottom: 10px;
-        text-shadow: 0 0 10px rgba(230,196,122,0.3);
-    }
-
-    /* ===== CUSTOM ALERT MODAL ===== */
-    #custom-modal {
-        display: none;
-        position: fixed;
-        z-index: 100;
-        left: 0; top: 0;
-        width: 100%; height: 100%;
-        background-color: rgba(0,0,0,0.85);
-        backdrop-filter: blur(2px);
-        justify-content: center;
-        align-items: center;
-    }
-
-    #modal-content {
-        background-color: #111;
-        border: 3px solid #e6c47a;
-        box-shadow: 0 0 30px rgba(230,196,122,0.4);
-        padding: 40px;
-        text-align: center;
-        max-width: 400px;
-        border-radius: 10px;
-        color: #e6c47a;
-    }
-
-    #modal-text {
-        font-size: 1.3em;
-        margin-bottom: 20px;
-        line-height: 1.5;
-    }
-
-    /* Responsywność dla urządzeń mobilnych */
-    @media (max-width: 768px) {
-        #right-panel {
-            position: relative;
-            right: auto;
-            top: auto;
-            transform: none;
-            margin-top: 30px;
-        }
-        .code-input {
-            width: 50px;
-            height: 70px;
-            font-size: 2.5em;
-        }
-    }
 </style>
 </head>
-<body>
+<body id="body-main">
 
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PB6TX54M"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <div class="sand"></div>
 
-    <div id="top-bar">
-        <button id="narratorBtn" class="dune-btn" onclick="playNarrator()">
-            🎙️ Narrator (Start)
-        </button>
+    <!-- Google Tag Manager (noscript) -->
+ <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PB6TX54M"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->    
+
+<div class="sand"></div>
+<div id="flash"></div>
+
+<div id="custom-modal">
+    <div id="modal-content">
+        <div id="modal-text">Komunikat</div>
     </div>
+</div>
 
-    <div id="center-stage">
-        <h2>Podaj Hasło</h2>
+<div id="top-controls">
+    <button id="narratorBtn" data-umami-event="Echo Narrator" class="ui-btn" onclick="playNarrator()">🎙️ Narrator (Start)</button>
+</div>
+
+<div class="main-layout">
+    <button id="dudnik-btn" data-umami-event="Echo Szyfr" onclick="activateDudnik()">Glif</button>
+
+    <div class="gate-frame" id="mainGate">
+        <h1>Wrota</h1>
         <div class="inputs-container">
-            <div class="input-group">
-                <input type="text" class="code-input" maxlength="1" data-index="0">
-                <input type="text" class="code-input" maxlength="1" data-index="1">
-                <input type="text" class="code-input" maxlength="1" data-index="2">
-                <input type="text" class="code-input" maxlength="1" data-index="3">
-            </div>
+            <input type="tel" class="code-input" id="c1" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c2" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c3" oninput="limit(this)" maxlength="1">
+            <input type="tel" class="code-input" id="c4" oninput="limit(this)" maxlength="1">
         </div>
+        <button id="revealBtn" data-umami-event="Wrota Wejście do Siczy" onclick="finalAction()">Wstąp do Siczy</button>
     </div>
 
-    <div id="right-panel">
-        <button class="dune-btn" onclick="triggerTrapdoor()">
-            Ukryta zapadnia
-        </button>
-    </div>
+    <div id="timer-display">60</div>
+</div>
 
-    <div id="custom-modal">
-        <div id="modal-content">
-            <div id="modal-text">Komunikat</div>
-            <button class="dune-btn" onclick="closeModal()">Zamknij</button>
-        </div>
-    </div>
+<audio id="stoneSound"><source src="stone_gate.mp3" type="audio/mpeg"></audio>
+<audio id="dudnikSound"><source src="Wrota_dudnik.mp3" type="audio/mpeg"></audio>
 
-    <script>
-        // ================= AUDIO (NARRATOR) =================
-        let narratorAudio = null;
-        function playNarrator() {
-            const btn = document.getElementById("narratorBtn");
-            
-            // Tutaj wpisz nazwę pliku mp3, jeśli masz konkretny
-            const audioFile = "Saper_Diuny.mp3"; 
+<script>
+    let narratorAudio = null;
+    let timeLeft = 60;
+    let timerId = null;
+    const inputs = document.querySelectorAll('.code-input');
+    const body = document.getElementById('body-main');
 
-            if (!narratorAudio) {
-                narratorAudio = new Audio(audioFile);
-                narratorAudio.addEventListener('ended', () => {
-                    btn.innerText = "🎙️ Narrator (Start)";
-                    narratorAudio.currentTime = 0;
-                });
-                // Obsługa błędu braku pliku
-                narratorAudio.addEventListener('error', () => {
-                   showModal("Błąd: Brak pliku audio (Saper_Diuny.mp3)");
-                });
-            }
+    function showCustomAlert(msg) {
+        document.getElementById("modal-text").innerText = msg;
+        document.getElementById("custom-modal").style.display = "flex";
+    }
+    function closeModal() { document.getElementById("custom-modal").style.display = "none"; }
 
-            if (narratorAudio.paused) {
-                narratorAudio.play().then(() => {
-                    btn.innerText = "⏸️ Narrator (Pauza)";
-                }).catch(err => {
-                    console.log(err);
-                    showModal("Nie można odtworzyć dźwięku. Sprawdź plik.");
-                });
-            } else {
-                narratorAudio.pause();
-                btn.innerText = "▶️ Narrator (Wznów)";
-            }
+    function playNarrator() {
+        const btn = document.getElementById("narratorBtn");
+        if (!narratorAudio) {
+            narratorAudio = new Audio("Wrota.mp3");
+            narratorAudio.onended = () => { btn.innerText = "🎙️ Narrator (Start)"; };
         }
+        if (narratorAudio.paused) {
+            narratorAudio.play().then(() => btn.innerText = "⏸️ Narrator (Pauza)").catch(() => showCustomAlert("Błąd: Brak pliku Wrota.mp3"));
+        } else {
+            narratorAudio.pause(); btn.innerText = "▶️ Narrator (Wznów)";
+        }
+    }
 
-        // ================= INPUT LOGIC (OKON / OKOŃ) =================
-        const inputs = document.querySelectorAll('.code-input');
+    function updateShakeLevel(seconds) {
+        // Czyścimy wszystkie klasy shake przed dodaniem nowej
+        body.classList.remove('shake-1', 'shake-2', 'shake-3', 'shake-4', 'shake-5');
+        
+        if (seconds > 0 && seconds <= 10) body.classList.add('shake-5');
+        else if (seconds > 10 && seconds <= 20) body.classList.add('shake-4');
+        else if (seconds > 20 && seconds <= 30) body.classList.add('shake-3');
+        else if (seconds > 30 && seconds <= 40) body.classList.add('shake-2');
+        else if (seconds > 40 && seconds <= 50) body.classList.add('shake-1');
+    }
 
-        inputs.forEach((input, index) => {
-            // 1. Obsługa wpisywania
-            input.addEventListener('input', (e) => {
-                const val = e.target.value.toUpperCase();
-                e.target.value = val; // Wymuś wielką literę
+    function activateDudnik() {
+        if (timerId !== null) return;
+        
+        const btn = document.getElementById('dudnik-btn');
+        btn.disabled = true;
+        btn.innerText = "AKTYWNY";
 
-                if (val.length === 1) {
-                    // Przejdź do następnego pola
-                    if (index < inputs.length - 1) {
-                        inputs[index + 1].focus();
-                    }
-                    // Sprawdź hasło po każdym wpisaniu
-                    checkPassword();
-                }
-            });
+        const sound = document.getElementById('dudnikSound');
+        sound.loop = true;
+        sound.play().catch(() => {});
 
-            // 2. Obsługa Backspace (cofanie)
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && e.target.value === '') {
-                    if (index > 0) {
-                        inputs[index - 1].focus();
-                    }
-                }
-            });
-            
-            // 3. Obsługa wklejenia całego słowa
-            input.addEventListener('paste', (e) => {
-                e.preventDefault();
-                const pasteData = (e.clipboardData || window.clipboardData).getData('text').toUpperCase();
-                // Rozdziel tekst na inputy
-                for (let i = 0; i < inputs.length; i++) {
-                    if (pasteData[i]) {
-                        inputs[i].value = pasteData[i];
-                    }
-                }
-                checkPassword();
-                // Ustaw focus na ostatnim wypełnionym
-                const focusIndex = Math.min(inputs.length - 1, pasteData.length - 1);
-                if (focusIndex >= 0) inputs[focusIndex].focus();
-            });
+        const display = document.getElementById('timer-display');
+        display.style.visibility = "visible";
+
+        // Uruchomienie pętli
+        timerId = setInterval(() => {
+            timeLeft--;
+            display.innerText = timeLeft;
+            updateShakeLevel(timeLeft);
+
+            if (timeLeft <= 0) {
+                clearInterval(timerId);
+                sound.pause();
+                body.className = ""; // Usuń trzęsienie
+                showCustomAlert("Czerw nadciągnął! Zostałeś odnaleziony...");
+                setTimeout(() => location.reload(), 3000);
+            }
+        }, 1000);
+    }
+
+    function limit(el) { 
+        el.value = el.value.replace(/[^0-9]/g, ''); 
+        if (el.value.length > 1) el.value = el.value.slice(0, 1); 
+    }
+
+    inputs.forEach((input, index) => {
+        input.addEventListener('input', () => {
+            if (input.value.length === 1 && index < inputs.length - 1) inputs[index + 1].focus();
+            checkCode();
         });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === "Backspace" && input.value === "" && index > 0) inputs[index - 1].focus();
+        });
+    });
 
-        function checkPassword() {
-            let code = '';
-            inputs.forEach(input => code += input.value);
+    function checkCode() {
+        const code = Array.from(inputs).map(i => i.value).join('');
+        document.getElementById('revealBtn').style.display = (code === "4217") ? "block" : "none";
+    }
 
-            // Sprawdzenie warunku OKON lub OKOŃ
-            if (code === 'OKON' || code === 'OKOŃ') {
-                // Efekt sukcesu (opcjonalnie)
-                inputs.forEach(input => {
-                    input.style.borderColor = '#fff';
-                    input.style.backgroundColor = '#221a0a';
-                });
-                
-                // Przekierowanie
-                setTimeout(() => {
-                    window.location.href = "https://www.www.www";
-                }, 300);
-            }
-        }
-
-        // ================= UKRYTA ZAPADNIA =================
-        function triggerTrapdoor() {
-            // Tu możesz wpisać inną logikę, np. przekierowanie gdzie indziej
-            showModal("Podłoga drży... Ale nic się nie dzieje. Może brakuje klucza?");
-        }
-
-        // ================= MODAL SYSTEM =================
-        function showModal(text) {
-            const modal = document.getElementById("custom-modal");
-            document.getElementById("modal-text").innerText = text;
-            modal.style.display = "flex";
-        }
-
-        function closeModal() {
-            document.getElementById("custom-modal").style.display = "none";
-        }
-    </script>
-
+    function finalAction() {
+        if(timerId) clearInterval(timerId);
+        body.className = ""; // Stop trzęsienia
+        document.getElementById('dudnikSound').pause();
+        document.getElementById('stoneSound').play().catch(() => {});
+        inputs.forEach(i => i.disabled = true);
+        
+        setTimeout(() => {
+            document.getElementById('flash').style.opacity = "1";
+            setTimeout(() => { 
+                showCustomAlert("Witaj w Siczy Tabr.");
+                setTimeout(() => { window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; }, 2000);
+            }, 2100);
+        }, 1000);
+    }
+</script>
 </body>
 </html>

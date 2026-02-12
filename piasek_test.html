@@ -52,12 +52,28 @@
             z-index: 10;
             min-width: 280px; 
             text-align: center;
+            text-decoration: none; /* Usunięcie podkreślenia dla linku */
+            display: inline-block;
         }
 
         .audio-btn:hover {
             background: #e6c47a;
             color: #000;
             box-shadow: 0 0 40px rgba(230, 196, 122, 0.6);
+        }
+
+        /* ===== NOWY PRZYCISK ABCD ===== */
+        #nextStepBtn {
+            display: none; /* Domyślnie ukryty */
+            position: absolute;
+            right: 5%;      /* Margines od prawej krawędzi */
+            bottom: 20%;    /* 20% od dołu ekranu */
+            animation: fadeIn 2s forwards; /* Powolne pojawianie się */
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         /* Efekt ziarnistego piasku w tle */
@@ -85,20 +101,28 @@
         🎙️ Głos Serca (Start)
     </button>
     
+    <a id="nextStepBtn" href="https://www.www.www" class="audio-btn">
+        ABCD
+    </a>
+    
     <script>
         let narratorAudio = null;
 
         function playNarrator() {
             const btn = document.getElementById("narratorBtn");
+            const nextBtn = document.getElementById("nextStepBtn");
 
             // Tworzymy obiekt Audio tylko raz, przy pierwszym kliknięciu
             if (!narratorAudio) {
                 // Podmiana pliku na właściwy dla tej podstrony
                 narratorAudio = new Audio("Piaskowa_pieczara.mp3");
                 
-                // Gdy nagranie się skończy, resetujemy przycisk
+                // GDY NAGRANIE SIĘ SKOŃCZY:
                 narratorAudio.onended = () => {
                     btn.innerText = "🎙️ Głos Serca (Start)";
+                    
+                    // Pokaż przycisk ABCD
+                    nextBtn.style.display = "block";
                 };
             }
 

@@ -38,19 +38,22 @@
             to { background-position: 1000px 1000px; }
         }
 
-        /* --- KONTENER CENTRUJĄCY --- */
-        .center-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            pointer-events: none;
-        }
+    /* --- KONTENER CENTRUJĄCY --- */
+    .center-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+        pointer-events: none;
+        
+        /* DODAJ TĘ LINIĘ: */
+        flex-direction: column; /* Ustawia elementy jeden pod drugim, a nie obok siebie */
+    }
 
         /* --- PRZYCISK STARTOWY (DIUNA STYLE) --- */
         #start-btn {

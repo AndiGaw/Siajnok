@@ -345,23 +345,27 @@
 
     // --- 5. Sekwencja Końcowa ---
     function triggerSuccess() {
-        // Blokada interfejsu
+        // Blokada interfejsu (natychmiast)
         inputs.forEach(i => i.disabled = true);
         glifBtn.disabled = true;
         
-        // 1. Trzęsienie ekranu
-        body.classList.add('shake-active');
-        
-        // 2. Ciemność (fade to black)
-        document.getElementById('flash').style.opacity = "1";
-
-        // 3. Audio Zapadni (natychmiast)
+        // 1. Audio Zapadni (Start: natychmiast, T=0s)
         const zapadniaAudio = document.getElementById('zapadniaSound');
         if (zapadniaAudio) {
             zapadniaAudio.play().catch(e => console.log("Błąd audio zapadni:", e));
         }
 
-        // 4. Przekierowanie po 40 sekundach
+        // 2. Trzęsienie ekranu (Start: po 7s)
+        setTimeout(() => {
+            body.classList.add('shake-active');
+        }, 7000);
+        
+        // 3. Ciemność (Start: po 15s od początku, czyli 8s po trzęsieniu)
+        setTimeout(() => {
+            document.getElementById('flash').style.opacity = "1";
+        }, 15000);
+
+        // 4. Przekierowanie (Start: po 45s)
         setTimeout(() => { 
             window.location.href = "https://andigaw.github.io/Siajnok/ciemnosc.html"; 
         }, 45000); 

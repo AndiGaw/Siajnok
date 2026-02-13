@@ -17,8 +17,8 @@
     html, body {
         margin: 0; padding: 0; 
         height: 100vh; 
-        background-color: #050300; /* Bardzo ciemny brąz/czern */
-        /* Możesz użyć tego samego tła co wcześniej lub innego pasującego do piasku */
+        background-color: #000000; /* Czysta czerń */
+        /* Zachowujemy sciana.png jako teksturę, ale tło pod spodem jest czarne */
         background-image: url('sciana.png'); 
         background-size: cover;
         background-position: center;
@@ -29,7 +29,7 @@
         display: flex; 
         flex-direction: column; 
         align-items: center;
-        justify-content: flex-start; /* Elementy od góry */
+        justify-content: flex-start; 
         position: relative;
         width: 100%;
     }
@@ -37,9 +37,10 @@
     /* ===== SAND EFFECT (Diuna Vibe) ===== */
     .sand { 
         position: fixed; width: 100%; height: 100%; 
-        background: repeating-linear-gradient(45deg, rgba(194, 142, 14, 0.08), rgba(0,0,0,0) 4px); 
+        /* Subtelniejszy piasek na czarnym tle */
+        background: repeating-linear-gradient(45deg, rgba(194, 142, 14, 0.05), rgba(0,0,0,0) 3px); 
         pointer-events: none; z-index: 1; 
-        animation: sand-drift 20s linear infinite;
+        animation: sand-drift 25s linear infinite;
     }
 
     @keyframes sand-drift {
@@ -70,8 +71,8 @@
     }
 
     .ui-btn:hover {
-        background: #2a2010;
-        box-shadow: 0 0 25px rgba(230, 196, 122, 0.5);
+        background: #222;
+        box-shadow: 0 0 25px rgba(230, 196, 122, 0.4);
     }
 
     /* ===== CENTRUM - MELANZ ===== */
@@ -79,16 +80,16 @@
         display: flex; 
         align-items: center; 
         justify-content: center; 
-        flex-grow: 1; /* Wypełnia resztę ekranu */
+        flex-grow: 1; 
         width: 100%;
         z-index: 5; 
-        padding-bottom: 100px; /* Lekkie przesunięcie optyczne w górę */
+        padding-bottom: 100px; 
     }
 
     #melanz-container {
         position: relative;
-        width: 300px; /* Rozmiar obrazka */
-        height: 300px;
+        width: 320px; 
+        height: 320px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -97,35 +98,37 @@
     #melanz-img {
         max-width: 100%;
         max-height: 100%;
-        transition: all 1.5s ease;
-        filter: grayscale(100%) brightness(0.4); /* Domyślnie "martwy" */
-        opacity: 0.5;
-        cursor: not-allowed;
+        transition: all 2s ease;
+        
+        /* STAN POCZĄTKOWY (ZABLOKOWANY): */
+        filter: brightness(0.8); /* Tylko lekko przygaszony, ale w kolorze! */
+        opacity: 0.8;
+        cursor: default; /* Kursor domyślny (strzałka), nie rączka */
     }
 
-    /* Klasa dodawana po odsłuchaniu */
+    /* STAN AKTYWNY (ODBLOKOWANY): */
     #melanz-img.active {
-        filter: grayscale(0%) brightness(1.2) drop-shadow(0 0 20px rgba(74, 144, 226, 0.6)); /* Niebieska poświata (oczy Ibada/Przyprawa) */
+        filter: brightness(1.1) drop-shadow(0 0 25px rgba(0, 153, 255, 0.5)); /* Błękitna poświata Przyprawy */
         opacity: 1;
-        cursor: pointer;
-        animation: pulse-spice 3s infinite alternate;
+        cursor: pointer; /* Pojawia się rączka */
+        animation: pulse-spice 4s infinite alternate;
     }
 
     #melanz-img.active:hover {
         transform: scale(1.05);
-        filter: grayscale(0%) brightness(1.4) drop-shadow(0 0 35px rgba(74, 144, 226, 0.9));
+        filter: brightness(1.3) drop-shadow(0 0 40px rgba(0, 153, 255, 0.8));
     }
 
     @keyframes pulse-spice {
-        0% { transform: scale(1); }
-        100% { transform: scale(1.02); }
+        0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 153, 255, 0.4)); }
+        100% { transform: scale(1.03); filter: drop-shadow(0 0 30px rgba(0, 153, 255, 0.7)); }
     }
 
     /* Flash efekt przy przejściu */
     #flash { 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
         background: #fff; opacity: 0; pointer-events: none; z-index: 100; 
-        transition: opacity 1s; 
+        transition: opacity 1.5s; 
     }
 
 </style>
@@ -159,10 +162,10 @@
         if (!narratorAudio) {
             narratorAudio = new Audio("Ekstrakt_przyprawowy.mp3");
             
-            // Zdarzenie: Koniec odtwarzania
+            // Zdarzenie: Koniec odtwarzania -> ODBLOKOWANIE
             narratorAudio.onended = () => { 
                 narratorBtn.innerText = "🎙️ Narrator (Zakończono)"; 
-                unlockMelanz(); // Odblokuj obrazek
+                unlockMelanz(); 
             };
         }
 
@@ -171,7 +174,7 @@
                 .then(() => narratorBtn.innerText = "⏸️ Narrator (Pauza)")
                 .catch(err => {
                     console.error(err);
-                    alert("Błąd: Nie znaleziono pliku Ekstrakt_przyprawowy.mp3");
+                    alert("Błąd: Upewnij się, że plik Ekstrakt_przyprawowy.mp3 jest w folderze.");
                 });
         } else {
             narratorAudio.pause(); 
@@ -184,37 +187,35 @@
         if (isUnlocked) return;
         isUnlocked = true;
         
-        melanzImg.classList.add('active'); // Dodaje styl (kolor, glow, kursor)
-        
-        // Dodaj obsługę kliknięcia dopiero teraz
-        melanzImg.addEventListener('click', () => {
-            goToFuture();
-        });
+        melanzImg.classList.add('active'); // Dodaje poświatę i kursor
     }
+
+    // --- Logika Kliknięcia w Melanż ---
+    melanzImg.addEventListener('click', (e) => {
+        if (!isUnlocked) {
+            // ZABLOKOWANE: Nic nie rób (lub subtelny efekt "brak dostępu")
+            e.preventDefault();
+            // Lekkie drgnięcie, żeby użytkownik wiedział, że przycisk "żyje" ale jest zablokowany
+            melanzImg.style.transform = "translateX(-3px)";
+            setTimeout(() => melanzImg.style.transform = "translateX(3px)", 100);
+            setTimeout(() => melanzImg.style.transform = "translateX(0)", 200);
+            return; 
+        }
+
+        // ODBLOKOWANE: Przekierowanie
+        goToFuture();
+    });
 
     // --- Przekierowanie ---
     function goToFuture() {
-        if (!isUnlocked) return;
-
-        // Efekt wizualny kliknięcia (błysk)
-        document.getElementById('flash').style.opacity = "0.8";
+        // Efekt wizualny (Wizja)
+        document.getElementById('flash').style.opacity = "0.9";
         
-        // Przekierowanie po krótkim opóźnieniu (dla efektu)
+        // Przekierowanie
         setTimeout(() => {
             window.location.href = "https://andigaw.github.io/Siajnok/wizja_przyszlosci.html";
-        }, 800);
+        }, 1200);
     }
-    
-    // Zabezpieczenie przed klikaniem w zablokowany obrazek
-    melanzImg.addEventListener('click', (e) => {
-        if (!isUnlocked) {
-            e.preventDefault();
-            // Opcjonalnie: krótki efekt "trzęsienia" informujący o blokadzie
-            melanzImg.style.transform = "translateX(-5px)";
-            setTimeout(() => melanzImg.style.transform = "translateX(5px)", 100);
-            setTimeout(() => melanzImg.style.transform = "translateX(0)", 200);
-        }
-    });
 
 </script>
 </body>
